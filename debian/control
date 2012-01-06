@@ -1,0 +1,33 @@
+Source: libmm-fileinfo
+Section: libs
+Priority: extra
+Maintainer: Shin Seung Bae <seungbae.shin@samsung.com>, JongHyuk Choi <jhchoi.choi@samsung.com>, Haejeong Kim <backto.kim@samsung.com> 
+Uploaders: Shin Seung Bae <seungbae.shin@samsung.com>, JongHyuk Choi <jhchoi.choi@samsung.com>, Haejeong Kim <backto.kim@samsung.com>, YoungHwan Ahn <younghwan_.an@samsung.com>
+Build-Depends: debhelper (>= 5), autotools-dev, libmm-common-dev, libglib2.0-dev, libmm-log-dev, libavutil-dev, libavcodec-dev, libavformat-dev, drm-service-dev, libmm-common-internal-dev, execstack, libswscale-dev
+Standards-Version: 3.7.2
+
+Package: libmm-fileinfo
+Section: libs
+Architecture: any
+Depends: libmm-common, libglib2.0-0, libmm-log, drm-service-0, libavcodec, libavutil, libavformat, libswscale
+Description: Multimedia Framework FileInfo Library
+
+Package: libmm-fileinfo-dev
+XB-Generate-Docs: yes
+Section: libdevel
+Architecture: any
+Depends: libmm-fileinfo (= ${Source-Version}),  libmm-common-dev, libglib2.0-dev, libmm-log-sdk-dev, drm-service-dev, libavutil-dev, libavcodec-dev, libavformat-dev, libswscale-dev
+Description: Multimedia Framework FileInfo Library (DEV)
+
+Package: libmm-fileinfo-dbg
+Section: debug
+Architecture: any
+Depends: libmm-fileinfo (= ${Source-Version})
+Description: Multimedia Framework FileInfo Library (unstripped)
+
+
+Package: mm-fileinfo-tools
+Section: libs
+Architecture: any
+Depends: libmm-common, libglib2.0-0, libmm-log, drm-service-0
+Description: Multimedia Framework FileInfo Tools
