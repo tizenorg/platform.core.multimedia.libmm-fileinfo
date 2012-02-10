@@ -237,14 +237,17 @@ int _parse_id3_tag(tMMFILE_AAC_HANDLE* pData)
     goto failure;
   }
 
+  mm_file_id3tag_restore_content_info(hTag);
+
   pData->tagInfo.title = hTag->pTitle;
   pData->tagInfo.author = hTag->pAuthor;
   pData->tagInfo.artist = hTag->pArtist;
   pData->tagInfo.album = hTag->pAlbum;
   pData->tagInfo.year = hTag->pYear;
   pData->tagInfo.copyright = hTag->pCopyright;
-  pData->tagInfo.comment = hTag->pComment;
+  pData->tagInfo.comment = hTag->pDescription;
   pData->tagInfo.genre = hTag->pGenre;
+  pData->tagInfo.tracknum = hTag->pTrackNum;
   pData->tagInfo.composer = hTag->pComposer;
   pData->tagInfo.classification = hTag->pContentGroup;
   pData->tagInfo.rating = hTag->pRating;
@@ -256,7 +259,6 @@ int _parse_id3_tag(tMMFILE_AAC_HANDLE* pData)
 
   ret = MMFILE_AAC_PARSER_SUCCESS;
 
-  mm_file_id3tag_restore_content_info(hTag);
   
 failure:
   if(tagBuff) {
@@ -864,6 +866,8 @@ int mmfile_format_read_tag_aac (MMFileFormatContext *formatContext)
     formatContext->comment = mmfile_strdup(aacinfo.comment);
   if(aacinfo.genre) 
     formatContext->genre = mmfile_strdup(aacinfo.genre);
+  if(aacinfo.tracknum)
+    formatContext->tagTrackNum= mmfile_strdup(aacinfo.tracknum);
   if(aacinfo.composer) 
     formatContext->composer = mmfile_strdup(aacinfo.composer);
   if(aacinfo.classification) 

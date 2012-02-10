@@ -444,7 +444,7 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 	}
 
 #ifdef __MMFILE_FFMPEG_V085__
-/*hjkim, 111221, use metadata extracted by ffmpeg*/
+/*metadata extracted by ffmpeg*/
 	if( (pFormatCtx != NULL) && (pFormatCtx->metadata != NULL) ) {
 		AVDictionary *metainfo = pFormatCtx->metadata;
 		AVDictionaryEntry *tag=NULL;
@@ -631,7 +631,7 @@ int mmfile_format_read_frame_ffmpg  (MMFileFormatContext *formatContext, unsigne
 		#endif
 
 		/*sometimes, ffmpeg's width/height is wrong*/
-		#if 0	/*hjkim, 111124, coded_width/height sometimes wrong. so use width/height*/
+		#if 0	/*coded_width/height sometimes wrong. so use width/height*/
 		width = pVideoCodecCtx->coded_width == 0 ? pVideoCodecCtx->width : pVideoCodecCtx->coded_width;
 		height = pVideoCodecCtx->coded_height == 0 ? pVideoCodecCtx->height : pVideoCodecCtx->coded_height;
 		#endif

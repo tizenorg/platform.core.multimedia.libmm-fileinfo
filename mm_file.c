@@ -280,6 +280,7 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 		if (formatContext->composer && formatContext->author == NULL)	
 											mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_AUTHOR, formatContext->composer);
 		if (formatContext->album)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM	, formatContext->album);
+		if (formatContext->copyright)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COPYRIGHT, formatContext->copyright);
 		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->comment);
 		if (formatContext->genre)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_GENRE, formatContext->genre);
 		if (formatContext->classification)  		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CLASSIFICATION, formatContext->classification);

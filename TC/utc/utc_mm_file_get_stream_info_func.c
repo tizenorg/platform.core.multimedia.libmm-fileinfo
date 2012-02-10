@@ -56,8 +56,6 @@
 // Declare the global variables and registers and Internal Funntions
 //-------------------------------------------------------------------------------------------------
 
-#define MEDIA_PATH	"/opt/media/Images and videos/My video clips/Helicopter.mp4"
-#define MEDIA_PATH2 "/opt/media/Sounds and music/Music/Over the horizon.mp3"
 #define TEST_API "mm_file_get_stream_info"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +86,7 @@ void utc_mm_file_get_stream_info_func_01()
 	int audio_stream_num = 0;
 	int video_stream_num = 0;
 
-	err = mm_file_get_stream_info(MEDIA_PATH,&audio_stream_num,&video_stream_num);
+	err = mm_file_get_stream_info(MEDIA_PATH2,&audio_stream_num,&video_stream_num);
 	dts_check_eq (TEST_API, err, MM_ERROR_NONE, "%x", err);
 	dts_check_eq (TEST_API, audio_stream_num, 1);
 	dts_check_eq (TEST_API, video_stream_num, 1);
@@ -102,7 +100,7 @@ void utc_mm_file_get_stream_info_func_02()
 	int audio_stream_num = 0;
 	int video_stream_num = 0;
 
-	err = mm_file_get_stream_info(MEDIA_PATH2,&audio_stream_num,&video_stream_num);
+	err = mm_file_get_stream_info(MEDIA_PATH,&audio_stream_num,&video_stream_num);
 	dts_check_eq (TEST_API, err, MM_ERROR_NONE, "%x", err);
 	dts_check_eq (TEST_API, audio_stream_num, 1);
 	dts_check_eq (TEST_API, video_stream_num, 0);
@@ -113,7 +111,7 @@ void utc_mm_file_get_stream_info_func_03()
 	int err = 0 ;
 	int video_stream_num =0;
 
-	err = mm_file_get_stream_info(MEDIA_PATH, NULL, &video_stream_num);
+	err = mm_file_get_stream_info(MEDIA_PATH2, NULL, &video_stream_num);
 	dts_check_ne (TEST_API, err, MM_ERROR_NONE, "%x", err);
 }
 
@@ -121,7 +119,7 @@ void utc_mm_file_get_stream_info_func_04()
 {
 	int err = 0 ;
 
-	err = mm_file_get_stream_info(MEDIA_PATH,NULL,NULL);
+	err = mm_file_get_stream_info(MEDIA_PATH2,NULL,NULL);
 	dts_check_ne (TEST_API, err, MM_ERROR_NONE, "%x", err);
 }
 

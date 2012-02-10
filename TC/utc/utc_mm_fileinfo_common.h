@@ -54,6 +54,10 @@
 #include <tet_api.h>
 #include <unistd.h>
 
+#define MEDIA_PATH		"/opt/media/Music/Over the horizon.mp3"
+#define MEDIA_PATH2	"/opt/media/Videos/Helicopter.mp4"
+
+
 void startup();
 void cleanup();
 

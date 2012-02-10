@@ -1848,7 +1848,7 @@ _mmf_SeqDataCheck3(PLOADINFO psLoad, unsigned char bSmafType)
 		case 0x90 :
 			psLoad->pfnGetByte(psHuf);
 			dIndex ++;
-			break; // added for prevent
+			break;
 		case 0x80 :
 			psLoad->pfnGetByte(psHuf);
 			dIndex ++;
@@ -1865,7 +1865,7 @@ _mmf_SeqDataCheck3(PLOADINFO psLoad, unsigned char bSmafType)
 		case 0xE0 :
 			bTemp = psLoad->pfnGetByte(psHuf);
 			dIndex ++;
-			break; // added for prevent
+			break;
 		case 0xC0 :
 		case 0xD0 :
 			bTemp = psLoad->pfnGetByte(psHuf);

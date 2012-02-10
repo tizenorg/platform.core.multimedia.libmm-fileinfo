@@ -64,6 +64,7 @@ typedef struct _mmfileaactaginfo {
   char *copyright;
   char *comment;
   char *genre;
+  char *tracknum;
   char *composer;
   char *classification;
   char *rating;

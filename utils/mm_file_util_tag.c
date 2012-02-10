@@ -815,7 +815,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			if (readed != _ITUNES_READ_BUF_SZ)
 				goto exception;
 
-/*hjkim, 111221, ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
+/*ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
 #if 0
 			/**
 			 * Artist : Added 2010.10.28
@@ -886,7 +886,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			mmfile_seek (fp, -(_ITUNES_READ_BUF_SZ - 1), SEEK_CUR);	/*FIXME: poor search*/
 		} /*loop*/
 
-/*hjkim, 111221, ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
+/*ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
 #if 0
 		if (artist_found) {
 			if (artist_sz > 0) {
@@ -959,8 +959,6 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 		}
 #endif
 /*
-	hjkim, 11220.
-
 	1) below spec is in "iTunes Package Asset Specification 4.3" published by apple.
 	Music Cover Art Image Profile
 	- TIFF with ".tif" extension (32-bit uncompressed), JPEG with ".jpg" extension (quality unconstrained), or PNG with ".png" extension
@@ -2485,6 +2483,10 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 								pInfo->pGenre = mmfile_string_convert ((const char*)pExtContent, realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->genreLen);
 							}
 
+								#ifdef __MMFILE_TEST_MODE__
+									debug_msg ( "pInfo->pGenre returned = (%s), pInfo->genreLen(%d)\n", pInfo->pGenre, pInfo->genreLen);
+								#endif
+
 							pInfo->tagV2Info.bGenreMarked = true;
 						}
 						else if(strncmp((char *)CompTmp, "TRCK", 4) == 0 && pInfo->tagV2Info.bTrackNumMarked == false)
@@ -3071,7 +3073,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 							#endif
 							pInfo->tagV2Info.bAlbumMarked = true;
 						}
-						else if(strncmp((char *)CompTmp, "TYER", 4) == 0 && pInfo->tagV2Info.bYearMarked == false)
+						else if(strncmp((char *)CompTmp, "TYER", 4) == 0 && pInfo->tagV2Info.bYearMarked == false)	//TODO. TYER is replaced by the TDRC. but many files use TYER in v2.4
 						{
 							if(textEncodingType == AV_ID3V2_UTF16)
 							{
@@ -3598,7 +3600,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 							#endif
 							pInfo->tagV2Info.bComposerMarked = true;
 						}
-						else if(strncmp((char *)CompTmp, "TRDA", 4) == 0 && pInfo->tagV2Info.bRecDateMarked== false)
+						else if(strncmp((char *)CompTmp, "TDRC", 4) == 0 && pInfo->tagV2Info.bRecDateMarked== false)	//TYER(year) and TRDA are replaced by the TDRC
 						{
 							if(textEncodingType == AV_ID3V2_UTF16)
 							{
@@ -3848,7 +3850,7 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo* pInfo)
 		else
 		{
 			#ifdef __MMFILE_TEST_MODE__
-			debug_msg (  "pInfo->genreLen size is Zero Or not UTF16 code! %d %s\n",pInfo->genreLen,pInfo->pGenre);
+			debug_msg (  "pInfo->genreLen size is Zero Or not UTF16 code! genreLen[%d] genre[%s]\n",pInfo->genreLen,pInfo->pGenre);
 			#endif
 			if (pInfo->pGenre) {
 				pInfo->genreLen = strlen(pInfo->pGenre);
@@ -3924,7 +3926,7 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo* pInfo)
 					pInfo->pGenre[pInfo->genreLen] = '\0';
 				}
 				#ifdef __MMFILE_TEST_MODE__
-				debug_msg ( "pInfo->pGenre = %s\n", pInfo->pGenre);
+				debug_msg ( "pInfo->pGenre = %s, pInfo->genreLen = %d\n", pInfo->pGenre, pInfo->genreLen);
 				#endif
 			}
 			else
