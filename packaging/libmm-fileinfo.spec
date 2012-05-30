@@ -5,6 +5,7 @@ Release:    15
 Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
+Source1001: packaging/libmm-fileinfo.manifest 
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -39,6 +40,7 @@ Multimedia Framework FileInfo Library (developement files)
 %setup -q
 
 %build
+cp %{SOURCE1001} .
 ./autogen.sh
 
 %if %{use_drm}
@@ -59,6 +61,7 @@ make
 
 
 %files
+%manifest libmm-fileinfo.manifest
 /usr/bin/memtrace_reader
 /usr/bin/mm_file_test
 /usr/lib/libmmffile.so.0
@@ -76,6 +79,7 @@ make
 
 
 %files devel
+%manifest libmm-fileinfo.manifest
 /usr/include/mmf/mm_file.h
 /usr/lib/pkgconfig/mm-fileinfo.pc
 
