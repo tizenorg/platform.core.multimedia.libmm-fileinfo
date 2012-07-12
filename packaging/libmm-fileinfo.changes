@@ -1,0 +1,3 @@
+* Thu Jul 12 2012 yan.yin@intel.com <yan.yin@intel.com> 4ffef48
+- bug fixing: metadata from ogg files is not parsed
+

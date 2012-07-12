@@ -444,41 +444,41 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 	}
 
 #ifdef __MMFILE_FFMPEG_V085__
-/*metadata extracted by ffmpeg*/
-	if( (pFormatCtx != NULL) && (pFormatCtx->metadata != NULL) ) {
-		AVDictionary *metainfo = pFormatCtx->metadata;
+/*metadata extracted by ffmpeg. Take metadata from first stream*/
+	if (pFormatCtx->nb_streams > 0) {
+		AVStream *st = pFormatCtx->streams[0];
 		AVDictionaryEntry *tag=NULL;
 
-		while((tag=av_dict_get(metainfo, "", tag, AV_DICT_IGNORE_SUFFIX))) {
+		while((tag=av_metadata_get(st->metadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {
 			if(tag->key != NULL) {
-				if(!strcmp(tag->key, "title")) {
+				if(!strcasecmp(tag->key, "title")) {
 					if (formatContext->title)	free (formatContext->title);
 					formatContext->title = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "artist")) {
+				} else if(!strcasecmp(tag->key, "artist")) {
 					if (formatContext->artist)	free (formatContext->artist);
 					formatContext->artist = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "composer")) {
+				} else if(!strcasecmp(tag->key, "composer")) {
 					if (formatContext->composer)	free (formatContext->composer);
 					formatContext->composer = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "album")) {
+				} else if(!strcasecmp(tag->key, "album")) {
 					if (formatContext->album)	free (formatContext->album);
 					formatContext->album = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "copyright")) {
+				} else if(!strcasecmp(tag->key, "copyright")) {
 					if (formatContext->copyright)	free (formatContext->copyright);
 					formatContext->copyright = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "comment")) {
+				} else if(!strcasecmp(tag->key, "comment")) {
 					if (formatContext->comment)	free (formatContext->comment);
 					formatContext->comment = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "genre")) {
+				} else if(!strcasecmp(tag->key, "genre")) {
 					if (formatContext->genre)	free (formatContext->genre);
 					formatContext->genre = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "date")) {
+				} else if(!strcasecmp(tag->key, "date")) {
 					if (formatContext->year)	free (formatContext->year);
 					formatContext->year = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "track")) {
+				} else if(!strcasecmp(tag->key, "track")) {
 					if (formatContext->tagTrackNum)	free (formatContext->tagTrackNum);
 					formatContext->tagTrackNum = mmfile_strdup (tag->value);
-				} else if(!strcmp(tag->key, "lyrics")) {
+				} else if(!strcasecmp(tag->key, "lyrics")) {
 					if (formatContext->unsyncLyrics)	free (formatContext->unsyncLyrics);
 					formatContext->unsyncLyrics= mmfile_strdup (tag->value);
 				} else {
