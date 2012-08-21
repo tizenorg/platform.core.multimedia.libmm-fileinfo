@@ -1,15 +1,16 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
-Version:    0.3.0
-Release:    15
+Version:    0.5.0
+Release:    12
 Group:      System/Libraries
-License:    LGPL
+License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
 BuildRequires: pkgconfig(mm-common)
 BuildRequires: pkgconfig(mm-log)
+BuildRequires: pkgconfig(libswscale)
 BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavutil)
@@ -19,7 +20,7 @@ BuildRequires: pkgconfig(libavformat)
 
 %if %{use_drm}
 BuildRequires: libss-client-devel
-BuildRequires: pkgconfig(drm-service)
+BuildRequires: pkgconfig(drm-client)
 %endif
 
 %description
@@ -49,7 +50,6 @@ CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility
 make
 
 %install
-rm -rf %{buildroot}
 %make_install
 
 
@@ -59,7 +59,6 @@ rm -rf %{buildroot}
 
 
 %files
-%defattr(-,root,root,-)
 /usr/bin/memtrace_reader
 /usr/bin/mm_file_test
 /usr/lib/libmmffile.so.0
@@ -70,14 +69,13 @@ rm -rf %{buildroot}
 /usr/lib/libmmfile_formats.so.0.0.0
 /usr/lib/libmmfile_utils.so.0
 /usr/lib/libmmfile_utils.so.0.0.0
-
-
-%files devel
-%defattr(-,root,root,-)
-/usr/include/mmf/mm_file.h
-/usr/lib/pkgconfig/mm-fileinfo.pc
-
 /usr/lib/libmmffile.so
 /usr/lib/libmmfile_codecs.so
 /usr/lib/libmmfile_formats.so
 /usr/lib/libmmfile_utils.so
+
+
+%files devel
+/usr/include/mmf/mm_file.h
+/usr/lib/pkgconfig/mm-fileinfo.pc
+

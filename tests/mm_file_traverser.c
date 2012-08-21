@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <glib.h>
 
 #include "mm_file_traverse.h"
@@ -98,7 +99,7 @@ int mmfile_get_file_names (char *root_dir, MMFunc cbfunc, void* user_data)
 						printf ("file: %s\n", cdirname);
 						if ( cbfunc != NULL )
 						{
-							cbfunc (cdirname, user_data);
+							cbfunc (cdirname, user_data, true);
 						}
 					}
 					

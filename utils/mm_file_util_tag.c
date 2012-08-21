@@ -719,6 +719,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 	unsigned int meta_version = 0;
 	MMFILE_3GP_HANDLER_BOX hdlrBox = {0,};
 	int encSize = 0;
+	int id3_meta = 0;
 #ifdef ENABLE_ITUNES_META /* We don't support itunes meta now. so this is not defined yet */
 	int iTunes_meta = 0;
 #endif
@@ -761,7 +762,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 		debug_msg ("ID3v2 tag detected.\n");
 		#endif
 
-
+		id3_meta = 1;
 #ifdef ENABLE_ITUNES_META
 		iTunes_meta = 0;
 #endif
@@ -769,7 +770,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 				mmfile_io_le_uint32 (hdlrBox.reserved[0]) == FOURCC ('a', 'p', 'p', 'l')) {
 
 		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ("Apple iTunes tag detected.\n");
+		debug_msg ("Apple iTunes tag detected by mdir.\n");
 		#endif
 
 #ifdef ENABLE_ITUNES_META
@@ -780,9 +781,40 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 																((char*)&hdlrBox.handler_type)[1],
 																((char*)&hdlrBox.handler_type)[2],
 																((char*)&hdlrBox.handler_type)[3]);
-		goto exception;
+		//goto exception;
 	}
 
+#ifdef ENABLE_ITUNES_META
+	if(!id3_meta && !iTunes_meta) {
+		/*Check ilst.
+		APPLE meta data for iTunes reader = 'mdir.' so if handler type is 'mdir', this content may has itunes meta.
+		most of contents has 'mdir' + 'appl'. but some contents just has 'mdir'
+		but 'ilst' is meta for iTunes. so find 'ilst' is more correct to check if this contents has iTunes meta or not.*/
+
+		char *ilst_box = "ilst";
+		int buf_size = strlen(ilst_box);
+
+		unsigned char read_buf[buf_size+1];
+		memset(read_buf, 0x00, buf_size+1);
+
+		/* skip hdlr box */
+		mmfile_seek (fp, hdlrBoxHeader.size - MMFILE_MP4_BASIC_BOX_HEADER_LEN - MMFILE_3GP_HANDLER_BOX_LEN +4, SEEK_CUR);	//+4 is hdlr size field
+
+		readed = mmfile_read (fp, read_buf, buf_size);	// to find 'ilst'
+		if (readed != buf_size) {
+			debug_error ("read fail [%d]\n", readed);
+			goto exception;
+		}
+
+		if(read_buf[0] == 'i' && read_buf[1] == 'l' && read_buf[2] == 's' && read_buf[3] == 't') {
+			#ifdef __MMFILE_TEST_MODE__
+				debug_msg ("Apple iTunes tag detected by ilst.\n");
+			#endif
+
+			iTunes_meta = 1;
+		}
+	}
+#endif
 
 #ifdef ENABLE_ITUNES_META
 	if (iTunes_meta) {
@@ -815,7 +847,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			if (readed != _ITUNES_READ_BUF_SZ)
 				goto exception;
 
-/*hjkim, 111221, ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
+/*ffmpeg extract artist, tracknum, excep cover image. see mov_read_udta_string()*/
 #if 0
 			/**
 			 * Artist : Added 2010.10.28
@@ -834,22 +866,6 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			}
 
 			/**
-			 * Genre : Added 2010.10.27
-			 */
-			if (genre_found == 0 &&
-				read_buf[0] == 'g' && read_buf[1] == 'n' && read_buf[2] == 'r' && read_buf[3] == 'e' &&
-				read_buf[8] == 'd' && read_buf[9] == 'a' && read_buf[10] == 't' && read_buf[11] == 'a') {
-
-				genre_found = 1;
-				genre_offset = mmfile_tell (fp);
-
-				#ifdef __MMFILE_TEST_MODE__
-				debug_msg ("[%s][%d]----------------------------------- genre found, offset=[%lld]\n", __func__, __LINE__, genre_offset);
-				#endif
-			}
-
-
-			/**
 			 * Track number
 			 */
 			if (track_found == 0 &&
@@ -864,6 +880,22 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 				#endif
 			}
 #endif
+			/**
+			 * Genre : Added 2010.10.27
+			 */
+			/*ffmpeg extract genre but only (0xa9,'g','e','n'). see mov_read_udta_string()*/
+			if (genre_found == 0 &&
+				read_buf[0] == 'g' && read_buf[1] == 'n' && read_buf[2] == 'r' && read_buf[3] == 'e' &&
+				read_buf[8] == 'd' && read_buf[9] == 'a' && read_buf[10] == 't' && read_buf[11] == 'a') {
+
+				genre_found = 1;
+				genre_offset = mmfile_tell (fp);
+
+				#ifdef __MMFILE_TEST_MODE__
+				debug_msg ("[%s][%d]----------------------------------- genre found, offset=[%lld]\n", __func__, __LINE__, genre_offset);
+				#endif
+			}
+
 			/**
 			 * Cover image
 			 */
@@ -886,7 +918,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			mmfile_seek (fp, -(_ITUNES_READ_BUF_SZ - 1), SEEK_CUR);	/*FIXME: poor search*/
 		} /*loop*/
 
-/*hjkim, 111221, ffmpeg extract artist, genre, tracknum, excep cover image. see mov_read_udta_string()*/
+/*ffmpeg extract artist, tracknum, excep cover image. see mov_read_udta_string()*/
 #if 0
 		if (artist_found) {
 			if (artist_sz > 0) {
@@ -919,30 +951,6 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			}
 		}
 
-		if (genre_found) {
-				mmfile_seek (fp, genre_offset, SEEK_SET);
-				readed = mmfile_read (fp, read_buf, _ITUNES_GENRE_NUM_SZ);
-				if (readed != _ITUNES_GENRE_NUM_SZ) {
-					debug_error ("failed to read. ret = %d, in = %d\n", readed, _ITUNES_GENRE_NUM_SZ);
-				} else {
-					genre_index = mmfile_io_be_uint16 (*(int*)read_buf);
-					#ifdef __MMFILE_TEST_MODE__
-					debug_msg ("[%s][%d] genre index=[%d] \n", __func__, __LINE__, genre_index);
-					#endif
-					if (genre_index > 0 && genre_index < GENRE_COUNT)	{
-						if (!formatContext->genre) {
-							memset (read_buf, 0x00, _ITUNES_READ_BUF_SZ);
-							snprintf ((char*)read_buf, sizeof(read_buf),"%s", MpegAudio_Genre[genre_index-1]);
-							#ifdef __MMFILE_TEST_MODE__
-							debug_msg ("[%s][%d] genre string=[%s] \n", __func__, __LINE__, read_buf);
-							#endif
-							formatContext->genre = mmfile_strdup ((const char*)read_buf);
-						}
-					}
-				}
-			}
-
-
 		if (track_found) {
 			mmfile_seek (fp, track_offset, SEEK_SET);
 			readed = mmfile_read (fp, read_buf, _ITUNES_TRACK_NUM_SZ);
@@ -958,9 +966,29 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 			}
 		}
 #endif
+		if (genre_found) {
+			mmfile_seek (fp, genre_offset, SEEK_SET);
+			readed = mmfile_read (fp, read_buf, _ITUNES_GENRE_NUM_SZ);
+			if (readed != _ITUNES_GENRE_NUM_SZ) {
+				debug_error ("failed to read. ret = %d, in = %d\n", readed, _ITUNES_GENRE_NUM_SZ);
+			} else {
+				genre_index = mmfile_io_be_uint16 (*(int*)read_buf);
+				#ifdef __MMFILE_TEST_MODE__
+				debug_msg ("[%s][%d] genre index=[%d] \n", __func__, __LINE__, genre_index);
+				#endif
+				if (genre_index > 0 && genre_index < GENRE_COUNT)	{
+					if (!formatContext->genre) {
+						memset (read_buf, 0x00, _ITUNES_READ_BUF_SZ);
+						snprintf ((char*)read_buf, sizeof(read_buf),"%s", MpegAudio_Genre[genre_index-1]);
+						#ifdef __MMFILE_TEST_MODE__
+						debug_msg ("[%s][%d] genre string=[%s] \n", __func__, __LINE__, read_buf);
+						#endif
+						formatContext->genre = mmfile_strdup ((const char*)read_buf);
+					}
+				}
+			}
+		}
 /*
-	hjkim, 11220.
-
 	1) below spec is in "iTunes Package Asset Specification 4.3" published by apple.
 	Music Cover Art Image Profile
 	- TIFF with ".tif" extension (32-bit uncompressed), JPEG with ".jpg" extension (quality unconstrained), or PNG with ".png" extension
@@ -1007,8 +1035,9 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 
 		return MMFILE_UTIL_SUCCESS;
 
-	} else {
+	} else
 #endif
+	if(id3_meta) {
 		/**
 		 * ID3v2
 		 */
@@ -1144,9 +1173,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 
 		return MMFILE_UTIL_SUCCESS;
 
-#ifdef ENABLE_ITUNES_META
 	}
-#endif
 
 
 exception:
@@ -2485,6 +2512,10 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 								pInfo->pGenre = mmfile_string_convert ((const char*)pExtContent, realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->genreLen);
 							}
 
+								#ifdef __MMFILE_TEST_MODE__
+									debug_msg ( "pInfo->pGenre returned = (%s), pInfo->genreLen(%d)\n", pInfo->pGenre, pInfo->genreLen);
+								#endif
+
 							pInfo->tagV2Info.bGenreMarked = true;
 						}
 						else if(strncmp((char *)CompTmp, "TRCK", 4) == 0 && pInfo->tagV2Info.bTrackNumMarked == false)
@@ -3071,7 +3102,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 							#endif
 							pInfo->tagV2Info.bAlbumMarked = true;
 						}
-						else if(strncmp((char *)CompTmp, "TYER", 4) == 0 && pInfo->tagV2Info.bYearMarked == false)
+						else if(strncmp((char *)CompTmp, "TYER", 4) == 0 && pInfo->tagV2Info.bYearMarked == false)	//TODO. TYER is replaced by the TDRC. but many files use TYER in v2.4
 						{
 							if(textEncodingType == AV_ID3V2_UTF16)
 							{
@@ -3598,7 +3629,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 							#endif
 							pInfo->tagV2Info.bComposerMarked = true;
 						}
-						else if(strncmp((char *)CompTmp, "TRDA", 4) == 0 && pInfo->tagV2Info.bRecDateMarked== false)
+						else if(strncmp((char *)CompTmp, "TDRC", 4) == 0 && pInfo->tagV2Info.bRecDateMarked== false)	//TYER(year) and TRDA are replaced by the TDRC
 						{
 							if(textEncodingType == AV_ID3V2_UTF16)
 							{
@@ -3848,7 +3879,7 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo* pInfo)
 		else
 		{
 			#ifdef __MMFILE_TEST_MODE__
-			debug_msg (  "pInfo->genreLen size is Zero Or not UTF16 code! %d %s\n",pInfo->genreLen,pInfo->pGenre);
+			debug_msg (  "pInfo->genreLen size is Zero Or not UTF16 code! genreLen[%d] genre[%s]\n",pInfo->genreLen,pInfo->pGenre);
 			#endif
 			if (pInfo->pGenre) {
 				pInfo->genreLen = strlen(pInfo->pGenre);
@@ -3924,7 +3955,7 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo* pInfo)
 					pInfo->pGenre[pInfo->genreLen] = '\0';
 				}
 				#ifdef __MMFILE_TEST_MODE__
-				debug_msg ( "pInfo->pGenre = %s\n", pInfo->pGenre);
+				debug_msg ( "pInfo->pGenre = %s, pInfo->genreLen = %d\n", pInfo->pGenre, pInfo->genreLen);
 				#endif
 			}
 			else

@@ -40,7 +40,7 @@ extern "C" {
 #include "mm_file_codecs.h"
 
 #define MMFILE_UTIL_FAIL		-1
-#define MMFILE_UTIL_SUCCESS		1
+#define MMFILE_UTIL_SUCCESS	0
 
 #define MMFILE_IO_FAILED		MMFILE_UTIL_FAIL
 #define MMFILE_IO_SUCCESS		MMFILE_UTIL_SUCCESS

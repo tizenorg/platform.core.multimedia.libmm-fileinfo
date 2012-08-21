@@ -552,6 +552,8 @@ int mm_file_create_content_attrs_simple(MMHandleType *content_attrs, const char 
 
 int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long *time_info, char **lyrics);
 
+int mm_file_get_video_frame(const char* path, double timestamp, bool keyframe, unsigned char **data, int *size, int *width, int *height);
+
 /**
 	@}
  */

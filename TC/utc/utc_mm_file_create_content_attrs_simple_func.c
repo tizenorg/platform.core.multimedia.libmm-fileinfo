@@ -48,7 +48,6 @@
 #include "utc_mm_fileinfo_common.h"
 
 
-#define MEDIA_PATH	"/opt/media/Images and videos/My video clips/Helicopter.mp4"
 #define TEST_API "mm_file_create_content_attrs_simple"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

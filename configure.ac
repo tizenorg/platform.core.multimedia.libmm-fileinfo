@@ -93,9 +93,9 @@ AC_ARG_ENABLE(drm, AC_HELP_STRING([--enable-drm], [using drm]),
    esac
 ],[USE_DRM=yes])
 if test "x$USE_DRM" = "xyes"; then
-     PKG_CHECK_MODULES(DRMSERVICE, drm-service)
-     AC_SUBST(DRMSERVICE_CFLAGS)
-     AC_SUBST(DRMSERVICE_LIBS)
+     PKG_CHECK_MODULES(DRMCLIENT, drm-client)
+     AC_SUBST(DRMCLIENT_CFLAGS)
+     AC_SUBST(DRMCLIENT_LIBS)
 fi
 AM_CONDITIONAL(USE_DRM, test "x$USE_DRM" = "xyes")
  

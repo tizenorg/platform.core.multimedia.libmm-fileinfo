@@ -56,7 +56,6 @@
 // Declare the global variables and registers and Internal Funntions
 //-------------------------------------------------------------------------------------------------
 #define TEST_API "mm_file_create_content_attrs"
-#define MEDIA_PATH	"/opt/media/Sounds and music/Music/Over the horizon.mp3"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 /* Initialize TCM data structures */

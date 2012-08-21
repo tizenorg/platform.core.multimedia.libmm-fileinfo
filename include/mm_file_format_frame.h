@@ -19,19 +19,6 @@
  *
  */
 
-#ifndef _MM_FILE_TRAVERSE_H_
-#define _MM_FILE_TRAVERSE_H_
-
-#define MMFILE_PATH_MAX 256
-
-typedef enum
-{
-	MMFILE_FAIL = 0,
-	MMFILE_SUCCESS		
-} MMFILE_RETURN;
-
-typedef int (*MMFunc) (void *data, void* user_data, bool file_test);
-
-int mmfile_get_file_names (char *root_dir, MMFunc cbfunc, void* user_data);
-
-#endif /* _MM_FILE_TRAVERSE_H_ */
+#ifndef __MMFILE_DYN_LOADING__
+int mmfile_format_get_frame(const char* path, double timestamp, bool keyframe, unsigned char **data, int *size, int *width, int *height);
+#endif

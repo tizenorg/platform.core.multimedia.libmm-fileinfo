@@ -9,7 +9,8 @@ SUBDIRS = utils \
 lib_LTLIBRARIES = libmmffile.la
 
 noinst_HEADERS = include/mm_file_codecs.h \
-		 include/mm_file_formats.h
+		 include/mm_file_formats.h \
+		 include/mm_file_format_frame.h
 
 libmmffile_la_SOURCES = mm_file.c 
 

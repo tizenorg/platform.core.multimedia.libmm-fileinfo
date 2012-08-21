@@ -1846,11 +1846,20 @@ _mmf_SeqDataCheck3(PLOADINFO psLoad, unsigned char bSmafType)
 		switch (bTemp & 0xF0)
 		{
 		case 0x90 :
-			psLoad->pfnGetByte(psHuf);
+			psLoad->pfnGetByte(psHuf);	/*Note number*/
 			dIndex ++;
-			break; // added for prevent
+			psLoad->pfnGetByte(psHuf);	/*Key Velocity*/
+			dIndex ++;
+			sdTemp = _mmf_GetFlex3L(psLoad, &dReadSize);
+			if (sdTemp < 0) {
+				return AV_MMF_ERR_CHUNK;
+			}
+			dIndex += dReadSize;
+			if ((unsigned int)sdTemp > dGate)
+				dGate = sdTemp;
+			break;
 		case 0x80 :
-			psLoad->pfnGetByte(psHuf);
+			psLoad->pfnGetByte(psHuf);	/*Note number*/
 			dIndex ++;
 			sdTemp = _mmf_GetFlex3L(psLoad, &dReadSize);
 			if (sdTemp < 0) {
@@ -1863,9 +1872,11 @@ _mmf_SeqDataCheck3(PLOADINFO psLoad, unsigned char bSmafType)
 		case 0xA0 :
 		case 0xB0 :
 		case 0xE0 :
-			bTemp = psLoad->pfnGetByte(psHuf);
+			bTemp = psLoad->pfnGetByte(psHuf);	/*B0: Conrol number, E0:Pitch Bend Change LSB*/
 			dIndex ++;
-			break; // added for prevent
+			bTemp = psLoad->pfnGetByte(psHuf);	/*B0: Conrol value, E0:Pitch Bend Change MSB*/
+			dIndex ++;
+			break;
 		case 0xC0 :
 		case 0xD0 :
 			bTemp = psLoad->pfnGetByte(psHuf);
@@ -2549,15 +2560,15 @@ _mmf_MalibMakeCRC(unsigned int dSize, unsigned char* pbData)
 static int
 _mmf_MALoad(	unsigned char* pbFile, unsigned int dFSize)
 {
-	PLOADINFO			psLoad_Info;
-	unsigned int				bNo;
-	unsigned int				dChunkID, dChunkNo;
-	unsigned char*				pbBuf;
-	unsigned int				dSize, dIndex;
-	int				sdChunkSize, sdResult;
-	unsigned int				dCalcCrc, dFileCrc;
-	int				rVal;
-	bNo = 0;
+	PLOADINFO		psLoad_Info;
+	unsigned int		bNo = 0;
+	unsigned int		dChunkID = 0, dChunkNo = 0;
+	unsigned char*	pbBuf = NULL;
+	unsigned int		dSize = 0, dIndex = 0;
+	int				sdChunkSize = 0, sdResult = 0;
+	unsigned int		dCalcCrc = 0, dFileCrc = 0;
+	int				rVal = 0;
+
 	pbBuf = pbFile;
 	dSize = dFSize;
 	psLoad_Info = &(g_sSmaf_Info.sLoad_Info[bNo]);
@@ -2844,12 +2855,12 @@ mmf_file_mmf_get_duration (char *src, int is_xmf)
 	long long		src_size = 0L;
 
 	PLOADINFO		load_info;
-	unsigned char	*p_crc;
-	unsigned int	dCrc;
+	unsigned char	*p_crc = NULL;
+	unsigned int		dCrc = 0;
 	int				ret = 0;
 
 	/*total time (millisecond)*/
-	int	ret_msec;
+	int	ret_msec = 0;
 
 	debug_msg ( "\n");
 

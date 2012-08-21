@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 #ifdef DRM_SUPPORT
-#include <drm-service.h>
+#include <drm_client.h>
 #endif
 
 
@@ -137,9 +137,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 	int			pos = 0;
 	int			filename_len = 0;
 	int			index = 0, skip_index = 0;
-#ifdef DRM_SUPPORT
-	drm_content_info_t	contentInfo = {0,};
-#endif
 
 	if (fileSrc->type == MM_FILE_SRC_TYPE_FILE) {
 		fileName = (const char *)(fileSrc->file.path);
@@ -155,12 +152,14 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				break;
 		}
 
-		if (pos == 0) {
-			debug_error ("invalid file format");
-			return MMFILE_FORMAT_FAIL;	/*invalid file*/
-		}
+		memset (extansion_name, 0x00, _MMF_FILE_FILEEXT_MAX);
 
-		if (_MMF_FILE_FILEEXT_MAX > (filename_len - pos - 1)) {
+		/*extract metadata for all file. ex)a , a. , a.mp3*/
+		if (pos == 0) {
+			/*even though there is no file extension, extracto metadata*/
+			debug_msg ("no file extension");
+		}
+		else if (_MMF_FILE_FILEEXT_MAX > (filename_len - pos - 1)) {
 			strncpy (extansion_name, fileName + pos +1 , (filename_len - pos - 1));
 			extansion_name[filename_len - pos - 1] = '\0';
 		} else {
@@ -172,35 +171,26 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 		/**
 		 * Make URI name with file name
 		 */
-		if (DRM_TRUE == drm_svc_is_drm_file (fileSrc->file.path) &&
-			DRM_FILE_TYPE_OMA == drm_svc_get_drm_type (fileSrc->file.path))
+		drm_bool_type_e res = DRM_TRUE;
+		drm_file_type_e file_type = DRM_TYPE_UNDEFINED;
+		int ret = 0;
+		bool is_drm = FALSE;
+
+		ret = drm_is_drm_file (fileSrc->file.path, &res);
+		if (ret == DRM_RETURN_SUCCESS && DRM_TRUE == res)
+		{
+			ret = drm_get_file_type(fileSrc->file.path, &file_type);
+			if((ret == DRM_RETURN_SUCCESS) && ((file_type == DRM_TYPE_OMA_V1) ||(file_type == DRM_TYPE_OMA_V2)))
+			{
+				is_drm = TRUE;
+			}
+		}
+
+		if (is_drm)
 		{
 			*isdrm = MM_FILE_DRM_OMA;
-			#ifdef __MMFILE_TEST_MODE__
-			debug_msg ("OMA DRM detected.\n");
-			#endif
-
-			if (DRM_RESULT_SUCCESS != drm_svc_get_content_info (fileSrc->file.path, &contentInfo)) {
-				debug_error ("error: drm_svc_get_content_info\n");
-				return MMFILE_FORMAT_FAIL;
-			}
-
-			memset (extansion_name, 0x00, _MMF_FILE_FILEEXT_MAX);
-			if (MMFILE_UTIL_SUCCESS != mmfile_util_get_file_ext (contentInfo.contentType, extansion_name)) {
-				debug_error ("error: mmfile_util_get_ffmpeg_format\n");
-				return MMFILE_FORMAT_FAIL;
-			}
-
-			*urifilename = mmfile_malloc (MMFILE_DRM_URI_LEN + filename_len + 1);
-			if (!*urifilename) {
-				debug_error ("error: mmfile_malloc uriname\n");
-				return MMFILE_FORMAT_FAIL;
-			}
-
-			memset (*urifilename, 0x00, MMFILE_DRM_URI_LEN + filename_len + 1);
-			strncpy (*urifilename, MMFILE_DRM_URI, MMFILE_DRM_URI_LEN);
-			strncat (*urifilename, fileName, filename_len);
-			(*urifilename)[MMFILE_DRM_URI_LEN + filename_len] = '\0';
+			debug_error ("OMA DRM detected. Not Support DRM Content\n");
+			return MMFILE_FORMAT_FAIL;		/*Not Support DRM Content*/
 		} 
 		else 
 #endif // DRM_SUPPORT			

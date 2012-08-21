@@ -92,7 +92,7 @@ char *MMFileUtilGetLocale (int *error)
 #endif
     {
         index = 0;
-        debug_warning ("fail to get gconf-client\n");
+        //debug_warning ("fail to get gconf-client\n");
     }
     
     if (index < 0 || index >= MMFILE_LANGUAGE_MAX)

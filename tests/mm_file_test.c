@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -120,13 +121,27 @@ char * VideoCodecTypeString [] = {
 
 FILE *fpFailList = NULL;
 
-static int mmfile_get_file_infomation (void *data, void* user_data);
+static int mmfile_get_file_infomation (void *data, void* user_data, bool file_test);
 
 inline static int mm_file_is_little_endian (void)
 {
     int i = 0x00000001;
     return ((char *)&i)[0];
 }
+
+#define READ_FROM_FILE(FILE_PATH, data, size) \
+do{	\
+	FILE * fp = fopen (FILE_PATH, "r");	\
+	if (fp) {	\
+			fseek (fp, 0, SEEK_END);	\
+			size = ftell(fp);	\
+			fseek (fp, 0, SEEK_SET);	\
+			data = malloc (size);	\
+			fread (data, size, sizeof(char), fp);	\
+			fclose (fp);	\
+			printf("file size = %d\n", size );	\
+	}	\
+}while(0)
 
 static int
 _is_file_exist (const char *filename)
@@ -146,7 +161,7 @@ _is_file_exist (const char *filename)
 int main(int argc, char **argv)
 {
     struct stat statbuf;
-
+	bool file_test = true;		//if you want to test mm_file_create_content_XXX_from_memory() set file_test to false
 
     if (_is_file_exist (argv[1])) {
     	int ret = lstat (argv[1], &statbuf);
@@ -162,7 +177,7 @@ int main(int argc, char **argv)
 		if ( S_ISDIR (statbuf.st_mode) )	{
 			mmfile_get_file_names (argv[1], mmfile_get_file_infomation, NULL);
 		} else {
-			mmfile_get_file_infomation (argv[1], NULL);
+			mmfile_get_file_infomation (argv[1], NULL, file_test);
 		}
 
 		if (fpFailList != NULL) {
@@ -174,7 +189,7 @@ int main(int argc, char **argv)
     exit(0);
 }
 
-static int mmfile_get_file_infomation (void *data, void* user_data)
+static int mmfile_get_file_infomation (void *data, void* user_data, bool file_test)
 {
 	MMHandleType content_attrs = 0;
 	MMHandleType tag_attrs = 0;
@@ -198,8 +213,17 @@ static int mmfile_get_file_infomation (void *data, void* user_data)
 		printf ("Failed to mm_file_get_stream_info() error=[%x]\n", ret);
 	}
 
-	/* get content handle */
-	ret = mm_file_create_content_attrs(&content_attrs, filename);
+	if(file_test) {
+		/* get content handle */
+		ret = mm_file_create_content_attrs(&content_attrs, filename);
+	} else {
+		int file_size = 0;
+		unsigned char * buffer = NULL;
+		/* Read file */
+		READ_FROM_FILE(filename, buffer, file_size);
+
+		ret =mm_file_create_content_attrs_from_memory(&content_attrs, buffer, file_size, MM_FILE_FORMAT_3GP);
+	}
 
 	if (ret == MM_ERROR_NONE && content_attrs) {
 		ContentContext_t ccontent;
@@ -264,8 +288,17 @@ static int mmfile_get_file_infomation (void *data, void* user_data)
 		printf ("Failed to mm_file_create_content_attrs() error=[%x]\n", ret);
 	}
 
-	/* get tag handle */
-	ret = mm_file_create_tag_attrs(&tag_attrs, filename);
+	if(file_test) {
+		/* get tag handle */
+		ret = mm_file_create_tag_attrs(&tag_attrs, filename);
+	} else {
+		int file_size = 0;
+		unsigned char * buffer = NULL;
+		/* Read file */
+		READ_FROM_FILE(filename, buffer, file_size);
+
+		ret =mm_file_create_tag_attrs_from_memory(&tag_attrs, buffer, file_size, MM_FILE_FORMAT_3GP);
+	}
 
 	if (ret == MM_ERROR_NONE && tag_attrs) {
 		TagContext_t ctag;

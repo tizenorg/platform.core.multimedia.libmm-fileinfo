@@ -36,6 +36,7 @@
 
 /* internal MM File headers */
 #include "mm_file_formats.h"
+#include "mm_file_format_frame.h"
 #include "mm_file_codecs.h"
 #include "mm_file_utils.h"
 
@@ -147,9 +148,10 @@ int (*mmfile_format_read_stream)	(MMFileFormatContext *formatContext);
 int (*mmfile_format_read_frame)		(MMFileFormatContext *formatContext, unsigned int timestamp, MMFileFormatFrame *frame);
 int (*mmfile_format_read_tag)		(MMFileFormatContext *formatContext);
 int (*mmfile_format_close)			(MMFileFormatContext *formatContext);
-int (*mmfile_codec_open)			(MMFileCodecContext **codecContext, int codecType, int codecId, MMFileCodecFrame *input);
+int (*mmfile_codec_open)				(MMFileCodecContext **codecContext, int codecType, int codecId, MMFileCodecFrame *input);
 int (*mmfile_codec_decode)			(MMFileCodecContext *codecContext, MMFileCodecFrame *output);
 int (*mmfile_codec_close)			(MMFileCodecContext *codecContext);
+int (*mmfile_format_get_frame)		(const char* path, double timestamp, bool keyframe, unsigned char **data, int *size, int *width, int *height);
 #endif
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -280,6 +282,7 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 		if (formatContext->composer && formatContext->author == NULL)	
 											mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_AUTHOR, formatContext->composer);
 		if (formatContext->album)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM	, formatContext->album);
+		if (formatContext->copyright)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COPYRIGHT, formatContext->copyright);
 		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->comment);
 		if (formatContext->genre)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_GENRE, formatContext->genre);
 		if (formatContext->classification)  		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CLASSIFICATION, formatContext->classification);
@@ -665,7 +668,7 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 		return MM_ERROR_INVALID_ARGUMENT;
 	}
 
-	ret = mm_attrs_get_data_by_name (tag_attrs, MM_FILE_TAG_SYNCLYRICS, &synclyrics_list);
+	ret = mm_attrs_get_data_by_name (tag_attrs, MM_FILE_TAG_SYNCLYRICS, (void **)&synclyrics_list);
 	if(ret != MM_ERROR_NONE) {
 		#ifdef __MMFILE_TEST_MODE__
 			debug_warning (  "get data fail");
@@ -784,7 +787,7 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 		mmfile_free (artwork);
 	}
 
-	ret = mm_attrs_get_data_by_name (tag_attrs, MM_FILE_TAG_SYNCLYRICS, &synclyrics_list);
+	ret = mm_attrs_get_data_by_name (tag_attrs, MM_FILE_TAG_SYNCLYRICS, (void **)&synclyrics_list);
 
 	if(synclyrics_list != NULL) {
 		mm_file_free_synclyrics_list(synclyrics_list);
@@ -1128,6 +1131,38 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 	return ret;
 }
 
+EXPORT_API
+int mm_file_get_video_frame(const char* path, double timestamp, bool keyframe, unsigned char **data, int *size, int *width, int *height)
+{
+	int ret = 0;
+	void *formatFuncHandle = NULL;
+#ifdef __MMFILE_DYN_LOADING__
+	/* Get from function argument */
+	formatFuncHandle = dlopen (MMFILE_FORMAT_SO_FILE_NAME, RTLD_LAZY);
+	if (!formatFuncHandle) {
+		debug_error ("error : dlopen");
+		goto exception;
+	}
 
+	mmfile_format_get_frame = dlsym (formatFuncHandle, "mmfile_format_get_frame");
+	if ( !mmfile_format_get_frame ) {
+		debug_error ("error : load library");
+		goto exception;
+	}
+#endif
+	ret = mmfile_format_get_frame(path, timestamp, keyframe, data, size, width, height);
+	if (ret  == MMFILE_FORMAT_FAIL) {
+		debug_error ("error : get frame");
+		goto exception;
+	}
 
+	if (formatFuncHandle) dlclose (formatFuncHandle);
 
+	return MM_ERROR_NONE;
+
+exception:
+	if (formatFuncHandle) dlclose (formatFuncHandle);
+
+	return MM_ERROR_FILE_INTERNAL;
+
+}
