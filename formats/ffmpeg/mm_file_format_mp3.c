@@ -200,7 +200,7 @@ int mmfile_format_read_tag_mp3    (MMFileFormatContext *formatContext)
 	if (privateData->pArtist)			formatContext->artist = mmfile_strdup(privateData->pArtist);
 	if (privateData->pAuthor)			formatContext->author = mmfile_strdup(privateData->pAuthor);
 	if (privateData->pCopyright)		formatContext->copyright = mmfile_strdup(privateData->pCopyright);
-	if (privateData->pDescription)		formatContext->comment = mmfile_strdup(privateData->pDescription);
+	if (privateData->pComment)		formatContext->comment = mmfile_strdup(privateData->pComment);
 	if (privateData->pAlbum)			formatContext->album = mmfile_strdup(privateData->pAlbum);
 	if (privateData->pYear)				formatContext->year = mmfile_strdup(privateData->pYear);
 	if (privateData->pGenre)			formatContext->genre = mmfile_strdup(privateData->pGenre);
@@ -1436,7 +1436,7 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 	debug_msg ( "**** Info #2 ****\n");
 	debug_msg ( "Author      : %s\n", pInfo->pAuthor);
 	debug_msg ( "Copyright   : %s\n", pInfo->pCopyright);
-	debug_msg ( "Description : %s\n", pInfo->pDescription);
+	debug_msg ( "Comment : %s\n", pInfo->pComment);
 	debug_msg ( "Rating      : %s\n", pInfo->pRating);
 	debug_msg ( "RecDate     : %s\n", pInfo->pRecDate);
 	debug_msg ( "Encoded by  : %s\n", pInfo->pEncBy);

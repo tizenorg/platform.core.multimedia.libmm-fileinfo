@@ -23,65 +23,220 @@
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 
+#include <mm_types.h>
 #include "mm_debug.h"
 #include "mm_file_formats.h"
 #include "mm_file_utils.h"
+#include "mm_file_format_ffmpeg_mem.h"
 #include "mm_file_format_frame.h"
 
 #define MILLION 1000000
 #ifdef MMFILE_FORMAT_DEBUG_DUMP
-static void _save_pgm (unsigned char *buf,int wrap, int xsize,int ysize,char *filename);
+static void __save_frame(AVFrame *pFrame, int width, int height, int iFrame);
 
-static void _save_pgm (unsigned char *buf,int wrap, int xsize,int ysize,char *filename)
-{
-	FILE *f;
-	int i;
+void __save_frame(AVFrame *pFrame, int width, int height, int iFrame) {
+	FILE *pFile;
+	char szFilename[32];
+	int y;
+	// Open file
+	sprintf(szFilename, "frame%d.ppm", iFrame);
+	pFile=fopen(szFilename, "wb");
+	if(pFile==NULL)
+		return;
 
-	f = fopen(filename,"w");
-	if (f) {
-		fprintf (f,"P5\n%d %d\n%d\n",xsize,ysize,255);
-		for (i = 0; i < ysize; i++)
-			fwrite (buf + i * wrap, 1, xsize, f);
-		fclose (f);
-	}
+	// Write header
+	fprintf(pFile, "P6\n%d %d\n255\n", width, height);
+	// Write pixel data
+	for(y=0; y<height; y++)
+		fwrite(pFrame->data[0]+y*pFrame->linesize[0], 1, width*3, pFile);
+
+	// Close file
+	fclose(pFile);
 }
 #endif
 
-int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
+static int __getMimeType(int formatId, char *mimeType)
 {
+	int ret = 0;	/*default: success*/
+
+	switch(formatId) {
+		case MM_FILE_FORMAT_3GP:
+		case MM_FILE_FORMAT_MP4:
+			sprintf(mimeType,"video/3gpp");
+			break;
+		case MM_FILE_FORMAT_ASF:
+		case MM_FILE_FORMAT_WMA:
+		case MM_FILE_FORMAT_WMV:
+			sprintf(mimeType,"video/x-ms-asf");
+			break;
+		case  MM_FILE_FORMAT_AVI:
+			sprintf(mimeType,"video/avi");
+			break;
+		case MM_FILE_FORMAT_OGG:
+			sprintf(mimeType,"video/ogg");
+			break;
+		case MM_FILE_FORMAT_REAL:
+			sprintf(mimeType,"video/vnd.rn-realvideo");
+			break;
+		case MM_FILE_FORMAT_AMR:
+			sprintf(mimeType,"audio/AMR");
+			break;
+		case MM_FILE_FORMAT_AAC:
+			sprintf(mimeType,"audio/aac");
+			break;
+		case MM_FILE_FORMAT_MP3:
+			sprintf(mimeType,"audio/mp3");
+			break;
+		case MM_FILE_FORMAT_AIFF:
+		case MM_FILE_FORMAT_WAV:
+			sprintf(mimeType,"audio/wave");
+			break;
+		case MM_FILE_FORMAT_MID:
+			sprintf(mimeType,"audio/midi");
+			break;
+		case MM_FILE_FORMAT_MMF:
+			sprintf(mimeType,"audio/mmf");
+			break;
+		case MM_FILE_FORMAT_DIVX:
+			sprintf(mimeType,"video/divx");
+			break;
+		case MM_FILE_FORMAT_IMELODY:
+			sprintf(mimeType,"audio/iMelody");
+			break;
+		case MM_FILE_FORMAT_JPG:
+			sprintf(mimeType,"image/jpeg");
+			break;
+		case MM_FILE_FORMAT_AU:
+			sprintf(mimeType,"audio/basic");
+			break;
+		case MM_FILE_FORMAT_VOB:
+			sprintf(mimeType,"video/mpeg");
+			break;
+		case MM_FILE_FORMAT_FLV:
+			sprintf(mimeType,"video/x-flv");
+			break;
+		case MM_FILE_FORMAT_QT:
+			sprintf(mimeType,"video/quicktime");
+			break;
+		case MM_FILE_FORMAT_MATROSKA:
+			sprintf(mimeType,"video/x-matroska");
+			break;
+		case MM_FILE_FORMAT_FLAC:
+			sprintf(mimeType,"audio/x-flac");
+			break;
+		default:
+			ret = -1;
+	}
+
+	debug_msg ("id: %d, mimetype: %s\n", formatId, mimeType);
+
+	return ret;
+}
+static int __get_fileformat(const char *urifilename, int *format)
+{
+	int index;
+
+	debug_error("%s\n", urifilename);
+
+	for (index = 0; index < MM_FILE_FORMAT_NUM; index++) {
+		debug_msg ("search index = [%d]\n", index);
+		switch (index) {
+			case MM_FILE_FORMAT_QT:
+			case MM_FILE_FORMAT_3GP:
+			case MM_FILE_FORMAT_MP4: {
+				if (MMFileFormatIsValidMP4 (urifilename)) {
+					*format = MM_FILE_FORMAT_3GP;
+					return MMFILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_ASF:
+			case MM_FILE_FORMAT_WMA:
+			case MM_FILE_FORMAT_WMV: {
+				if (MMFileFormatIsValidASF (urifilename)) {
+					*format = MM_FILE_FORMAT_ASF;
+					return MMFILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_DIVX:
+			case MM_FILE_FORMAT_AVI: {
+				if (MMFileFormatIsValidAVI(urifilename)) {
+					*format = MM_FILE_FORMAT_AVI;
+					return MMFILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_MATROSKA: {
+				if (MMFileFormatIsValidMatroska (urifilename)) {
+					*format = MM_FILE_FORMAT_MATROSKA;
+					return MMFILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_FLV: {
+				if (MMFileFormatIsValidFLV (urifilename)) {
+					*format = MM_FILE_FORMAT_FLV;
+					return MMFILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			/* this is not video file format */
+			case MM_FILE_FORMAT_OGG:
+			case MM_FILE_FORMAT_AMR:
+			case MM_FILE_FORMAT_AAC:
+			case MM_FILE_FORMAT_MP3:
+			case MM_FILE_FORMAT_WAV:
+			case MM_FILE_FORMAT_MID:
+			case MM_FILE_FORMAT_MMF:
+			case MM_FILE_FORMAT_IMELODY:
+			case MM_FILE_FORMAT_FLAC:
+				break;
+			/* not supported file */
+			case MM_FILE_FORMAT_NUT:
+			case MM_FILE_FORMAT_REAL:
+			case MM_FILE_FORMAT_AIFF:
+			case MM_FILE_FORMAT_AU:
+			case MM_FILE_FORMAT_VOB:
+			case MM_FILE_FORMAT_JPG:
+				break;
+			default: {
+				debug_error ("error: invaild format enum[%d]\n", index);
+				break;
+			}
+		}
+	}
+
+	if (index == MM_FILE_FORMAT_NUM) {
+		debug_error("Can't probe file type\n");
+	}
+
+	*format = -1;
+	return MMFILE_FORMAT_FAIL;
+}
+
+static int __mmfile_get_frame(AVFormatContext *pFormatCtx, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
+{
+
 	int i = 0;
+	int len = 0;
 	int ret = MMFILE_FORMAT_SUCCESS;
 	int videoStream = -1;
+	int key_detected = 0;
 	int frameFinished = 0;
 	double pos = timestamp;
 	bool find = false ;
 	bool first_seek = true;
 	int64_t pts = 0;
-	AVFormatContext *pFormatCtx = NULL;
 	AVCodecContext *pVideoCodecCtx = NULL;
 	AVCodec *pVideoCodec = NULL;
 	AVFrame *pFrame = NULL, *pFrameRGB = NULL;
 	AVPacket packet;
-	int len = 0;
-	int key_detected = 0;
-
-	if (!size || !width || !height) {
-		return MMFILE_FORMAT_FAIL;
-	}
-
-	av_register_all();
-
-	/* Open video file */
-	if(avformat_open_input(&pFormatCtx, path, NULL, NULL) != 0) {
-		debug_error("error : avformat_open_input failed");
-		return MMFILE_FORMAT_FAIL; /* Couldn't open file */
-	}
-
-	if (!pFormatCtx) {
-		debug_warning ("failed to find av stream. maybe corrupted data.\n");
-		ret = MMFILE_FORMAT_FAIL;
-		goto exception;
-	}
 
 	/* Retrieve stream information */
 #ifdef __MMFILE_FFMPEG_V100__
@@ -243,11 +398,6 @@ int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate
 			}
 
 			if(find && frameFinished) {
-				#ifdef MMFILE_FORMAT_DEBUG_DUMP
-				char pgm_name[256] = {0,};
-				sprintf (pgm_name, "./key_%d.ppm", (int)pos/1000);
-				_save_pgm (pFrame->data[0], pFrame->linesize[0], pVideoCodecCtx->width, pVideoCodecCtx->height, pgm_name);
-				#endif
 				break;
 			}
 		}
@@ -329,6 +479,9 @@ int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate
 		}
 #endif
 
+#ifdef MMFILE_FORMAT_DEBUG_DUMP
+		__save_frame(pFrameRGB, pVideoCodecCtx->width, pVideoCodecCtx->height,  (int)(pos/1000));
+#endif
 	}
 	else
 	{
@@ -340,8 +493,6 @@ int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate
 	if (pFrame)			av_free (pFrame);
 	if (pFrameRGB)		av_free (pFrameRGB);
 	if (pVideoCodecCtx)	avcodec_close(pVideoCodecCtx);
-	/* Close video file */
-	if (pFormatCtx) avformat_close_input(&pFormatCtx);
 
 	return MMFILE_FORMAT_SUCCESS;
 
@@ -350,6 +501,126 @@ exception:
 	if (pFrame)			av_free (pFrame);
 	if (pFrameRGB)		av_free (pFrameRGB);
 	if (pVideoCodecCtx) 	avcodec_close (pVideoCodecCtx);
+
+	return ret;
+}
+
+int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
+{
+	int ret = MMFILE_FORMAT_SUCCESS;
+	AVFormatContext *pFormatCtx = NULL;
+
+	if (!size || !width || !height) {
+		return MMFILE_FORMAT_FAIL;
+	}
+
+	av_register_all();
+
+	/* Open video file */
+	if(avformat_open_input(&pFormatCtx, path, NULL, NULL) != 0) {
+		debug_error("error : avformat_open_input failed");
+		return MMFILE_FORMAT_FAIL; /* Couldn't open file */
+	}
+
+	if (!pFormatCtx) {
+		debug_warning ("failed to find av stream. maybe corrupted data.\n");
+		ret = MMFILE_FORMAT_FAIL;
+		goto exception;
+	}
+
+	ret = __mmfile_get_frame(pFormatCtx, timestamp, is_accurate, frame, size, width, height);
+	if (ret == MMFILE_FORMAT_SUCCESS) {
+		return ret;
+	}
+
+exception:
+	/* Close video file */
+	if (pFormatCtx) 		avformat_close_input(&pFormatCtx);
+
+	return ret;
+  }
+
+int mmfile_format_get_frame_from_memory(const void *data, unsigned int datasize, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
+{
+	int ret = MMFILE_FORMAT_SUCCESS;
+	int format = -1;
+	char mimeType[MMFILE_MIMETYPE_MAX_LEN] = {0,};
+	char ffmpegFormatName[MMFILE_FILE_FMT_MAX_LEN] = {0,};
+	char tempURIBuffer[MMFILE_URI_MAX_LEN] = {0,};
+	char *urifilename = NULL;
+	AVFormatContext *pFormatCtx = NULL;
+	AVInputFormat *grab_iformat = NULL;
+
+	if (!size || !width || !height) {
+		return MMFILE_FORMAT_FAIL;
+	}
+
+	av_register_all();
+
+	sprintf (tempURIBuffer, "%s%u:%u", MMFILE_MEM_URI, (unsigned int)data, datasize);
+	urifilename = mmfile_strdup (tempURIBuffer);
+	if (!urifilename) {
+		debug_error ("error: uri is NULL\n");
+		return MMFILE_FORMAT_FAIL;
+	}
+
+	mmfile_register_io_all();
+
+	ret = __get_fileformat(urifilename, &format);
+	if (ret != MMFILE_FORMAT_SUCCESS) {
+		debug_error ("error: file format is invalid\n");
+		return MMFILE_FORMAT_FAIL;
+	}
+
+#ifdef __MMFILE_FFMPEG_V085__
+	ffurl_register_protocol(&MMFileMEMProtocol, sizeof (URLProtocol));
+#else
+	register_protocol (&MMFileMEMProtocol);
+#endif
+
+	if(__getMimeType(format,mimeType)< 0) {
+		debug_error ("error: Error in MIME Type finding\n");
+		return MMFILE_FORMAT_FAIL;
+	}
+
+	memset (ffmpegFormatName, 0x00, MMFILE_FILE_FMT_MAX_LEN);
+
+	ret = mmfile_util_get_ffmpeg_format (mimeType,ffmpegFormatName);
+
+	if (MMFILE_UTIL_SUCCESS != ret) {
+		debug_error ("error: mmfile_util_get_ffmpeg_format\n");
+		return MMFILE_FORMAT_FAIL;
+	}
+
+	grab_iformat = av_find_input_format (ffmpegFormatName);
+
+	if (NULL == grab_iformat) {
+		debug_error ("error: cannot find format\n");
+		goto exception;
+	}
+
+#ifdef __MMFILE_FFMPEG_V085__
+	ret = avformat_open_input (&pFormatCtx, urifilename, grab_iformat, NULL);
+#else
+	ret = av_open_input_file (&pFormatCtx, urifilename, grab_iformat, 0, NULL);
+#endif
+	if (ret < 0) {
+		debug_error("error: cannot open %s %d\n", urifilename, ret);
+		goto exception;
+	}
+
+	if (!pFormatCtx) {
+		debug_warning ("failed to find av stream. maybe corrupted data.\n");
+		ret = MMFILE_FORMAT_FAIL;
+		goto exception;
+	}
+
+	ret = __mmfile_get_frame(pFormatCtx, timestamp, is_accurate, frame, size, width, height);
+	if (ret == MMFILE_FORMAT_SUCCESS) {
+		return ret;
+	}
+
+exception:
 	/* Close video file */
 	if (pFormatCtx) 		avformat_close_input(&pFormatCtx);
 

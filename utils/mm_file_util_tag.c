@@ -25,7 +25,7 @@
 #include "mm_debug.h"
 #include "mm_file_utils.h"
 
-#define ENABLE_ITUNES_META
+//#define ENABLE_ITUNES_META		//All itunes metadata extracted by ffmpeg. see mov_read_udta_string()
 
 typedef struct _mmfilemp4basicboxheader {
 	unsigned int size;
@@ -214,8 +214,8 @@ static int GetStringFromTextTagBox (MMFileFormatContext *formatContext, MMFileIO
 			break;
 		}
 		case eMMFILE_3GP_TAG_CAPTION: {
-			if (!formatContext->comment) {
-				formatContext->comment = temp_text;
+			if (!formatContext->description) {
+				formatContext->description = temp_text;
 			}
 			break;
 		}
@@ -1149,7 +1149,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 		if (!formatContext->artist)         formatContext->artist = mmfile_strdup((const char*)tagInfo.pArtist);
 		if (!formatContext->author)         formatContext->author = mmfile_strdup((const char*)tagInfo.pAuthor);
 		if (!formatContext->copyright)      formatContext->copyright = mmfile_strdup((const char*)tagInfo.pCopyright);
-		if (!formatContext->comment)        formatContext->comment = mmfile_strdup((const char*)tagInfo.pDescription);
+		if (!formatContext->comment)        formatContext->comment = mmfile_strdup((const char*)tagInfo.pComment);
 		if (!formatContext->album)          formatContext->album = mmfile_strdup((const char*)tagInfo.pAlbum);
 		if (!formatContext->year)           formatContext->year = mmfile_strdup((const char*)tagInfo.pYear);
 		if (!formatContext->genre)          formatContext->genre = mmfile_strdup((const char*)tagInfo.pGenre);
@@ -1384,9 +1384,9 @@ bool mm_file_id3tag_parse_v110(AvFileContentInfo* pInfo,  unsigned char *buffer)
 		#endif
 	}
 	if(pInfo->tagV2Info.bDescriptionMarked == false) {
-		pInfo->pDescription = mmfile_string_convert ((const char*)&buffer[97], MP3_ID3_DESCRIPTION_LENGTH, "UTF-8", locale, NULL, (unsigned int*)&pInfo->descriptionLen);
+		pInfo->pComment = mmfile_string_convert ((const char*)&buffer[97], MP3_ID3_DESCRIPTION_LENGTH, "UTF-8", locale, NULL, (unsigned int*)&pInfo->commentLen);
 		#ifdef __MMFILE_TEST_MODE__
-		debug_msg (  "pInfo->pDescription returned =(%s), pInfo->descriptionLen(%d)\n", pInfo->pDescription, pInfo->descriptionLen);
+		debug_msg (  "pInfo->pComment returned =(%s), pInfo->commentLen(%d)\n", pInfo->pComment, pInfo->commentLen);
 		#endif
 	}
 
@@ -1608,15 +1608,15 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo* pInfo, unsigned char *buffer)
 
 									if(textEncodingType == AV_ID3V2_UTF16)
 									{
-										pInfo->pDescription = mmfile_string_convert ((char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->descriptionLen);
+										pInfo->pComment = mmfile_string_convert ((char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->commentLen);
 									}
 									else
 									{
-										pInfo->pDescription = mmfile_string_convert ((char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->descriptionLen);
+										pInfo->pComment = mmfile_string_convert ((char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->commentLen);
 									}
 
 									#ifdef __MMFILE_TEST_MODE__
-									debug_msg ( "pInfo->pDescription returned = (%s), pInfo->descriptionLen(%d)\n", pInfo->pDescription, pInfo->descriptionLen);
+									debug_msg ( "pInfo->pComment returned = (%s), pInfo->commentLen(%d)\n", pInfo->pComment, pInfo->commentLen);
 									#endif
 									pInfo->tagV2Info.bDescriptionMarked = true;
 								}
@@ -2259,7 +2259,7 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 										else
 										{
 											#ifdef __MMFILE_TEST_MODE__
-											debug_msg ( "pInfo->pDescription Never Get Here!!\n");
+											debug_msg ( "pInfo->pComment Never Get Here!!\n");
 											#endif
 										}
 									}
@@ -2279,7 +2279,7 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 
 									if(textEncodingType == AV_ID3V2_UTF16)
 									{
-										pInfo->pDescription = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->descriptionLen);
+										pInfo->pComment = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->commentLen);
 									}
 									else if (textEncodingType == AV_ID3V2_UTF16_BE)
 									{
@@ -2287,7 +2287,7 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 									}
 									else
 									{
-										pInfo->pDescription = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->descriptionLen);
+										pInfo->pComment = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->commentLen);
 									}
 								}
 								else
@@ -2295,7 +2295,7 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 									#ifdef __MMFILE_TEST_MODE__
 									debug_msg ( "failed to get Comment Info tmp(%d), purelyFramelen - encodingOffSet(%d)\n", tmp, purelyFramelen - encodingOffSet);
 									#endif
-									pInfo->descriptionLen = 0;
+									pInfo->commentLen = 0;
 								}
 							}
 							else
@@ -2303,12 +2303,12 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 								#ifdef __MMFILE_TEST_MODE__
 								debug_msg ( "Description info too small to parse realCpyFrameNum(%d)\n", realCpyFrameNum);
 								#endif
-								pInfo->descriptionLen = 0;
+								pInfo->commentLen = 0;
 							}
 							tmp = 0;
 
 							#ifdef __MMFILE_TEST_MODE__
-							debug_msg ( "pInfo->pDescription returned = (%s), pInfo->descriptionLen(%d)\n", pInfo->pDescription, pInfo->descriptionLen);
+							debug_msg ( "pInfo->pComment returned = (%s), pInfo->commentLen(%d)\n", pInfo->pComment, pInfo->commentLen);
 							#endif
 							pInfo->tagV2Info.bDescriptionMarked = true;
 						}
@@ -3257,7 +3257,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 									else
 									{
 										#ifdef __MMFILE_TEST_MODE__
-										debug_msg ( "pInfo->pDescription Never Get Here!!\n");
+										debug_msg ( "pInfo->pComment Never Get Here!!\n");
 										#endif
 									}
 								}
@@ -3286,7 +3286,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 
 								if(textEncodingType == AV_ID3V2_UTF16)
 								{
-									pInfo->pDescription = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->descriptionLen);
+									pInfo->pComment = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", "UCS2", NULL, (unsigned int*)&pInfo->commentLen);
 								}
 								else if(textEncodingType == AV_ID3V2_UTF16_BE)
 								{
@@ -3294,17 +3294,17 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 								}
 								else if(textEncodingType == AV_ID3V2_UTF8)
 								{
-									pInfo->pDescription= mmfile_malloc (realCpyFrameNum+2);//Ignore NULL char for UTF16
-									memset(pInfo->pDescription, 0, (realCpyFrameNum+2));
-									memcpy(pInfo->pDescription, pExtContent+tmp, realCpyFrameNum);
-									pInfo->pDescription[realCpyFrameNum] = '\0';
+									pInfo->pComment= mmfile_malloc (realCpyFrameNum+2);//Ignore NULL char for UTF16
+									memset(pInfo->pComment, 0, (realCpyFrameNum+2));
+									memcpy(pInfo->pComment, pExtContent+tmp, realCpyFrameNum);
+									pInfo->pComment[realCpyFrameNum] = '\0';
 									/*string copy with '\0'*/
-									pInfo->descriptionLen = realCpyFrameNum;
-									_STRNCPY_EX (pInfo->pDescription, pExtContent, pInfo->descriptionLen);
+									pInfo->commentLen = realCpyFrameNum;
+									_STRNCPY_EX (pInfo->pComment, pExtContent, pInfo->commentLen);
 								}
 								else
 								{
-									pInfo->pDescription = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->descriptionLen);
+									pInfo->pComment = mmfile_string_convert ((const char*)&pExtContent[tmp], realCpyFrameNum, "UTF-8", locale, NULL, (unsigned int*)&pInfo->commentLen);
 								}
 							}
 							else
@@ -3317,7 +3317,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo* pInfo, unsigned char *buffer)
 							tmp = 0;
 
 							#ifdef __MMFILE_TEST_MODE__
-							debug_msg ( "pInfo->pDescription returned = (%s), pInfo->descriptionLen(%d)\n", pInfo->pDescription, pInfo->descriptionLen);
+							debug_msg ( "pInfo->pComment returned = (%s), pInfo->commentLen(%d)\n", pInfo->pComment, pInfo->commentLen);
 							#endif
 							pInfo->tagV2Info.bDescriptionMarked = true;
 						}

@@ -11,7 +11,7 @@ noinst_HEADERS = include/mm_file_format_dummy.h \
 		include/mm_file_format_ffmpeg_mem.h \
 		include/mm_file_format_ffmpeg.h \
 		include/mm_file_format_mmf.h \
-		include/mm_file_format_mp3.h \
+		#include/mm_file_format_mp3.h \
 		include/mm_file_format_wav.h \
 		include/mm_file_format_private.h
 

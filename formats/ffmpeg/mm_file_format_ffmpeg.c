@@ -404,33 +404,47 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 	int idx = 0;
 
 	if(pFormatCtx != NULL) {
-		for(idx = 0; idx < 3; idx++) {
+		for(idx = 0; idx < pFormatCtx->nb_streams + 1; idx++) {
 			AVDictionary *metainfo = NULL;
+			AVStream *st = NULL;
 
-			if(idx == 0) {			//Check metadata of Content
+			if(idx < pFormatCtx->nb_streams) {	//Check metadata of normal stream like audio, video, video cover art(cover art saved in new stream). refer to mov_read_covr() in ffmpeg.
+				st = pFormatCtx->streams[idx];
+					if(st != NULL)
+						metainfo = st->metadata;
+			} else {	//Check metadata of Content
 				if(pFormatCtx->metadata != NULL) {
 					metainfo = pFormatCtx->metadata;
 				} else {
 					continue;
 				}
-			} else if(idx == 1) {	//Check metadata of Video stream
-				if (formatContext->videoStreamId != -1) {
-					AVStream *st = pFormatCtx->streams[formatContext->videoStreamId];
-					if(st != NULL)
-						metainfo = st->metadata;
-				} else {
-					continue;
+			}
+
+			/*refer to mov_read_covr() in ffmpeg.*/
+			if(st != NULL) {
+				AVPacket pkt = st->attached_pic;
+				int codec_id = st->codec->codec_id;
+
+				if((pkt.data != NULL) && (pkt.size > 0)) {
+					/*Set mime type*/
+					if (formatContext->artworkMime)	mmfile_free (formatContext->artworkMime);
+
+					if(codec_id == AV_CODEC_ID_MJPEG)
+						formatContext->artworkMime = mmfile_strdup("image/jpeg");
+					else if(codec_id == AV_CODEC_ID_PNG)
+						formatContext->artworkMime = mmfile_strdup("image/png");
+					else if(codec_id == AV_CODEC_ID_BMP)
+						formatContext->artworkMime = mmfile_strdup("image/bmp");
+					else
+						debug_error ("Unknown cover type: 0x%x\n", codec_id);
+
+					/*Copy artwork*/
+					if (formatContext->artwork)	mmfile_free (formatContext->artwork);
+
+					formatContext->artworkSize = pkt.size;
+					formatContext->artwork = mmfile_malloc (pkt.size);
+					memcpy (formatContext->artwork, pkt.data, pkt.size);
 				}
-			} else if(idx == 2) {	//Check metadata of Audio stream
-				if (formatContext->audioStreamId != -1) {
-					AVStream *st = pFormatCtx->streams[formatContext->audioStreamId];
-					if(st != NULL)
-						metainfo = st->metadata;
-				} else {
-					continue;
-				}
-			} else {
-				metainfo = NULL;
 			}
 
 			if(metainfo != NULL) {
@@ -455,6 +469,9 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 						} else if(!strcasecmp(tag->key, "comment")) {
 							if (formatContext->comment)	free (formatContext->comment);
 							formatContext->comment = mmfile_strdup (tag->value);
+						} else if(!strcasecmp(tag->key, "description")) {
+							if (formatContext->description)	free (formatContext->description);
+							formatContext->description = mmfile_strdup (tag->value);
 						} else if(!strcasecmp(tag->key, "genre")) {
 							if (formatContext->genre)	free (formatContext->genre);
 							formatContext->genre = mmfile_strdup (tag->value);
@@ -476,6 +493,9 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 					}
 				}
 			}
+#ifdef 	__MMFILE_TEST_MODE__
+			mmfile_format_print_tags (formatContext);
+#endif
 		}
 	}
 #else
@@ -528,9 +548,6 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 		formatContext->tagTrackNum = mmfile_strdup (tracknum);
 	}
 #endif
-	#ifdef 	__MMFILE_TEST_MODE__
-	mmfile_format_print_tags (formatContext);
-	#endif
 
 	return MMFILE_FORMAT_SUCCESS;
 }

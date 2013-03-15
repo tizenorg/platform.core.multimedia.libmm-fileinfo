@@ -81,6 +81,7 @@ extern "C" {
 #define	MM_FILE_TAG_COPYRIGHT		"tag-copyright"		/**< Copyright */
 #define	MM_FILE_TAG_DATE				"tag-date"			/**< Year */
 #define	MM_FILE_TAG_DESCRIPTION		"tag-description"		/**< Description */
+#define	MM_FILE_TAG_COMMENT			"tag-comment"		/**< Comment */
 #define	MM_FILE_TAG_ARTWORK			"tag-artwork"			/**< Artwork */
 #define	MM_FILE_TAG_ARTWORK_SIZE		"tag-artwork-size"		/**< Artwork size */
 #define	MM_FILE_TAG_ARTWORK_MIME	"tag-artwork-mime"	/**< Artwork mime type */
@@ -577,6 +578,8 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
  */
 
 int mm_file_get_video_frame(const char* path, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
+
+int mm_file_get_video_frame_from_memory(const void *data, unsigned int datasize, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
 
 /**
 	@}

@@ -63,30 +63,41 @@ int (*MMFileOpenFunc[MM_FILE_FORMAT_NUM+1]) (MMFileFormatContext *fileContext) =
 	NULL,
 };
 
-static int _CleanupFrameContext (MMFileFormatContext *formatContext)
+static int _CleanupFrameContext (MMFileFormatContext *formatContext, bool clean_all)
 {
 	if (formatContext) {
-		formatContext->ReadFrame	= NULL;
-		formatContext->ReadStream	= NULL;
-		formatContext->ReadTag		= NULL;
-		formatContext->Close		= NULL;
 
-		if (formatContext->title)			mmfile_free(formatContext->title);
-		if (formatContext->artist)			mmfile_free(formatContext->artist);
+		if (formatContext->ReadStream)	formatContext->ReadStream	= NULL;
+		if (formatContext->ReadFrame)		formatContext->ReadFrame	= NULL;
+		if (formatContext->ReadTag)		formatContext->ReadTag		= NULL;
+		if (formatContext->Close)			formatContext->Close			= NULL;
+
+		if (formatContext->uriFileName)		mmfile_free(formatContext->uriFileName);
+		if (formatContext->title)				mmfile_free(formatContext->title);
+		if (formatContext->artist)				mmfile_free(formatContext->artist);
 		if (formatContext->author)			mmfile_free(formatContext->author);
-		if (formatContext->composer)		mmfile_free(formatContext->composer);
-		if (formatContext->album)			mmfile_free(formatContext->album);
-		if (formatContext->year)			mmfile_free(formatContext->year);
-		if (formatContext->copyright)		mmfile_free(formatContext->copyright);
+		if (formatContext->composer)			mmfile_free(formatContext->composer);
+		if (formatContext->album)				mmfile_free(formatContext->album);
+		if (formatContext->copyright)			mmfile_free(formatContext->copyright);
+		if (formatContext->description)			mmfile_free(formatContext->description);
 		if (formatContext->comment)			mmfile_free(formatContext->comment);
-		if (formatContext->genre)			mmfile_free(formatContext->genre);
+		if (formatContext->genre)				mmfile_free(formatContext->genre);
+		if (formatContext->classification)		mmfile_free(formatContext->classification);
+		if (formatContext->year)				mmfile_free(formatContext->year);
+		if (formatContext->recDate) 			mmfile_free(formatContext->recDate);
+		if (formatContext->tagTrackNum) 		mmfile_free(formatContext->tagTrackNum);
+		if (formatContext->rating)				mmfile_free(formatContext->rating);
+		if (formatContext->artworkMime)		mmfile_free(formatContext->artworkMime);
 		if (formatContext->artwork)			mmfile_free(formatContext->artwork);
-		if (formatContext->classification)	mmfile_free(formatContext->classification);
-		if (formatContext->conductor)		mmfile_free(formatContext->conductor);
+		if (formatContext->conductor)			mmfile_free(formatContext->conductor);
+		if (formatContext->unsyncLyrics)		mmfile_free(formatContext->unsyncLyrics);
+		if (formatContext->rotate)				mmfile_free(formatContext->rotate);
+
+		if(clean_all)	//syncLyrics has to be freed in mm_file_destroy_tag_attrs() except abnormal status
+			if (formatContext->syncLyrics)			mm_file_free_synclyrics_list(formatContext->syncLyrics);
 
 		if (formatContext->privateFormatData)	mmfile_free(formatContext->privateFormatData);
 		if (formatContext->privateCodecData)	mmfile_free(formatContext->privateCodecData);
-
 
 		if (formatContext->nbStreams > 0) {
 			int i = 0;
@@ -104,29 +115,8 @@ static int _CleanupFrameContext (MMFileFormatContext *formatContext)
 
 			mmfile_free (formatContext->thumbNail);
 		}
-
-		formatContext->title		= NULL;
-		formatContext->artist		= NULL;
-		formatContext->author		= NULL;
-		formatContext->composer		= NULL;
-		formatContext->album		= NULL;
-		formatContext->copyright	= NULL;
-		formatContext->comment		= NULL;
-		formatContext->genre		= NULL;
-		formatContext->artwork		= NULL;
-
-		formatContext->privateFormatData	= NULL;
-		formatContext->privateCodecData		= NULL;
-		formatContext->classification		= NULL;
-
-		formatContext->videoTotalTrackNum	= 0;
-		formatContext->audioTotalTrackNum	= 0;
-
-		formatContext->nbStreams					= 0;
-		formatContext->streams[MMFILE_AUDIO_STREAM]	= NULL;
-		formatContext->streams[MMFILE_VIDEO_STREAM]	= NULL;
-		formatContext->thumbNail					= NULL;
 	}
+
 	return MMFILE_FORMAT_SUCCESS;
 }
 
@@ -787,7 +777,7 @@ PROBE_PROPER_FILE_TYPE:
 
 }
 
-static int _mmfile_format_close (MMFileFormatContext *formatContext)
+static int _mmfile_format_close (MMFileFormatContext *formatContext, bool clean_all)
 {
 	if (NULL == formatContext) {
 		debug_error ("error: invalid params\n");
@@ -799,47 +789,7 @@ static int _mmfile_format_close (MMFileFormatContext *formatContext)
 		formatContext->Close = NULL;
 	}
 
-	if (formatContext->ReadFrame)	formatContext->ReadFrame	= NULL;
-	if (formatContext->ReadStream)	formatContext->ReadStream	= NULL;
-	if (formatContext->ReadTag)		formatContext->ReadTag		= NULL;
-	if (formatContext->Close)		formatContext->Close		= NULL;
-
-	if (formatContext->uriFileName)		mmfile_free(formatContext->uriFileName);
-	if (formatContext->title)			mmfile_free(formatContext->title);
-	if (formatContext->artist)			mmfile_free(formatContext->artist);
-	if (formatContext->author)			mmfile_free(formatContext->author);
-	if (formatContext->copyright)		mmfile_free(formatContext->copyright);
-	if (formatContext->comment)			mmfile_free(formatContext->comment);
-	if (formatContext->album)			mmfile_free(formatContext->album);
-	if (formatContext->year)			mmfile_free(formatContext->year);
-	if (formatContext->genre)			mmfile_free(formatContext->genre);
-	if (formatContext->composer)		mmfile_free(formatContext->composer);
-	if (formatContext->classification)	mmfile_free(formatContext->classification);
-	if (formatContext->artwork)			mmfile_free(formatContext->artwork);
-	if (formatContext->conductor)		mmfile_free(formatContext->conductor);
-	if (formatContext->unsyncLyrics)		mmfile_free(formatContext->unsyncLyrics);
-	if (formatContext->syncLyrics)			mm_file_free_synclyrics_list(formatContext->syncLyrics);
-	if (formatContext->artworkMime)		mmfile_free(formatContext->artworkMime);
-	if (formatContext->recDate) 		mmfile_free(formatContext->recDate);
-
-	if (formatContext->privateFormatData)	mmfile_free(formatContext->privateFormatData);
-	if (formatContext->privateCodecData)	mmfile_free(formatContext->privateCodecData);
-
-	if (formatContext->nbStreams > 0) {
-		int i = 0;
-		for (i = 0; i < MAXSTREAMS; i++)
-			if (formatContext->streams[i]) mmfile_free(formatContext->streams[i]);
-	}
-
-	if (formatContext->thumbNail) {
-		if (formatContext->thumbNail->frameData)
-			mmfile_free (formatContext->thumbNail->frameData);
-
-		if (formatContext->thumbNail->configData)
-			mmfile_free (formatContext->thumbNail->configData);
-
-		mmfile_free (formatContext->thumbNail);
-	}
+	_CleanupFrameContext(formatContext, clean_all);
 
 	if (formatContext)
 		mmfile_free (formatContext);
@@ -923,7 +873,7 @@ find_valid_handler:
 
 		ret = MMFileOpenFunc[index] (formatObject);
 		if (MMFILE_FORMAT_FAIL == ret) {
-			_CleanupFrameContext (formatObject);
+			_CleanupFrameContext (formatObject, true);
 			continue;
 		}
 
@@ -944,7 +894,7 @@ find_valid_handler:
 	return MMFILE_FORMAT_SUCCESS;
 
 exception:
-	_mmfile_format_close (formatObject);
+	_mmfile_format_close (formatObject, true);
 	*formatContext = NULL;
 
 	return ret;
@@ -987,63 +937,5 @@ int mmfile_format_read_tag (MMFileFormatContext *formatContext)
 EXPORT_API
 int mmfile_format_close (MMFileFormatContext *formatContext)
 {
-	if (NULL == formatContext) {
-		debug_error ("error: invalid params\n");
-		return MMFILE_FORMAT_FAIL;
-	}
-
-	if (formatContext->Close) {
-		formatContext->Close(formatContext);
-		formatContext->Close = NULL;
-	}
-
-	if (formatContext->ReadFrame)	formatContext->ReadFrame	= NULL;
-	if (formatContext->ReadStream)	formatContext->ReadStream	= NULL;
-	if (formatContext->ReadTag)		formatContext->ReadTag		= NULL;
-	if (formatContext->Close)		formatContext->Close		= NULL;
-
-	if (formatContext->uriFileName)		mmfile_free(formatContext->uriFileName);
-
-	if (formatContext->title)			mmfile_free(formatContext->title);
-	if (formatContext->artist)			mmfile_free(formatContext->artist);
-	if (formatContext->author)			mmfile_free(formatContext->author);
-	if (formatContext->copyright)		mmfile_free(formatContext->copyright);
-	if (formatContext->comment)			mmfile_free(formatContext->comment);
-	if (formatContext->album)			mmfile_free(formatContext->album);
-	if (formatContext->year)			mmfile_free(formatContext->year);
-	if (formatContext->genre)			mmfile_free(formatContext->genre);
-	if (formatContext->composer)		mmfile_free(formatContext->composer);
-	if (formatContext->classification)	mmfile_free(formatContext->classification);
-	if (formatContext->artwork)			mmfile_free(formatContext->artwork);
-	if (formatContext->artworkMime)			mmfile_free(formatContext->artworkMime);
-	if (formatContext->tagTrackNum)		mmfile_free(formatContext->tagTrackNum);
-	if (formatContext->rating)			mmfile_free(formatContext->rating);
-	if (formatContext->conductor)		mmfile_free(formatContext->conductor);
-	if (formatContext->unsyncLyrics) 		mmfile_free(formatContext->unsyncLyrics);
-	if (formatContext->recDate)			mmfile_free(formatContext->recDate);
-
-	if (formatContext->privateFormatData)	mmfile_free(formatContext->privateFormatData);
-	if (formatContext->privateCodecData)	mmfile_free(formatContext->privateCodecData);
-
-	if (formatContext->nbStreams > 0) {
-		int i = 0;
-		for (i = 0; i < MAXSTREAMS; i++)
-			if (formatContext->streams[i]) mmfile_free(formatContext->streams[i]);
-	}
-
-	if (formatContext->thumbNail) {
-		if (formatContext->thumbNail->frameData)
-			mmfile_free (formatContext->thumbNail->frameData);
-
-		if (formatContext->thumbNail->configData)
-			mmfile_free (formatContext->thumbNail->configData);
-
-		mmfile_free (formatContext->thumbNail);
-	}
-
-	if (formatContext)
-		mmfile_free (formatContext);
-
-	return MMFILE_FORMAT_SUCCESS;
+	return _mmfile_format_close(formatContext, false);
 }
-

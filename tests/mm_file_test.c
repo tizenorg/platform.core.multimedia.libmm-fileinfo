@@ -66,6 +66,7 @@ typedef struct _TagContext {
 	mmfile_value_t date; 			//string
 	mmfile_value_t recdate;			//string
 	mmfile_value_t description;
+	mmfile_value_t comment;
 	mmfile_value_t artwork;		//data
 	mmfile_value_t artwork_size;	//int
 	mmfile_value_t artwork_mime;
@@ -325,6 +326,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 									MM_FILE_TAG_DATE, &ctag.date.value.s_val, &ctag.date.len,
 									MM_FILE_TAG_RECDATE, &ctag.recdate.value.s_val, &ctag.recdate.len,
 									MM_FILE_TAG_DESCRIPTION, &ctag.description.value.s_val, &ctag.description.len,
+									MM_FILE_TAG_COMMENT, &ctag.comment.value.s_val, &ctag.comment.len,
 									MM_FILE_TAG_ARTWORK, &ctag.artwork.value.p_val, &ctag.artwork.len,
 									MM_FILE_TAG_ARTWORK_SIZE, &ctag.artwork_size.value.i_val,
 									MM_FILE_TAG_ARTWORK_MIME, &ctag.artwork_mime.value.s_val, &ctag.artwork_mime.len,
@@ -365,6 +367,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 		printf("# year: [%s]\n", ctag.date.value.s_val);
 		printf("# recdate: [%s]\n", ctag.recdate.value.s_val);
 		printf("# description: [%s]\n", ctag.description.value.s_val);
+		printf("# comment: [%s]\n", ctag.comment.value.s_val);
 		printf("# artwork: [%p]\n", ctag.artwork.value.p_val);
 		printf("# artwork_size: [%d]\n", ctag.artwork_size.value.i_val);
 		printf("# artwork_mime: [%s]\n", ctag.artwork_mime.value.s_val);

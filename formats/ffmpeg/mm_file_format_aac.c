@@ -260,7 +260,7 @@ int _parse_id3_tag(tMMFILE_AAC_HANDLE* pData)
   pData->tagInfo.album = hTag->pAlbum;
   pData->tagInfo.year = hTag->pYear;
   pData->tagInfo.copyright = hTag->pCopyright;
-  pData->tagInfo.comment = hTag->pDescription;
+  pData->tagInfo.comment = hTag->pComment;
   pData->tagInfo.genre = hTag->pGenre;
   pData->tagInfo.tracknum = hTag->pTrackNum;
   pData->tagInfo.composer = hTag->pComposer;

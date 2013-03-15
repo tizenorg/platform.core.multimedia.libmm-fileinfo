@@ -153,7 +153,7 @@ typedef struct
 	int		artistLen;
 	int		authorLen;
 	int		copyrightLen;
-	int		descriptionLen;
+	//int		descriptionLen;	/*ID3tag official tag name is "COMM" and meaning "Comment"*/
 	int		commentLen;
 	int		ratingLen;
 	int		albumLen;
@@ -201,8 +201,8 @@ typedef struct
 	char			*pArtist;		//Lead performer(s)/Soloist(s), 
 	char			*pAuthor;		//Author
 	char			*pCopyright;
-	char			*pDescription;
-	char			*pComment;		//Same to Description. Apps use Description. So replace this to Description  for ID3V2 Tag
+	//char			*pDescription;	/*ID3tag official tag name is "COMM" and meaning "Comment"*/
+	char			*pComment;
 	char			*pRating;
 	char			*pAlbum;		//Album/Movie/
 	char			*pYear;
@@ -244,7 +244,7 @@ inline static void mm_file_free_AvFileContentInfo (AvFileContentInfo *pInfo)
 		if (pInfo->pArtist) mmfile_free (pInfo->pArtist);
 		if (pInfo->pAuthor) mmfile_free (pInfo->pAuthor);
 		if (pInfo->pCopyright) mmfile_free (pInfo->pCopyright);
-		if (pInfo->pDescription) mmfile_free (pInfo->pDescription);
+		//if (pInfo->pDescription) mmfile_free (pInfo->pDescription);
 		if (pInfo->pComment) mmfile_free (pInfo->pComment);
 		if (pInfo->pRating) mmfile_free (pInfo->pRating);
 		if (pInfo->pAlbum) mmfile_free (pInfo->pAlbum);
@@ -272,7 +272,6 @@ bool	mm_file_id3tag_parse_v222 (AvFileContentInfo* pInfo, unsigned char *buffer)
 bool	mm_file_id3tag_parse_v223 (AvFileContentInfo* pInfo, unsigned char *buffer);
 bool	mm_file_id3tag_parse_v224 (AvFileContentInfo* pInfo, unsigned char *buffer);
 void mm_file_id3tag_restore_content_info (AvFileContentInfo* pInfo);
-
 
 #ifdef __cplusplus
 }

@@ -105,6 +105,7 @@ static mmf_attrs_construct_info_t g_tag_attrs[] = {
 	{"tag-copyright",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-date",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-description",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{"tag-comment",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-artwork",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-artwork-size",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
 	{"tag-artwork-mime",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
@@ -153,6 +154,7 @@ int (*mmfile_codec_open)				(MMFileCodecContext **codecContext, int codecType, i
 int (*mmfile_codec_decode)			(MMFileCodecContext *codecContext, MMFileCodecFrame *output);
 int (*mmfile_codec_close)			(MMFileCodecContext *codecContext);
 int (*mmfile_format_get_frame)		(const char* path, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
+int (*mmfile_format_get_frame_from_memory)		(const void *data, unsigned int datasize, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
 #endif
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -284,7 +286,8 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 											mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_AUTHOR, formatContext->composer);
 		if (formatContext->album)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM	, formatContext->album);
 		if (formatContext->copyright)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COPYRIGHT, formatContext->copyright);
-		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->comment);
+		if (formatContext->description)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->description);
+		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COMMENT, formatContext->comment);
 		if (formatContext->genre)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_GENRE, formatContext->genre);
 		if (formatContext->classification)  		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CLASSIFICATION, formatContext->classification);
 		if (formatContext->year)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DATE, formatContext->year); 
@@ -863,12 +866,9 @@ int mm_file_create_content_attrs (MMHandleType *contents_attrs, const char *file
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info (attrs, &src, &parse);
-
-#ifdef __MMFILE_TEST_MODE__
 	if (ret != MM_ERROR_NONE) {
 		debug_error ("failed to get contents: %s\n", filename);
 	}
-#endif
 
 	*contents_attrs = (MMHandleType) attrs;
 
@@ -981,6 +981,9 @@ int mm_file_create_content_attrs_from_memory (MMHandleType *contents_attrs, cons
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info (attrs, &src, &parse);
+	if (ret != MM_ERROR_NONE) {
+		debug_error ("failed to get contents");
+	}
 
 	*contents_attrs = (MMHandleType)attrs;
 
@@ -1053,11 +1056,9 @@ int mm_file_get_stream_info(const char* filename, int *audio_stream_num, int *vi
 
 	parse.type = MM_FILE_PARSE_TYPE_SIMPLE;
 	ret = _get_contents_info (NULL, &src, &parse);
-#ifdef __MMFILE_TEST_MODE__
 	if (ret != MM_ERROR_NONE) {
 		debug_error ("failed to get stream info: %s\n", filename);
 	}
-#endif
 
 	/*set number of each stream*/
 	*audio_stream_num = parse.audio_track_num;
@@ -1114,12 +1115,9 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 
 	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
 	ret = _get_contents_info (attrs, &src, &parse);
-
-#ifdef __MMFILE_TEST_MODE__
 	if (ret != MM_ERROR_NONE) {
 		debug_error ("failed to get contents: %s\n", filename);
 	}
-#endif
 
 	*contents_attrs = (MMHandleType) attrs;
 
@@ -1176,5 +1174,55 @@ exception:
 	if (formatFuncHandle) dlclose (formatFuncHandle);
 
 	return MM_ERROR_FILE_INTERNAL;
+}
 
+EXPORT_API
+int mm_file_get_video_frame_from_memory(const void *data, unsigned int datasize,  double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
+{
+	int ret = 0;
+	void *formatFuncHandle = NULL;
+
+	if (data == NULL) {
+		debug_error ("Invalid arguments [data is Null]\n");
+		return MM_ERROR_INVALID_ARGUMENT;
+	}
+
+	if (datasize == 0) {
+		debug_error ("Invalid arguments [datasize is zero]\n");
+		return MM_ERROR_INVALID_ARGUMENT;
+	}
+
+#ifdef __MMFILE_DYN_LOADING__
+	/* Get from function argument */
+	formatFuncHandle = dlopen (MMFILE_FORMAT_SO_FILE_NAME, RTLD_LAZY);
+	if (!formatFuncHandle) {
+		debug_error ("error : dlopen");
+		goto exception;
+	}
+
+	mmfile_format_get_frame_from_memory = dlsym (formatFuncHandle, "mmfile_format_get_frame_from_memory");
+	if ( !mmfile_format_get_frame_from_memory ) {
+		debug_error ("error : load library");
+		goto exception;
+	}
+#endif
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_msg("data [%p], data_size[%d], is_accurate [%d]", data, datasize, is_accurate);
+#endif
+
+	ret = mmfile_format_get_frame_from_memory(data, datasize, timestamp, is_accurate, frame, size, width, height);
+	if (ret  == MMFILE_FORMAT_FAIL) {
+		debug_error ("error : get frame");
+		goto exception;
+	}
+
+	if (formatFuncHandle) dlclose (formatFuncHandle);
+
+	return MM_ERROR_NONE;
+
+exception:
+	if (formatFuncHandle) dlclose (formatFuncHandle);
+
+	return MM_ERROR_FILE_INTERNAL;
 }

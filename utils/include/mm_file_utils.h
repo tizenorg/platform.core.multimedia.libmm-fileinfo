@@ -424,7 +424,7 @@ typedef struct
 	int		authorLen;
 	int		copyrightLen;
 	int		descriptionLen;
-//	int		commentLen;
+	int		commentLen;
 	int		ratingLen;
 	int		albumLen;
 	int		yearLen;
@@ -476,7 +476,7 @@ typedef struct
 	char			*pAuthor;		//Author
 	char			*pCopyright;
 	char			*pDescription;
-	char			*pComment;		//Same to Description. Apps use Description. So replace this to Description  for ID3V2 Tag
+	char			*pComment;
 	char			*pRating;
 	char			*pAlbum;		//Album/Movie/
 	char			*pYear;
@@ -544,10 +544,11 @@ inline static void mm_file_free_AvFileContentInfo (AvFileContentInfo *pInfo)
 		if (pInfo->pURL) mmfile_free (pInfo->pURL);
 		if (pInfo->pOriginArtist) mmfile_free (pInfo->pOriginArtist);
 		if (pInfo->pComposer) mmfile_free (pInfo->pComposer);
+		if (pInfo->pUnsyncLyrics) mmfile_free (pInfo->pUnsyncLyrics);
 		if (pInfo->imageInfo.pImageBuf) mmfile_free (pInfo->imageInfo.pImageBuf);
 		if (strlen(pInfo->imageInfo.imageMIMEType)>0) memset(pInfo->imageInfo.imageMIMEType, 0, MP3_ID3_IMAGE_MIME_TYPE_MAX_LENGTH);
 		if (pInfo->pTransactionID) mmfile_free (pInfo->pTransactionID);
-		if (pInfo->pUnsyncLyrics) mmfile_free (pInfo->pUnsyncLyrics);
+
 	}
 }
 
