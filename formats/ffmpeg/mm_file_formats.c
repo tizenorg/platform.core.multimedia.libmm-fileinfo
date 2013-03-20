@@ -873,7 +873,7 @@ find_valid_handler:
 
 		ret = MMFileOpenFunc[index] (formatObject);
 		if (MMFILE_FORMAT_FAIL == ret) {
-			_CleanupFrameContext (formatObject, true);
+//			_CleanupFrameContext (formatObject, true);
 			continue;
 		}
 
@@ -884,6 +884,7 @@ find_valid_handler:
 
 	if (index == MM_FILE_FORMAT_NUM + 1 && MMFILE_FORMAT_FAIL == ret) {
 		debug_error ("can't find file format handler\n");
+		_CleanupFrameContext (formatObject, true);
 		ret = MMFILE_FORMAT_FAIL;
 		goto exception;
 	}
