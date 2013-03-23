@@ -296,6 +296,14 @@ int mmfile_format_read_stream_ffmpg (MMFileFormatContext * formatContext)
 				pVideoCodecCtx = pFormatCtx->streams[i]->codec;
 				if (pVideoCodecCtx) {
 					videoStream->codecId		= ConvertVideoCodecEnum (pVideoCodecCtx->codec_id);
+					if (videoStream->codecId == MM_VIDEO_CODEC_NONE) {
+						debug_error("Proper codec is not found in [%d] stream", i);
+						formatContext->videoStreamId = -1;
+						mmfile_free(videoStream);
+						formatContext->streams[MMFILE_VIDEO_STREAM] = NULL;
+						videoStream = NULL;
+						continue;
+					}
 
 					/**
 					 * Get FPS

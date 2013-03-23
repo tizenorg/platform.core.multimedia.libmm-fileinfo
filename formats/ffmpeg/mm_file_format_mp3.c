@@ -315,10 +315,19 @@ __AvGetXingHeader( AvXHeadData* headData,  unsigned char *buf )
 			buf += (9+4);
 	}
 
-	if( buf[0] != 'X' ) return 0;    // fail
-	if( buf[1] != 'i' ) return 0;    // header not found
-	if( buf[2] != 'n' ) return 0;
-	if( buf[3] != 'g' ) return 0;
+	/* There could be 2 attrs in this header : Xing or Info */
+	if (buf[0] == 'X') {
+		if( buf[1] != 'i' ) return 0;
+		if( buf[2] != 'n' ) return 0;
+		if( buf[3] != 'g' ) return 0;
+	} else if (buf[0] == 'I') {
+		if( buf[1] != 'n' ) return 0;
+		if( buf[2] != 'f' ) return 0;
+		if( buf[3] != 'o' ) return 0;
+	} else {
+		return 0;
+	}
+
 	buf += 4;
 
 	headData->hId = hId;
@@ -579,35 +588,57 @@ __AvParseXingHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 	AvXHeadData data;
 	memset( &data, 0x00, sizeof(AvXHeadData) );
 
-	//	1. Xing Header üũ
+	//	1. Xing Header
+	/* There could be 2 attrs in this header : Xing or Info */
 	if((pInfo->mpegVersion == AV_MPEG_VER_1) && (pInfo->channels == 2))
 	{
-		if( buf[36] != 'X' ) return false;   
-		if( buf[37] != 'i' ) return false;   
-		if( buf[38] != 'n' ) return false;
-		if( buf[39] != 'g' ) return false;
+		if (buf[36] =='X') {
+			if( buf[37] != 'i' ) return false;
+			if( buf[38] != 'n' ) return false;
+			if( buf[39] != 'g' ) return false;
+		} else if (buf[36] == 'I') {
+			if( buf[37] != 'n' ) return false;
+			if( buf[38] != 'f' ) return false;
+			if( buf[39] != 'o' ) return false;
+		} else {
+			return false;
+		}
 	}
 	else
 	if((pInfo->mpegVersion == AV_MPEG_VER_2) && (pInfo->channels == 1))
 	{
-		if( buf[13] != 'X' ) return false;   
-		if( buf[14] != 'i' ) return false;   
-		if( buf[15] != 'n' ) return false;
-		if( buf[16] != 'g' ) return false;
+		if (buf[13] =='X') {
+			if( buf[14] != 'i' ) return false;
+			if( buf[15] != 'n' ) return false;
+			if( buf[16] != 'g' ) return false;
+		} else if (buf[13] == 'I') {
+			if( buf[14] != 'n' ) return false;
+			if( buf[15] != 'f' ) return false;
+			if( buf[16] != 'o' ) return false;
+		} else {
+			return false;
+		}
 	}
 	else
 	{
-		if( buf[21] != 'X' ) return false;
-		if( buf[22] != 'i' ) return false;
-		if( buf[23] != 'n' ) return false;
-		if( buf[24] != 'g' ) return false;
+		if (buf[21] =='X') {
+			if( buf[22] != 'i' ) return false;
+			if( buf[23] != 'n' ) return false;
+			if( buf[24] != 'g' ) return false;
+		} else if (buf[21] == 'I') {
+			if( buf[22] != 'n' ) return false;
+			if( buf[23] != 'f' ) return false;
+			if( buf[24] != 'o' ) return false;
+		} else {
+			return false;
+		}
 	}
 
-	//	2. TOC�� ����ұ�?
+	//	2. TOC
 	if ( pInfo->pToc )
 		data.toc = (unsigned char *)(pInfo->pToc);
 
-	if ( __AvGetXingHeader( &data, (unsigned char *)buf ) == 1 ) // VBR�̴�.
+	if ( __AvGetXingHeader( &data, (unsigned char *)buf ) == 1 ) // VBR.
 	{
 		if (data.sampRate == 0 || data.bytes == 0 || data.frames == 0) {
 			debug_error ("invalid Xing header\n");
@@ -631,7 +662,7 @@ __AvParseVBRIHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 	AvVBRIHeadData data;
 	memset( &data, 0x00, sizeof(AvVBRIHeadData) );
 
-	//	1. Xing Header üũ
+	//	1. Xing Header
 	if((pInfo->mpegVersion == AV_MPEG_VER_1) && (pInfo->channels == 2))
 	{
 		if( buf[36] != 'V' ) return false;   
@@ -655,11 +686,11 @@ __AvParseVBRIHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 		if( buf[39] != 'I' ) return false;	
 	}
 
-	//	2. TOC�� ����ұ�?
+	//	2. TOC
 	if ( pInfo->pToc )
 		data.toc = (unsigned char*)(pInfo->pToc);
 
-	if ( __AvGetVBRIHeader( &data, (unsigned char*)buf ) == 1 ) // VBR�̴�.
+	if ( __AvGetVBRIHeader( &data, (unsigned char*)buf ) == 1 ) // VBR.
 	{
 		if (data.sampRate == 0 || data.bytes == 0 || data.frames == 0) {
 			debug_error ("invalid Vbri header\n");

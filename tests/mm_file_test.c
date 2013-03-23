@@ -139,7 +139,7 @@ do{	\
 			size = ftell(fp);	\
 			fseek (fp, 0, SEEK_SET);	\
 			data = malloc (size);	\
-			fread (data, size, sizeof(char), fp);	\
+			if (fread (data, size, sizeof(char), fp) != size) { printf("fread error\n"); }	\
 			fclose (fp);	\
 			printf("file size = %d\n", size );	\
 	}	\
