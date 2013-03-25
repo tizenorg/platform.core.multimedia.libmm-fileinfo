@@ -36,12 +36,15 @@ Multimedia Framework FileInfo Library (developement files)
 %setup -q
 
 %build
-./autogen.sh
+CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
+export CFLAGS
+
+%autogen.sh
 
 %if %{use_drm}
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure  --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --enable-drm --disable-gtk
+%configure  --disable-testmode --disable-dump --enable-dyn --disable-iommap --enable-drm --disable-gtk
 %else
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --disable-drm --disable-gtk
+%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap  --disable-drm --disable-gtk         
 %endif
 
 make
