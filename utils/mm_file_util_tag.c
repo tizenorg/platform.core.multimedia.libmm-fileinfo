@@ -2462,6 +2462,11 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo* pInfo, unsigned char *buffer)
 								//pExtContent[tmp+1] value should't have encoding value
 								if(pExtContent[tmp] == 0x00 || pExtContent[tmp] == 0xFF|| pExtContent[tmp] == 0xFE)
 								{
+									if (pExtContent[tmp] == 0x00) {
+										realCpyFrameNum -= 2;
+										tmp = 5;
+									}
+
 									if((IS_ENCODEDBY_UTF16(pExtContent+tmp) || IS_ENCODEDBY_UTF16_R(pExtContent+tmp)) && realCpyFrameNum > 2)
 									{
 										while((NEWLINE_OF_UTF16(pExtContent + tmp) || NEWLINE_OF_UTF16_R(pExtContent + tmp))&& realCpyFrameNum > 4)

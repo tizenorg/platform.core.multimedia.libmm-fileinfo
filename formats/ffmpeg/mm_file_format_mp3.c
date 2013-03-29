@@ -620,6 +620,21 @@ __AvParseXingHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 		}
 	}
 	else
+	if((pInfo->mpegVersion == AV_MPEG_VER_25) && (pInfo->channels == 1))
+	{
+		if (buf[13] =='X') {
+			if( buf[14] != 'i' ) return false;
+			if( buf[15] != 'n' ) return false;
+			if( buf[16] != 'g' ) return false;
+		} else if (buf[13] == 'I') {
+			if( buf[14] != 'n' ) return false;
+			if( buf[15] != 'f' ) return false;
+			if( buf[16] != 'o' ) return false;
+		} else {
+			return false;
+		}
+	}
+	else
 	{
 		if (buf[21] =='X') {
 			if( buf[22] != 'i' ) return false;
@@ -645,7 +660,10 @@ __AvParseXingHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 			return false;
 		}
 	
-		pInfo->sampleRate = data.sampRate;
+		/* Temporary fix code for MPEG 2.5 */
+		if (pInfo->mpegVersion != AV_MPEG_VER_25) {
+			pInfo->sampleRate = data.sampRate;
+		}
 		pInfo->datafileLen = data.bytes;
 		pInfo->frameNum = data.frames;
 		pInfo->frameSize = (int) ( (float) data.bytes / (float) data.frames )  ;
@@ -1432,6 +1450,8 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 		else 
 			frameSamples = MPEG_2_SIZE_LAYER_2_3;
 	}
+
+	debug_msg("frameSamples : %d, tempduration : %ld", frameSamples, tempduration);
 
 	if(tempduration < (unsigned long long)pInfo->sampleRate)
 	{
