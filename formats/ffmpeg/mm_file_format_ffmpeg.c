@@ -37,8 +37,6 @@
 #include "mm_file_format_ffmpeg_mem.h"
 #include <sys/time.h>
 
-
-
 #define _SHORT_MEDIA_LIMIT		2000	/* under X seconds duration*/
 
 extern int	img_convert (AVPicture *dst, int dst_pix_fmt, const AVPicture *src, int src_pix_fmt,int src_width, int src_height);
@@ -390,6 +388,9 @@ exception:
 	return MMFILE_FORMAT_FAIL;
 }
 
+#define DATA_LENGTH 4
+#define POS_OF_MIME_LEN DATA_LENGTH
+#define CONVERT_TO_INT(dest, src) {dest = 0; dest |= (0 |src[0] << 24) | (0 | src[1] << 16) | (0 | src[2] << 8) | (0 | src[3]);}
 
 EXPORT_API
 int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
@@ -495,6 +496,51 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 						} else if(!strcasecmp(tag->key, "rotate")) {	//can be "90", "180", "270"
 							if (formatContext->rotate)	free (formatContext->rotate);
 							formatContext->rotate= mmfile_strdup (tag->value);
+						} else if(!strcasecmp(tag->key, "metadata_block_picture")) {
+							gsize len = 0;
+							guchar *meta_data = NULL;
+
+							meta_data = g_base64_decode(tag->value, &len);
+							if (meta_data != NULL) {
+								/* in METADATA_BLOCK_PICTURE,
+								the length of mime type and  the length of description are flexible,
+								so, we have to get the length of their for getting correct postion of picture data. */
+								int mime_len = 0;
+								int description_len = 0;
+								int data_len = 0;
+								int current_pos = 0;
+								unsigned char current_data[DATA_LENGTH] = {0};
+
+								/* get length of mime_type */
+								memcpy(current_data, meta_data + POS_OF_MIME_LEN, DATA_LENGTH);
+								CONVERT_TO_INT(mime_len, current_data);
+
+								/* get length of description */
+								current_pos =  mime_len + (DATA_LENGTH * 2); /*current position is length of description */
+								memcpy(current_data, meta_data + current_pos, DATA_LENGTH);
+								CONVERT_TO_INT(description_len, current_data);
+
+								/* get length of picture data */
+								current_pos = mime_len  + description_len + (DATA_LENGTH * 7); /*current position is length of picture data */
+								memcpy(current_data, meta_data + current_pos, DATA_LENGTH);
+								CONVERT_TO_INT(data_len, current_data);
+
+								/* set the size of art work */
+								formatContext->artworkSize = data_len;
+
+								/* set mime type */
+								current_pos = POS_OF_MIME_LEN + DATA_LENGTH; /*current position is mime type */
+								if (formatContext->artworkMime) mmfile_free (formatContext->artworkMime);
+								formatContext->artworkMime = strndup((const char*)meta_data + current_pos, mime_len);
+
+								/* set art work data */
+								current_pos = mime_len  + description_len + (DATA_LENGTH * 8); /*current position is picture data */
+								if (formatContext->artwork) mmfile_free (formatContext->artwork);
+								formatContext->artwork = mmfile_malloc (data_len);
+								memcpy(formatContext->artwork, meta_data + current_pos, data_len);
+
+								g_free(meta_data);
+							}
 						} else {
 							debug_log("Not support metadata. [%s:%s]", tag->key, tag->value);
 						}
