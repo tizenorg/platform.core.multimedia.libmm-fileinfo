@@ -13,7 +13,7 @@ BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavutil)
 BuildRequires: pkgconfig(libavformat)
 
-%define use_drm 1
+%define use_drm 0
 
 %if %{use_drm}
 BuildRequires: libss-client-devel
