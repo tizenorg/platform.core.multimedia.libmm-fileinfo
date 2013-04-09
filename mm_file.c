@@ -411,7 +411,7 @@ _get_contents_info (mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO
 			if (formatContext->videoTotalTrackNum > 0) {
 				MMFileFormatStream *videoStream = formatContext->streams[MMFILE_VIDEO_STREAM];
 				unsigned int timestamp = _SEEK_POINT_;
-				
+
 				ret = mmfile_format_read_frame (formatContext, timestamp, &frameContext);
 				if (MMFILE_FORMAT_FAIL == ret) {
 					debug_error ("error: mmfile_format_read_frame\n");

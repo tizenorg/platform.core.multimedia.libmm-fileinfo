@@ -605,22 +605,7 @@ __AvParseXingHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 		}
 	}
 	else
-	if((pInfo->mpegVersion == AV_MPEG_VER_2) && (pInfo->channels == 1))
-	{
-		if (buf[13] =='X') {
-			if( buf[14] != 'i' ) return false;
-			if( buf[15] != 'n' ) return false;
-			if( buf[16] != 'g' ) return false;
-		} else if (buf[13] == 'I') {
-			if( buf[14] != 'n' ) return false;
-			if( buf[15] != 'f' ) return false;
-			if( buf[16] != 'o' ) return false;
-		} else {
-			return false;
-		}
-	}
-	else
-	if((pInfo->mpegVersion == AV_MPEG_VER_25) && (pInfo->channels == 1))
+	if((pInfo->mpegVersion == AV_MPEG_VER_2 || pInfo->mpegVersion == AV_MPEG_VER_25) && (pInfo->channels == 1))
 	{
 		if (buf[13] =='X') {
 			if( buf[14] != 'i' ) return false;
@@ -659,11 +644,7 @@ __AvParseXingHeader( AvFileContentInfo* pInfo, unsigned char* buf )
 			debug_error ("invalid Xing header\n");
 			return false;
 		}
-	
-		/* Temporary fix code for MPEG 2.5 */
-		if (pInfo->mpegVersion != AV_MPEG_VER_25) {
-			pInfo->sampleRate = data.sampRate;
-		}
+
 		pInfo->datafileLen = data.bytes;
 		pInfo->frameNum = data.frames;
 		pInfo->frameSize = (int) ( (float) data.bytes / (float) data.frames )  ;
