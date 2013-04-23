@@ -529,9 +529,6 @@ int mmfile_format_get_frame(const char* path, double timestamp, bool is_accurate
 	}
 
 	ret = __mmfile_get_frame(pFormatCtx, timestamp, is_accurate, frame, size, width, height);
-	if (ret == MMFILE_FORMAT_SUCCESS) {
-		return ret;
-	}
 
 exception:
 	/* Close video file */
@@ -616,9 +613,6 @@ int mmfile_format_get_frame_from_memory(const void *data, unsigned int datasize,
 	}
 
 	ret = __mmfile_get_frame(pFormatCtx, timestamp, is_accurate, frame, size, width, height);
-	if (ret == MMFILE_FORMAT_SUCCESS) {
-		return ret;
-	}
 
 exception:
 	/* Close video file */
