@@ -5,6 +5,7 @@ Release:    21
 Group:      System/Libraries
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
+Source1001: 	libmm-fileinfo.manifest
 BuildRequires: pkgconfig(mm-common)
 BuildRequires: pkgconfig(mm-log)
 BuildRequires: pkgconfig(libswscale)
@@ -34,6 +35,7 @@ Multimedia Framework FileInfo Library (developement files)
 
 %prep
 %setup -q
+cp %{SOURCE1001} .
 
 %build
 CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
@@ -60,7 +62,7 @@ cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/
 %postun -p /sbin/ldconfig
 
 %files
-%manifest libmm-fileinfo.manifest
+%manifest %{name}.manifest
 %{_bindir}/memtrace_reader
 %{_bindir}/mm_file_test
 %{_libdir}/libmmffile.so.*
@@ -74,5 +76,6 @@ cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/
 %{_datadir}/license/%{name}
 
 %files devel
+%manifest %{name}.manifest
 %{_includedir}/mmf/mm_file.h
 %{_libdir}/pkgconfig/mm-fileinfo.pc
