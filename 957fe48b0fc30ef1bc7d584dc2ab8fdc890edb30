@@ -1,0 +1,8 @@
+Change-Id: I957fe48b0fc30ef1bc7d584dc2ab8fdc890edb30
+Code-Review+2: Ryan Ware <ware@linux.intel.com>
+Verified+1: Ryan Ware <ware@linux.intel.com>
+Submitted-by: Ryan Ware <ware@linux.intel.com>
+Submitted-at: Mon, 08 Jul 2013 10:06:37 -0700
+Reviewed-on: https://review.tizen.org/gerrit/4561
+Project: platform/core/multimedia/libmm-fileinfo
+Branch: refs/heads/tizen
