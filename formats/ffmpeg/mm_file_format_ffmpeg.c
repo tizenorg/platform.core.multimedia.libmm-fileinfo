@@ -439,11 +439,11 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 					/*Set mime type*/
 					if (formatContext->artworkMime)	mmfile_free (formatContext->artworkMime);
 
-					if(codec_id == AV_CODEC_ID_MJPEG)
+					if(codec_id == CODEC_ID_MJPEG)
 						formatContext->artworkMime = mmfile_strdup("image/jpeg");
-					else if(codec_id == AV_CODEC_ID_PNG)
+					else if(codec_id == CODEC_ID_PNG)
 						formatContext->artworkMime = mmfile_strdup("image/png");
-					else if(codec_id == AV_CODEC_ID_BMP)
+					else if(codec_id == CODEC_ID_BMP)
 						formatContext->artworkMime = mmfile_strdup("image/bmp");
 					else
 						debug_error ("Unknown cover type: 0x%x\n", codec_id);
@@ -1138,64 +1138,64 @@ static int ConvertVideoCodecEnum (int AVVideoCodecID)
 
 	switch (AVVideoCodecID)
 	{
-		case AV_CODEC_ID_NONE:
+		case CODEC_ID_NONE:
 			ret_codecid = MM_VIDEO_CODEC_NONE;
 			break;
-		case AV_CODEC_ID_MPEG1VIDEO:
+		case CODEC_ID_MPEG1VIDEO:
 			ret_codecid = MM_VIDEO_CODEC_MPEG1;
 			break;
-		case AV_CODEC_ID_MPEG2VIDEO:  ///< preferred ID for MPEG-1/2 video decoding
+		case CODEC_ID_MPEG2VIDEO:  ///< preferred ID for MPEG-1/2 video decoding
 			ret_codecid = MM_VIDEO_CODEC_MPEG2;
 			break;
-		case AV_CODEC_ID_MPEG2VIDEO_XVMC:
+		case CODEC_ID_MPEG2VIDEO_XVMC:
 			ret_codecid = MM_VIDEO_CODEC_MPEG2;
 			break;
-		case AV_CODEC_ID_H261:
+		case CODEC_ID_H261:
 			ret_codecid = MM_VIDEO_CODEC_H261;
 			break;
-		case AV_CODEC_ID_H263:
+		case CODEC_ID_H263:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case AV_CODEC_ID_MPEG4:
+		case CODEC_ID_MPEG4:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case AV_CODEC_ID_MSMPEG4V1:
+		case CODEC_ID_MSMPEG4V1:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case AV_CODEC_ID_MSMPEG4V2:
+		case CODEC_ID_MSMPEG4V2:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case AV_CODEC_ID_MSMPEG4V3:
+		case CODEC_ID_MSMPEG4V3:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case AV_CODEC_ID_WMV1:
+		case CODEC_ID_WMV1:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case AV_CODEC_ID_WMV2:
+		case CODEC_ID_WMV2:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case AV_CODEC_ID_H263P:
+		case CODEC_ID_H263P:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case AV_CODEC_ID_H263I:
+		case CODEC_ID_H263I:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case AV_CODEC_ID_FLV1:
+		case CODEC_ID_FLV1:
 			ret_codecid = MM_VIDEO_CODEC_FLV;
 			break;
-		case AV_CODEC_ID_H264:
+		case CODEC_ID_H264:
 			ret_codecid = MM_VIDEO_CODEC_H264;
 			break;
-		case AV_CODEC_ID_INDEO2:
-		case AV_CODEC_ID_INDEO3:
-		case AV_CODEC_ID_INDEO4:
-		case AV_CODEC_ID_INDEO5:
+		case CODEC_ID_INDEO2:
+		case CODEC_ID_INDEO3:
+		case CODEC_ID_INDEO4:
+		case CODEC_ID_INDEO5:
 			ret_codecid = MM_VIDEO_CODEC_INDEO;
 			break;
-		case AV_CODEC_ID_THEORA:
+		case CODEC_ID_THEORA:
 			ret_codecid = MM_VIDEO_CODEC_THEORA;
 			break;
-		case AV_CODEC_ID_CINEPAK:
+		case CODEC_ID_CINEPAK:
 			ret_codecid = MM_VIDEO_CODEC_CINEPAK;
 			break;
 #ifndef __MMFILE_FFMPEG_V085__
@@ -1203,16 +1203,16 @@ static int ConvertVideoCodecEnum (int AVVideoCodecID)
 			ret_codecid = MM_VIDEO_CODEC_XVID;
 			break;
 #endif
-		case AV_CODEC_ID_VC1:
+		case CODEC_ID_VC1:
 			ret_codecid = MM_VIDEO_CODEC_VC1;
 			break;
-		case AV_CODEC_ID_WMV3:
+		case CODEC_ID_WMV3:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case AV_CODEC_ID_AVS:
+		case CODEC_ID_AVS:
 			ret_codecid = MM_VIDEO_CODEC_AVS;
 			break;
-		case AV_CODEC_ID_RL2:
+		case CODEC_ID_RL2:
 			ret_codecid = MM_VIDEO_CODEC_REAL;
 			break;
 		default:
@@ -1230,51 +1230,51 @@ static int ConvertAudioCodecEnum (int AVAudioCodecID)
 
 	switch (AVAudioCodecID)
 	{
-		case AV_CODEC_ID_AMR_NB:
-		case AV_CODEC_ID_AMR_WB:
+		case CODEC_ID_AMR_NB:
+		case CODEC_ID_AMR_WB:
 			ret_codecid = MM_AUDIO_CODEC_AMR;
 			break;
 		/* RealAudio codecs*/
-		case AV_CODEC_ID_RA_144:
-		case AV_CODEC_ID_RA_288:
+		case CODEC_ID_RA_144:
+		case CODEC_ID_RA_288:
 			ret_codecid = MM_AUDIO_CODEC_REAL;
 			break;
-		case AV_CODEC_ID_MP2:
+		case CODEC_ID_MP2:
 			ret_codecid = MM_AUDIO_CODEC_MP2;
 			break;
-		case AV_CODEC_ID_MP3:
-		case AV_CODEC_ID_MP3ADU:
-		case AV_CODEC_ID_MP3ON4:
+		case CODEC_ID_MP3:
+		case CODEC_ID_MP3ADU:
+		case CODEC_ID_MP3ON4:
 			ret_codecid = MM_AUDIO_CODEC_MP3;
 			break;
-		case AV_CODEC_ID_AAC:
+		case CODEC_ID_AAC:
 			ret_codecid = MM_AUDIO_CODEC_AAC;
 			break;
-		case AV_CODEC_ID_AC3:
+		case CODEC_ID_AC3:
 			ret_codecid = MM_AUDIO_CODEC_AC3;
 			break;
-		case AV_CODEC_ID_VORBIS:
+		case CODEC_ID_VORBIS:
 			ret_codecid = MM_AUDIO_CODEC_VORBIS;
 			break;
-		case AV_CODEC_ID_WMAV1:
-		case AV_CODEC_ID_WMAV2:
-		case AV_CODEC_ID_WMAVOICE:
-		case AV_CODEC_ID_WMAPRO:
-		case AV_CODEC_ID_WMALOSSLESS:
+		case CODEC_ID_WMAV1:
+		case CODEC_ID_WMAV2:
+		case CODEC_ID_WMAVOICE:
+		case CODEC_ID_WMAPRO:
+		case CODEC_ID_WMALOSSLESS:
 			ret_codecid = MM_AUDIO_CODEC_WMA;
 			break;
-		case AV_CODEC_ID_FLAC:
+		case CODEC_ID_FLAC:
 			ret_codecid = MM_AUDIO_CODEC_FLAC;
 			break;
-		case AV_CODEC_ID_ALAC:
+		case CODEC_ID_ALAC:
 			ret_codecid = MM_AUDIO_CODEC_ALAC;
 			break;
-		case AV_CODEC_ID_WAVPACK:
+		case CODEC_ID_WAVPACK:
 			ret_codecid = MM_AUDIO_CODEC_WAVE;
 			break;
-		case AV_CODEC_ID_ATRAC3:
-		case AV_CODEC_ID_ATRAC3P:
-		case AV_CODEC_ID_EAC3:
+		case CODEC_ID_ATRAC3:
+		case CODEC_ID_ATRAC3P:
+		case CODEC_ID_EAC3:
 			ret_codecid = MM_AUDIO_CODEC_AC3;
 			break;
 		default:
