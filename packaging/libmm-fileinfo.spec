@@ -1,9 +1,9 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
 Version:    0.6.0
-Release:    21
+Release:    0
 Group:      System/Libraries
-License:    Apache License, Version 2.0
+License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1001: 	libmm-fileinfo.manifest
 BuildRequires: pkgconfig(mm-common)
@@ -44,9 +44,9 @@ export CFLAGS
 %autogen.sh
 
 %if %{use_drm}
-%configure  --disable-testmode --disable-dump --enable-dyn --disable-iommap --enable-drm --disable-gtk
+%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --enable-drm --disable-gtk
 %else
-%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap  --disable-drm --disable-gtk         
+%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --disable-drm --disable-gtk
 %endif
 
 make
