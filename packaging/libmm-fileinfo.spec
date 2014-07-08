@@ -5,7 +5,7 @@ Release:    0
 Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1001: 	libmm-fileinfo.manifest
+Source1001:    libmm-fileinfo.manifest
 BuildRequires: pkgconfig(mm-common)
 BuildRequires: pkgconfig(mm-log)
 BuildRequires: pkgconfig(libswscale)
@@ -24,7 +24,6 @@ BuildRequires: pkgconfig(drm-client)
 %description
 Multimedia Framework FileInfo Library
 
-
 %package devel
 Summary:    Media Fileinfo
 Group:      Development/Libraries
@@ -41,21 +40,22 @@ cp %{SOURCE1001} .
 CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
 export CFLAGS
 
-%autogen.sh
-
+%reconfigure \
+    --disable-testmode \
+    --disable-dump \
+    --enable-dyn \
+    --disable-iommap \
+    --disable-gtk \
 %if %{use_drm}
-%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --enable-drm --disable-gtk
+    --enable-drm
 %else
-%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --disable-drm --disable-gtk
+    --disable-drm
 %endif
 
-make
+%__make
 
 %install
 %make_install
-mkdir -p %{buildroot}/%{_datadir}/license
-cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/license/%{name}
-
 
 %post -p /sbin/ldconfig
 
@@ -73,9 +73,10 @@ cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/
 %{_libdir}/libmmfile_codecs.so
 %{_libdir}/libmmfile_formats.so
 %{_libdir}/libmmfile_utils.so
-%{_datadir}/license/%{name}
+%license LICENSE.APLv2.0
 
 %files devel
 %manifest %{name}.manifest
 %{_includedir}/mmf/mm_file.h
 %{_libdir}/pkgconfig/mm-fileinfo.pc
+
