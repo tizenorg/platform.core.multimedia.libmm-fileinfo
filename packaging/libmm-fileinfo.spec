@@ -41,15 +41,19 @@ cp %{SOURCE1001} .
 CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
 export CFLAGS
 
-%autogen.sh
-
+%reconfigure \
+    --disable-testmode \
+    --disable-dump \
+    --enable-dyn \
+    --disable-iommap \
+    --disable-gtk \
 %if %{use_drm}
-%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --enable-drm --disable-gtk
+    --enable-drm 
 %else
-%configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --disable-drm --disable-gtk
+    --disable-drm
 %endif
 
-make
+%__make
 
 %install
 %make_install
