@@ -1,4 +1,4 @@
-Name:	    libmm-fileinfo
+Name:       libmm-fileinfo
 Summary:    Media Fileinfo
 Version:    0.6.0
 Release:    0
@@ -6,6 +6,7 @@ Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1001:    libmm-fileinfo.manifest
+BuildRequires: pkgconfig
 BuildRequires: pkgconfig(mm-common)
 BuildRequires: pkgconfig(mm-log)
 BuildRequires: pkgconfig(libswscale)
@@ -30,7 +31,7 @@ Group:      Development/Libraries
 Requires:   %{name} = %{version}-%{release}
 
 %description devel
-Multimedia Framework FileInfo Library (developement files)
+Multimedia Framework FileInfo Library (development files)
 
 %prep
 %setup -q
