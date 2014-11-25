@@ -1423,7 +1423,7 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo* pInfo, unsigned char *buffer)
 	unsigned long purelyFramelen = 0;
 	char *tmpConvert2Pcode = NULL;
 	int inx=0, encodingOffSet=0, realCpyFrameNum=0,
-		checkImgMimeTypeMax=0, checkImgDescriptionMax=0, checkImgExtMax=0,
+        checkImgDescriptionMax=0, checkImgExtMax=0,
 		imgstartOffset=0, tmp = 0;
 
 	int textEncodingType = 0;
@@ -1914,7 +1914,6 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo* pInfo, unsigned char *buffer)
 
 							}
 
-							checkImgMimeTypeMax = 0;
 							checkImgDescriptionMax = 0;
 							checkImgExtMax = 0;
 							inx = 0;
