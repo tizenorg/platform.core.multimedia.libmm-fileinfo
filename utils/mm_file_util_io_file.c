@@ -149,7 +149,7 @@ static int file_close(MMFileIOHandle *handle)
         ret = close(privateData->fd);
         mmfile_free (privateData);
         handle->privateData = NULL;
-        return MMFILE_IO_SUCCESS;
+        return ret;
     }
     
     return MMFILE_IO_FAILED;   
