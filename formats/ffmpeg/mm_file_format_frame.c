@@ -569,7 +569,7 @@ int mmfile_format_get_frame_from_memory(const void *data, unsigned int datasize,
 		return MMFILE_FORMAT_FAIL;
 	}
 
-#ifdef __MMFILE_FFMPEG_V085__
+#if (defined __MMFILE_FFMPEG_V085__ && ! defined __MMFILE_LIBAV_VERSION__)
 	ffurl_register_protocol(&MMFileMEMProtocol, sizeof (URLProtocol));
 #else
 	register_protocol (&MMFileMEMProtocol);
