@@ -101,7 +101,7 @@ int mmfile_format_open_ffmpg (MMFileFormatContext *formatContext)
 
 	if (formatContext->filesrc->type  == MM_FILE_SRC_TYPE_MEMORY) {
 
-#ifdef __MMFILE_FFMPEG_V085__ 
+#if (defined __MMFILE_FFMPEG_V085__  && ! defined __MMFILE_LIBAV_VERSION__)
 		ffurl_register_protocol(&MMFileMEMProtocol, sizeof (URLProtocol));
 #else
 		register_protocol (&MMFileMEMProtocol);
@@ -187,13 +187,13 @@ HANDLING_DRM_DIVX:
 			formatContext->audioTotalTrackNum += 1;
 		}
 #else	
-		if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
+		if (pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_VIDEO) {
 			#ifdef __MMFILE_TEST_MODE__
 			debug_msg ("FFMPEG video codec id: 0x%08X\n", pFormatCtx->streams[i]->codec->codec_id);
 			#endif
 			formatContext->videoTotalTrackNum += 1;
 		}
-		if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) {
+		if (pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_AUDIO) {
 			#ifdef __MMFILE_TEST_MODE__
 			debug_msg ("FFMPEG audio codec id: 0x%08X\n", pFormatCtx->streams[i]->codec->codec_id);
 			#endif
@@ -278,7 +278,7 @@ int mmfile_format_read_stream_ffmpg (MMFileFormatContext * formatContext)
 #ifdef __MMFILE_FFMPEG_V085__		
 		if ( pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
 #else
-		if ( pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
+		if ( pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_VIDEO) {
 #endif
 			if (formatContext->videoStreamId == -1) {
 				videoStream = mmfile_malloc (sizeof(MMFileFormatStream));
@@ -313,9 +313,13 @@ int mmfile_format_read_stream_ffmpg (MMFileFormatContext * formatContext)
 																	pFormatCtx->streams[i]->duration,
 																	pFormatCtx->streams[i]->time_base,
 																	1);
-
-					if (videoStream->framePerSec == 0)
+					if (videoStream->framePerSec == 0) {
+#ifndef __MMFILE_LIBAV_VERSION__
 						videoStream->framePerSec = av_q2d (pFormatCtx->streams[i]->r_frame_rate);
+#else
+						videoStream->framePerSec = av_q2d (pFormatCtx->streams[i]->avg_frame_rate);
+#endif
+					}
 
 					videoStream->width			= pVideoCodecCtx->width;
 					videoStream->height			= pVideoCodecCtx->height;
@@ -326,7 +330,7 @@ int mmfile_format_read_stream_ffmpg (MMFileFormatContext * formatContext)
 #ifdef __MMFILE_FFMPEG_V085__
 		else if ( pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO ) {
 #else
-		else if ( pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO ) {
+		else if ( pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_AUDIO ) {
 #endif
 			if (formatContext->audioStreamId == -1) {
 				audioStream = mmfile_malloc (sizeof(MMFileFormatStream));
@@ -439,11 +443,11 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 					/*Set mime type*/
 					if (formatContext->artworkMime)	mmfile_free (formatContext->artworkMime);
 
-					if(codec_id == CODEC_ID_MJPEG)
+					if(codec_id == AV_CODEC_ID_MJPEG)
 						formatContext->artworkMime = mmfile_strdup("image/jpeg");
-					else if(codec_id == CODEC_ID_PNG)
+					else if(codec_id == AV_CODEC_ID_PNG)
 						formatContext->artworkMime = mmfile_strdup("image/png");
-					else if(codec_id == CODEC_ID_BMP)
+					else if(codec_id == AV_CODEC_ID_BMP)
 						formatContext->artworkMime = mmfile_strdup("image/bmp");
 					else
 						debug_error ("Unknown cover type: 0x%x\n", codec_id);
@@ -648,14 +652,14 @@ int mmfile_format_read_frame_ffmpg  (MMFileFormatContext *formatContext, unsigne
 
 		#ifdef __MMFILE_TEST_MODE__
 		debug_msg ("flag: 0x%08X\n", pVideoCodec->capabilities);
-		// debug_msg ("  DRAW_HORIZ_BAND : %d\n", pVideoCodec->capabilities & CODEC_CAP_DRAW_HORIZ_BAND ? 1 : 0);
-		// debug_msg ("  DR1             : %d\n", pVideoCodec->capabilities & CODEC_CAP_DR1 ? 1 : 0);
-		// debug_msg ("  PARSE_ONLY      : %d\n", pVideoCodec->capabilities & CODEC_CAP_PARSE_ONLY ? 1 : 0);
-		// debug_msg ("  TRUNCATED       : %d\n", pVideoCodec->capabilities & CODEC_CAP_TRUNCATED ? 1 : 0);
-		// debug_msg ("  HWACCEL         : %d\n", pVideoCodec->capabilities & CODEC_CAP_HWACCEL ? 1 : 0);
-		// debug_msg ("  DELAY           : %d\n", pVideoCodec->capabilities & CODEC_CAP_DELAY ? 1 : 0);
-		// debug_msg ("  SMALL_LAST_FRAME: %d\n", pVideoCodec->capabilities & CODEC_CAP_SMALL_LAST_FRAME ? 1 : 0);
-		// debug_msg ("  HWACCEL_VDPAU   : %d\n", pVideoCodec->capabilities & CODEC_CAP_HWACCEL_VDPAU ? 1 : 0);
+		// debug_msg ("  DRAW_HORIZ_BAND : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_DRAW_HORIZ_BAND ? 1 : 0);
+		// debug_msg ("  DR1             : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_DR1 ? 1 : 0);
+		// debug_msg ("  PARSE_ONLY      : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_PARSE_ONLY ? 1 : 0);
+		// debug_msg ("  TRUNCATED       : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_TRUNCATED ? 1 : 0);
+		// debug_msg ("  HWACCEL         : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_HWACCEL ? 1 : 0);
+		// debug_msg ("  DELAY           : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_DELAY ? 1 : 0);
+		// debug_msg ("  SMALL_LAST_FRAME: %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_SMALL_LAST_FRAME ? 1 : 0);
+		// debug_msg ("  HWACCEL_VDPAU   : %d\n", pVideoCodec->capabilities & AV_CODEC_CAP_HWACCEL_VDPAU ? 1 : 0);
 		#endif
 
 		if (pVideoCodec->capabilities & CODEC_CAP_TRUNCATED) {
@@ -1138,81 +1142,81 @@ static int ConvertVideoCodecEnum (int AVVideoCodecID)
 
 	switch (AVVideoCodecID)
 	{
-		case CODEC_ID_NONE:
+		case AV_CODEC_ID_NONE:
 			ret_codecid = MM_VIDEO_CODEC_NONE;
 			break;
-		case CODEC_ID_MPEG1VIDEO:
+		case AV_CODEC_ID_MPEG1VIDEO:
 			ret_codecid = MM_VIDEO_CODEC_MPEG1;
 			break;
-		case CODEC_ID_MPEG2VIDEO:  ///< preferred ID for MPEG-1/2 video decoding
+		case AV_CODEC_ID_MPEG2VIDEO:  ///< preferred ID for MPEG-1/2 video decoding
 			ret_codecid = MM_VIDEO_CODEC_MPEG2;
 			break;
-		case CODEC_ID_MPEG2VIDEO_XVMC:
+		case AV_CODEC_ID_MPEG2VIDEO_XVMC:
 			ret_codecid = MM_VIDEO_CODEC_MPEG2;
 			break;
-		case CODEC_ID_H261:
+		case AV_CODEC_ID_H261:
 			ret_codecid = MM_VIDEO_CODEC_H261;
 			break;
-		case CODEC_ID_H263:
+		case AV_CODEC_ID_H263:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case CODEC_ID_MPEG4:
+		case AV_CODEC_ID_MPEG4:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case CODEC_ID_MSMPEG4V1:
+		case AV_CODEC_ID_MSMPEG4V1:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case CODEC_ID_MSMPEG4V2:
+		case AV_CODEC_ID_MSMPEG4V2:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case CODEC_ID_MSMPEG4V3:
+		case AV_CODEC_ID_MSMPEG4V3:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
-		case CODEC_ID_WMV1:
+		case AV_CODEC_ID_WMV1:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case CODEC_ID_WMV2:
+		case AV_CODEC_ID_WMV2:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case CODEC_ID_H263P:
+		case AV_CODEC_ID_H263P:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case CODEC_ID_H263I:
+		case AV_CODEC_ID_H263I:
 			ret_codecid = MM_VIDEO_CODEC_H263;
 			break;
-		case CODEC_ID_FLV1:
+		case AV_CODEC_ID_FLV1:
 			ret_codecid = MM_VIDEO_CODEC_FLV;
 			break;
-		case CODEC_ID_H264:
+		case AV_CODEC_ID_H264:
 			ret_codecid = MM_VIDEO_CODEC_H264;
 			break;
-		case CODEC_ID_INDEO2:
-		case CODEC_ID_INDEO3:
-		case CODEC_ID_INDEO4:
-		case CODEC_ID_INDEO5:
+		case AV_CODEC_ID_INDEO2:
+		case AV_CODEC_ID_INDEO3:
+		case AV_CODEC_ID_INDEO4:
+		case AV_CODEC_ID_INDEO5:
 			ret_codecid = MM_VIDEO_CODEC_INDEO;
 			break;
-		case CODEC_ID_THEORA:
+		case AV_CODEC_ID_THEORA:
 			ret_codecid = MM_VIDEO_CODEC_THEORA;
 			break;
-		case CODEC_ID_CINEPAK:
+		case AV_CODEC_ID_CINEPAK:
 			ret_codecid = MM_VIDEO_CODEC_CINEPAK;
 			break;
-#ifndef __MMFILE_FFMPEG_V085__
-		case CODEC_ID_XVID:
+#if (!defined __MMFILE_FFMPEG_V085__ && !defined __MMFILE_LIBAV_VERSION__)
+		case AV_CODEC_ID_XVID:
 			ret_codecid = MM_VIDEO_CODEC_XVID;
 			break;
 #endif
-		case CODEC_ID_VC1:
+		case AV_CODEC_ID_VC1:
 			ret_codecid = MM_VIDEO_CODEC_VC1;
 			break;
-		case CODEC_ID_WMV3:
+		case AV_CODEC_ID_WMV3:
 			ret_codecid = MM_VIDEO_CODEC_WMV;
 			break;
-		case CODEC_ID_AVS:
+		case AV_CODEC_ID_AVS:
 			ret_codecid = MM_VIDEO_CODEC_AVS;
 			break;
-		case CODEC_ID_RL2:
+		case AV_CODEC_ID_RL2:
 			ret_codecid = MM_VIDEO_CODEC_REAL;
 			break;
 		default:
@@ -1230,51 +1234,51 @@ static int ConvertAudioCodecEnum (int AVAudioCodecID)
 
 	switch (AVAudioCodecID)
 	{
-		case CODEC_ID_AMR_NB:
-		case CODEC_ID_AMR_WB:
+		case AV_CODEC_ID_AMR_NB:
+		case AV_CODEC_ID_AMR_WB:
 			ret_codecid = MM_AUDIO_CODEC_AMR;
 			break;
 		/* RealAudio codecs*/
-		case CODEC_ID_RA_144:
-		case CODEC_ID_RA_288:
+		case AV_CODEC_ID_RA_144:
+		case AV_CODEC_ID_RA_288:
 			ret_codecid = MM_AUDIO_CODEC_REAL;
 			break;
-		case CODEC_ID_MP2:
+		case AV_CODEC_ID_MP2:
 			ret_codecid = MM_AUDIO_CODEC_MP2;
 			break;
-		case CODEC_ID_MP3:
-		case CODEC_ID_MP3ADU:
-		case CODEC_ID_MP3ON4:
+		case AV_CODEC_ID_MP3:
+		case AV_CODEC_ID_MP3ADU:
+		case AV_CODEC_ID_MP3ON4:
 			ret_codecid = MM_AUDIO_CODEC_MP3;
 			break;
-		case CODEC_ID_AAC:
+		case AV_CODEC_ID_AAC:
 			ret_codecid = MM_AUDIO_CODEC_AAC;
 			break;
-		case CODEC_ID_AC3:
+		case AV_CODEC_ID_AC3:
 			ret_codecid = MM_AUDIO_CODEC_AC3;
 			break;
-		case CODEC_ID_VORBIS:
+		case AV_CODEC_ID_VORBIS:
 			ret_codecid = MM_AUDIO_CODEC_VORBIS;
 			break;
-		case CODEC_ID_WMAV1:
-		case CODEC_ID_WMAV2:
-		case CODEC_ID_WMAVOICE:
-		case CODEC_ID_WMAPRO:
-		case CODEC_ID_WMALOSSLESS:
+		case AV_CODEC_ID_WMAV1:
+		case AV_CODEC_ID_WMAV2:
+		case AV_CODEC_ID_WMAVOICE:
+		case AV_CODEC_ID_WMAPRO:
+		case AV_CODEC_ID_WMALOSSLESS:
 			ret_codecid = MM_AUDIO_CODEC_WMA;
 			break;
-		case CODEC_ID_FLAC:
+		case AV_CODEC_ID_FLAC:
 			ret_codecid = MM_AUDIO_CODEC_FLAC;
 			break;
-		case CODEC_ID_ALAC:
+		case AV_CODEC_ID_ALAC:
 			ret_codecid = MM_AUDIO_CODEC_ALAC;
 			break;
-		case CODEC_ID_WAVPACK:
+		case AV_CODEC_ID_WAVPACK:
 			ret_codecid = MM_AUDIO_CODEC_WAVE;
 			break;
-		case CODEC_ID_ATRAC3:
-		case CODEC_ID_ATRAC3P:
-		case CODEC_ID_EAC3:
+		case AV_CODEC_ID_ATRAC3:
+		case AV_CODEC_ID_ATRAC3P:
+		case AV_CODEC_ID_EAC3:
 			ret_codecid = MM_AUDIO_CODEC_AC3;
 			break;
 		default:
