@@ -3,6 +3,16 @@ Verified+1: Ewan LE BIDEAU-CANEVET <ewan.lebideau-canevet@open.eurogiciel.org>
 Code-Review+1: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
 Code-Review+2: Philippe Coval <philippe.coval@open.eurogiciel.org>
 Submitted-by: Philippe Coval <philippe.coval@open.eurogiciel.org>
+Submitted-at: Thu, 27 Nov 2014 02:37:15 -0800
+Reviewed-on: https://review.tizen.org/gerrit/30890
+Project: platform/core/multimedia/libmm-fileinfo
+Branch: refs/heads/tizen
+
+Code-Review+1: Chanho Park <chanho61.park@samsung.com>
+Verified+1: Ewan LE BIDEAU-CANEVET <ewan.lebideau-canevet@open.eurogiciel.org>
+Code-Review+1: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
+Code-Review+2: Philippe Coval <philippe.coval@open.eurogiciel.org>
+Submitted-by: Philippe Coval <philippe.coval@open.eurogiciel.org>
 Submitted-at: Thu, 27 Nov 2014 02:36:23 -0800
 Reviewed-on: https://review.tizen.org/gerrit/30890
 Project: platform/core/multimedia/libmm-fileinfo
