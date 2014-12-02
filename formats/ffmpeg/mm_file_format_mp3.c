@@ -363,7 +363,6 @@ __AvGetXingHeader( AvXHeadData* headData,  unsigned char *buf )
 	if( headFlags & VBR_SCALE_FLAG )
 	{
 		headData->vbrScale = __AvExtractI4( buf );
-		buf+=4;
 	}
 
 	#ifdef __MMFILE_TEST_MODE__
@@ -415,7 +414,6 @@ __AvGetVBRIHeader( AvVBRIHeadData* headData,  unsigned char *buf )
 	headData->sizePerTable = __AvExtractI2( buf );
 	buf+=2;
 	headData->framesPerTable = __AvExtractI2( buf );
-	buf+=2;
 
 	#ifdef __MMFILE_TEST_MODE__
 	debug_msg ("Vbri header: sampling-rate:%d, stream-size:%d, frame-number:%d\n",
