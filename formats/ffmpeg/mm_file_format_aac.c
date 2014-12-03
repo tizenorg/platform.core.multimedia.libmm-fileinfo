@@ -422,7 +422,6 @@ int _parse_aac_adif_header (tMMFILE_AAC_HANDLE* pData)
 
   //num_lfe_channel_elements
   pData->streamInfo.numAudioChannels += _get_range_bits_value(adifHeader, currentBitOffset, 2);
-  currentBitOffset += 2;
 
   return MMFILE_AAC_PARSER_SUCCESS;
   
@@ -481,11 +480,7 @@ int _parse_aac_adts_header(tMMFILE_AAC_HANDLE* pData)
   currentBitOffset += 1;
   
   //skipping Home status
-  fieldValue = _get_range_bits_value(adtsHeader, currentBitOffset, 1);
-  currentBitOffset += 1;
-  
-  //copy right Id status bit
-  currentBitOffset += 1;
+  _get_range_bits_value(adtsHeader, currentBitOffset, 1);
   
   return MMFILE_AAC_PARSER_SUCCESS;
 }
