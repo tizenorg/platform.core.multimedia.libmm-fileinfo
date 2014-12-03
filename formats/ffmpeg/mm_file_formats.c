@@ -417,7 +417,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_3GP;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_MP4: {
@@ -427,7 +426,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_MP4;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_AMR: {
@@ -437,7 +435,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_AMR;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_WAV: {
@@ -447,7 +444,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_WAV;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_MID: {
@@ -457,7 +453,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_MID;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_MP3: {
@@ -467,7 +462,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_MP3;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_AAC: {
@@ -477,7 +471,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_AAC;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_MMF: {
@@ -487,7 +480,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_MMF;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_IMELODY: {
@@ -497,7 +489,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_IMELODY;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_AVI: {
@@ -507,7 +498,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_AVI;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_DIVX: {
@@ -517,7 +507,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_DIVX;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_ASF: {
@@ -527,7 +516,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_ASF;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_WMA: {
@@ -537,7 +525,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_WMA;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_WMV: {
@@ -547,7 +534,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_WMV;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 
 			case MM_FILE_FORMAT_OGG: {
@@ -599,7 +585,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				debug_warning ("probe fileformat type=%d (%d: autoscan)\n", fileSrc->memory.format, MM_FILE_FORMAT_INVALID);
 				skip_index = -1;
 				goto PROBE_PROPER_FILE_TYPE;
-				break;
 			}
 		}
 	} else {
