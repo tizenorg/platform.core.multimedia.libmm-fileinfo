@@ -1163,18 +1163,18 @@ int MMFileFormatIsValidMatroska (const char *mmfileuri)
 	    debug_msg ("Initial total header size = [0x%x]\n", total);
 
 	    while (size <= 8 && !(total & len_mask)) {
-	      debug_error ("This case can not be handled yet....")
+	      debug_error ("This case can not be handled yet....");
 	      size++;
 	      len_mask >>= 1;
 	    }
 	    if (size > 8) {
-	    	debug_error ("This case can not be handled yet....")
+	    	debug_error ("This case can not be handled yet....");
 	    	ret = 0;
 	    	goto exit;
 	    }
 	    total &= (len_mask - 1);
 	    while (n < size) {
-	      debug_error ("This case can not be handled yet....")
+	      debug_error ("This case can not be handled yet....");
 	      ret = 0;
 	      goto exit;
 	    }
