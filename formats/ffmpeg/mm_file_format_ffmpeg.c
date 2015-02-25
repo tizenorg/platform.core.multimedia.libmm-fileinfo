@@ -477,6 +477,9 @@ int mmfile_format_read_tag_ffmpg (MMFileFormatContext *formatContext)
 						} else if(!strcasecmp(tag->key, "album")) {
 							if (formatContext->album)	free (formatContext->album);
 							formatContext->album = mmfile_strdup (tag->value);
+						} else if(!strcasecmp(tag->key, "album_artist")) {
+							if (formatContext->album_artist)	free (formatContext->album_artist);
+							formatContext->album_artist = mmfile_strdup (tag->value);
 						} else if(!strcasecmp(tag->key, "copyright")) {
 							if (formatContext->copyright)	free (formatContext->copyright);
 							formatContext->copyright = mmfile_strdup (tag->value);

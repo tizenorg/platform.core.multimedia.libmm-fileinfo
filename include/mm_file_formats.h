@@ -132,6 +132,7 @@ struct _MMFileFormatContext {
 	char *author;
 	char *composer;
 	char *album;
+	char *album_artist;
 	char *copyright;
 	char *description;
 	char *comment;

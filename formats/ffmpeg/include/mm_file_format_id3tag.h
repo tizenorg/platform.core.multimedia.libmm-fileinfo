@@ -205,6 +205,7 @@ typedef struct
 	char			*pComment;
 	char			*pRating;
 	char			*pAlbum;		//Album/Movie/
+	char			*pAlbum_Artist;
 	char			*pYear;
 	char			*pGenre; 
 	char			*pTrackNum;		//Track number/Position in set
@@ -248,6 +249,7 @@ inline static void mm_file_free_AvFileContentInfo (AvFileContentInfo *pInfo)
 		if (pInfo->pComment) mmfile_free (pInfo->pComment);
 		if (pInfo->pRating) mmfile_free (pInfo->pRating);
 		if (pInfo->pAlbum) mmfile_free (pInfo->pAlbum);
+		if (pInfo->pAlbum_Artist) mmfile_free (pInfo->pAlbum_Artist);
 		if (pInfo->pYear) mmfile_free (pInfo->pYear);
 		if (pInfo->pGenre) mmfile_free (pInfo->pGenre); 
 		if (pInfo->pTrackNum) mmfile_free (pInfo->pTrackNum);

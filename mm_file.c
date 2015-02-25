@@ -100,6 +100,7 @@ static mmf_attrs_construct_info_t g_tag_attrs[] = {
 	{"tag-artist",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-title",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-album",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{"tag-album-artist",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-genre",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-author",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{"tag-copyright",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
@@ -284,7 +285,8 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 		if (formatContext->author)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_AUTHOR, formatContext->author);
 		if (formatContext->composer && formatContext->author == NULL)	
 											mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_AUTHOR, formatContext->composer);
-		if (formatContext->album)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM	, formatContext->album);
+		if (formatContext->album)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM, formatContext->album);
+		if (formatContext->album_artist)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ALBUM_ARTIST, formatContext->album_artist);
 		if (formatContext->copyright)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COPYRIGHT, formatContext->copyright);
 		if (formatContext->description)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->description);
 		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COMMENT, formatContext->comment);

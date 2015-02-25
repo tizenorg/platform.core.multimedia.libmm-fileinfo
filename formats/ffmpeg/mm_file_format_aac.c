@@ -124,6 +124,7 @@ void _aac_init_handle(tMMFILE_AAC_HANDLE* privateData)
   privateData->tagInfo.author = NULL;
   privateData->tagInfo.artist = NULL;
   privateData->tagInfo.album = NULL;
+  privateData->tagInfo.album_artist = NULL;
   privateData->tagInfo.year = NULL;
   privateData->tagInfo.copyright = NULL;
   privateData->tagInfo.comment = NULL;
