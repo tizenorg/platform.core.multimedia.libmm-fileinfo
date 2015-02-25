@@ -78,6 +78,7 @@ static int _CleanupFrameContext (MMFileFormatContext *formatContext, bool clean_
 		if (formatContext->author)			mmfile_free(formatContext->author);
 		if (formatContext->composer)			mmfile_free(formatContext->composer);
 		if (formatContext->album)				mmfile_free(formatContext->album);
+		if (formatContext->album_artist)		mmfile_free(formatContext->album_artist);
 		if (formatContext->copyright)			mmfile_free(formatContext->copyright);
 		if (formatContext->description)			mmfile_free(formatContext->description);
 		if (formatContext->comment)			mmfile_free(formatContext->comment);

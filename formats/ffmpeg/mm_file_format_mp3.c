@@ -202,6 +202,7 @@ int mmfile_format_read_tag_mp3    (MMFileFormatContext *formatContext)
 	if (privateData->pCopyright)		formatContext->copyright = mmfile_strdup(privateData->pCopyright);
 	if (privateData->pComment)		formatContext->comment = mmfile_strdup(privateData->pComment);
 	if (privateData->pAlbum)			formatContext->album = mmfile_strdup(privateData->pAlbum);
+	if (privateData->pAlbum_Artist)			formatContext->album_artist = mmfile_strdup(privateData->pAlbum_Artist);
 	if (privateData->pYear)				formatContext->year = mmfile_strdup(privateData->pYear);
 	if (privateData->pGenre)			formatContext->genre = mmfile_strdup(privateData->pGenre);
 	if (privateData->pTrackNum)		formatContext->tagTrackNum = mmfile_strdup(privateData->pTrackNum);

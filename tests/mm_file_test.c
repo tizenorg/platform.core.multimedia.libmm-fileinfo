@@ -60,6 +60,7 @@ typedef struct _TagContext {
 	mmfile_value_t artist;
 	mmfile_value_t title;
 	mmfile_value_t album;
+	mmfile_value_t album_artist;
 	mmfile_value_t genre;
 	mmfile_value_t author;
 	mmfile_value_t copyright;
@@ -319,6 +320,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 									&err_attr_name,
 									MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
 									MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
+									MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
 									MM_FILE_TAG_TITLE, &ctag.title.value.s_val, &ctag.title.len,
 									MM_FILE_TAG_GENRE, &ctag.genre.value.s_val, &ctag.genre.len,
 									MM_FILE_TAG_AUTHOR, &ctag.author.value.s_val, &ctag.author.len,
@@ -361,6 +363,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 		printf("# artist: [%s]\n", ctag.artist.value.s_val);
 		printf("# title: [%s]\n", ctag.title.value.s_val);
 		printf("# album: [%s]\n", ctag.album.value.s_val);
+		printf("# album_artist: [%s]\n", ctag.album_artist.value.s_val);
 		printf("# genre: [%s]\n", ctag.genre.value.s_val);
 		printf("# author: [%s]\n", ctag.author.value.s_val);
 		printf("# copyright: [%s]\n", ctag.copyright.value.s_val);
