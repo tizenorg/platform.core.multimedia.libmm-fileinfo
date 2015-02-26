@@ -76,6 +76,7 @@ extern "C" {
 #define 	MM_FILE_TAG_ARTIST 			"tag-artist"			/**< Artist */
 #define	MM_FILE_TAG_TITLE				"tag-title"			/**< Title */
 #define	MM_FILE_TAG_ALBUM			"tag-album"			/**< Album */
+#define	MM_FILE_TAG_ALBUM_ARTIST	"tag-album-artist"			/**< Album_Artist */
 #define	MM_FILE_TAG_GENRE				"tag-genre"			/**< Genre */
 #define	MM_FILE_TAG_AUTHOR			"tag-author"			/**< Author / Composer */
 #define	MM_FILE_TAG_COPYRIGHT		"tag-copyright"		/**< Copyright */

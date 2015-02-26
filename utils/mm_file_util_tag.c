@@ -1151,6 +1151,7 @@ static int GetTagFromMetaBox (MMFileFormatContext *formatContext, MMFileIOHandle
 		if (!formatContext->copyright)      formatContext->copyright = mmfile_strdup((const char*)tagInfo.pCopyright);
 		if (!formatContext->comment)        formatContext->comment = mmfile_strdup((const char*)tagInfo.pComment);
 		if (!formatContext->album)          formatContext->album = mmfile_strdup((const char*)tagInfo.pAlbum);
+		if (!formatContext->album_artist)   formatContext->album_artist = mmfile_strdup((const char*)tagInfo.pAlbum_Artist);
 		if (!formatContext->year)           formatContext->year = mmfile_strdup((const char*)tagInfo.pYear);
 		if (!formatContext->genre)          formatContext->genre = mmfile_strdup((const char*)tagInfo.pGenre);
 		if (!formatContext->tagTrackNum)    formatContext->tagTrackNum = mmfile_strdup((const char*)tagInfo.pTrackNum);

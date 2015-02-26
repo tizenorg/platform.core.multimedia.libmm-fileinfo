@@ -68,6 +68,7 @@ void mmfile_format_print_tags (MMFileFormatContext *in)
 		if (in->author)			debug_msg ("author = %s\n", in->author);
 		if (in->composer)			debug_msg ("composer = %s\n", in->composer);
 		if (in->album)			debug_msg ("album = %s\n", in->album);
+		if (in->album_artist)			debug_msg ("album_artist = %s\n", in->album_artist);
 		if (in->copyright)			debug_msg ("copyright = %s\n", in->copyright);
 		if (in->comment)			debug_msg ("comment = %s\n", in->comment);
 		if (in->genre)			debug_msg ("genre = %s\n", in->genre);
