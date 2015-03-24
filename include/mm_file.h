@@ -69,6 +69,7 @@ extern "C" {
 #define MM_FILE_CONTENT_AUDIO_SAMPLERATE	"content-audio-samplerate" /**< Sampling rate of audio stream */
 #define MM_FILE_CONTENT_AUDIO_TRACK_INDEX	"content-audio-track-index"	/**< Current stream of audio */
 #define MM_FILE_CONTENT_AUDIO_TRACK_COUNT	"content-audio-track-count"/**< Number of audio streams */
+#define MM_FILE_CONTENT_AUDIO_BITPERSAMPLE	"content-audio-bitpersample" /**< Bit per sample of audio stream */
 
 /**
  * tag attributes.
