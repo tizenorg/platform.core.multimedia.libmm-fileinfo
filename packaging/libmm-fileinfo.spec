@@ -37,7 +37,7 @@ Multimedia Framework FileInfo Library (developement files)
 cp %{SOURCE1001} .
 
 %build
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
+CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" -fgnu89-inline "
 export CFLAGS
 
 %reconfigure \
