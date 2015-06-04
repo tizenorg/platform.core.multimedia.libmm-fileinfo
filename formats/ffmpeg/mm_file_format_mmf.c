@@ -598,19 +598,19 @@ int mmfile_format_close_mmf       (MMFileFormatContext *formatContext);
 
 EXPORT_API
 int mmfile_format_open_mmf (MMFileFormatContext *formatContext)
-{   
+{
 	int ret = 0;
 
 	if (NULL == formatContext) {
 		debug_error ("error: formatContext is NULL\n");
-		return MMFILE_FORMAT_FAIL;        
+		return MMFILE_FORMAT_FAIL;
 	}
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidMMF (formatContext->uriFileName);
+		ret = MMFileFormatIsValidMMF (NULL, formatContext->uriFileName);
 		if (ret == 0) {
 			debug_error ("error: it is not MMF file\n");
-			return MMFILE_FORMAT_FAIL;         
+			return MMFILE_FORMAT_FAIL;
 		}
 	}
 

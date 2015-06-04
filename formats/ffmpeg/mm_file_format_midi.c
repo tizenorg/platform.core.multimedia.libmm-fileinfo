@@ -266,7 +266,7 @@ int mmfile_format_open_mid (MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->pre_checked == 0) {
-		res = MMFileFormatIsValidMID (formatContext->uriFileName);
+		res = MMFileFormatIsValidMID (NULL, formatContext->uriFileName);
 		if ( res == 0 ) {
 			debug_error("It is not MIDI file\n");
 			return MMFILE_FORMAT_FAIL;

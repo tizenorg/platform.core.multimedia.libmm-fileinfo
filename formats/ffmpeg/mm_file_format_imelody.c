@@ -107,10 +107,10 @@ int mmfile_format_open_imy (MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidIMY (formatContext->uriFileName);
+		ret = MMFileFormatIsValidIMY (NULL, formatContext->uriFileName);
 		if (ret == 0) {
 			debug_error("It is not imelody file\n");
-			return MMFILE_FORMAT_FAIL;        
+			return MMFILE_FORMAT_FAIL;
 		}
 	}
 
