@@ -89,7 +89,7 @@ int mmfile_format_open_mp3 (MMFileFormatContext *formatContext)
     int ret = 0;
 
 	debug_fenter();
-	
+
     if (NULL == formatContext)
     {
         debug_error("formatContext is NULL\n");
@@ -97,15 +97,14 @@ int mmfile_format_open_mp3 (MMFileFormatContext *formatContext)
     }
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidMP3 (formatContext->uriFileName,5);
+		ret = MMFileFormatIsValidMP3 (NULL, formatContext->uriFileName, 5);
 		if ( ret == 0 )
 		{
 			debug_error("It is not mp3 file\n");
-			return MMFILE_FORMAT_FAIL;        
+			return MMFILE_FORMAT_FAIL;
 		}
 	}
 
-    
     formatContext->ReadStream   = mmfile_format_read_stream_mp3;
     formatContext->ReadFrame    = mmfile_format_read_frame_mp3;
     formatContext->ReadTag      = mmfile_format_read_tag_mp3;

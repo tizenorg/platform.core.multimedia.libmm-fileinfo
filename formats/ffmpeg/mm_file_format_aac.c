@@ -765,10 +765,10 @@ int mmfile_format_open_aac (MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->pre_checked == 0) {
-		res = MMFileFormatIsValidAAC (formatContext->uriFileName);
+		res = MMFileFormatIsValidAAC (NULL, formatContext->uriFileName);
 		if (res == 0) {
 			debug_error("It is not AAC file\n");
-			return MMFILE_FORMAT_FAIL;        
+			return MMFILE_FORMAT_FAIL;
 		}
 	}
 

@@ -201,11 +201,11 @@ int mmfile_format_open_wav (MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidWAV (formatContext->uriFileName);
+		ret = MMFileFormatIsValidWAV (NULL, formatContext->uriFileName);
 		if ( ret == 0 )
 		{
 			debug_error("It is not wav file\n");
-			return MMFILE_FORMAT_FAIL;        
+			return MMFILE_FORMAT_FAIL;
 		}
 	}
 
