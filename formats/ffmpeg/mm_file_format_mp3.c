@@ -97,7 +97,7 @@ int mmfile_format_open_mp3 (MMFileFormatContext *formatContext)
     }
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidMP3 (formatContext->uriFileName,5);
+		ret = MMFileFormatIsValidMP3 (NULL, formatContext->uriFileName, 5);
 		if ( ret == 0 )
 		{
 			debug_error("It is not mp3 file\n");

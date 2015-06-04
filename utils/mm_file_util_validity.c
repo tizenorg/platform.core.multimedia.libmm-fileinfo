@@ -53,13 +53,13 @@ static int _MMFileIsFLVHeader  (void *header);
 /*                     MP3 Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidMP3 (const char *mmfileuri, int frameCnt)
+int MMFileFormatIsValidMP3 (MMFileIOHandle *pFileIO, const char *mmfileuri, int frameCnt)
 {
 #define _MMFILE_MP3_HEADER_LENGTH   4
 #define _MMFILE_MP3_BUFFER_LENGTH   8200
 
-	MMFileIOHandle *fp = NULL;
-	unsigned char *buffer=NULL;
+	MMFileIOHandle *fp = pFileIO;
+	unsigned char buffer[_MMFILE_MP3_BUFFER_LENGTH] = {0,};
 	long long  filesize = 0;
 	unsigned int  sizeID3 = 0;
 	int           readed = 0;
@@ -68,11 +68,15 @@ int MMFileFormatIsValidMP3 (const char *mmfileuri, int frameCnt)
 	unsigned int  i = 0, j = 0;
 	int ret = 0,frameSize,count,offset;
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if(ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if(ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
+
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	mmfile_seek (fp, 0L, MMFILE_SEEK_END);
 	filesize = mmfile_tell (fp);
@@ -103,13 +107,6 @@ int MMFileFormatIsValidMP3 (const char *mmfileuri, int frameCnt)
 	i = startoffset;
 	count = 0;
 	
-	buffer =  mmfile_malloc (_MMFILE_MP3_BUFFER_LENGTH * sizeof(char));
-
-	if (NULL == buffer) {
-		debug_error("Error in allocating memory for MP3 buffer\n");
-		goto exit;
-	}
-
 	while (i < endoffset) {
 		mmfile_seek (fp, i, MMFILE_SEEK_SET);
 		readed = mmfile_read (fp, buffer, _MMFILE_MP3_BUFFER_LENGTH);
@@ -163,14 +160,8 @@ failMP3:
 	debug_msg ( "Header Not Detected at: %d\n",i+j);
 	#endif
 exit:
-
-	if(buffer) {
-		mmfile_free (buffer);
-	}
-
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -181,13 +172,13 @@ exit:
 /*                     AAC Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidAAC (const char *mmfileuri)
+int MMFileFormatIsValidAAC (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_AAC_HEADER_LENGTH   4
 #define _MMFILE_AAC_BUFFER_LENGTH   8200
 
-	MMFileIOHandle *fp = NULL;
-	unsigned char *buffer=NULL;
+	MMFileIOHandle *fp = pFileIO;
+	unsigned char buffer[_MMFILE_AAC_BUFFER_LENGTH] = {0,};
 	unsigned int  sizeID3 = 0;
 	long long     filesize = 0;
 	int           readed = 0;
@@ -197,16 +188,15 @@ int MMFileFormatIsValidAAC (const char *mmfileuri)
 	int ret = 0;
 	unsigned int sync,frameSize;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	/* Initialize the members of handle */
 	mmfile_seek (fp, 0, MMFILE_SEEK_END);
@@ -233,13 +223,6 @@ int MMFileFormatIsValidAAC (const char *mmfileuri)
 	endoffset = startoffset + 10240;
 	if(endoffset > filesize - _MMFILE_AAC_HEADER_LENGTH)
 		endoffset = filesize - _MMFILE_AAC_HEADER_LENGTH;
-	
-	buffer = mmfile_malloc (_MMFILE_AAC_BUFFER_LENGTH * sizeof(char));
-
-	if (NULL == buffer) {
-		debug_error("Error in allocating memory for AAC buffer\n");
-		goto exit;
-	}
 	
 	i = startoffset;
 
@@ -305,13 +288,8 @@ fail:
 	#endif
 
 exit:
-	if (buffer) {
-		mmfile_free (buffer);
-	}
-
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -322,13 +300,13 @@ exit:
 /*                     OGG Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidOGG (const char *mmfileuri)
+int MMFileFormatIsValidOGG (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_OGG_HEADER_LENGTH   4
 #define _MMFILE_OGG_BUFFER_LENGTH   512
 #define _MMFILE_OGG_CHECK_LIMIT		(_MMFILE_OGG_HEADER_LENGTH * 1000)
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_OGG_BUFFER_LENGTH] = {0,};
 	unsigned int  sizeID3 = 0;
 	long long     filesize = 0;
@@ -339,18 +317,16 @@ int MMFileFormatIsValidOGG (const char *mmfileuri)
 	int ret = 0;
 	unsigned int check_limit = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		ret = 0;
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			ret = 0;
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		ret = 0;
-		goto exit;
-	}
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	/* Initialize the members of handle */
 	mmfile_seek (fp, 0, MMFILE_SEEK_END);
@@ -404,9 +380,8 @@ int MMFileFormatIsValidOGG (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -417,13 +392,13 @@ exit:
 /*                     MIDI Header Check API                           */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidMID (const char *mmfileuri)
+int MMFileFormatIsValidMID (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_MIDI_HEADER_LENGTH 4
 #define _MMFILE_MIDI_BUFFER_LENGTH 512
 #define _MMFILE_MIDI_CHECK_LIMIT	(_MMFILE_MIDI_HEADER_LENGTH * 1024)
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MIDI_BUFFER_LENGTH] = {0,};
 	long long     filesize = 0;
 	int           readed = 0;
@@ -433,16 +408,15 @@ int MMFileFormatIsValidMID (const char *mmfileuri)
 	int ret = 0;
 	unsigned int check_limit = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	/* Initialize the members of handle */
 	mmfile_seek (fp, 0, MMFILE_SEEK_END);
@@ -489,9 +463,8 @@ int MMFileFormatIsValidMID (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -501,45 +474,24 @@ exit:
 /*                     WAV Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidWAV (const char *mmfileuri)
+int MMFileFormatIsValidWAV (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_WAV_HEADER_LENGTH 15
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_WAV_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	 /* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_WAV_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	
-	/* set begin and end point at the file */
-	startoffset = 0;
-	
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_WAV_HEADER_LENGTH);
 	if (_MMFILE_WAV_HEADER_LENGTH != readed) {
@@ -556,11 +508,9 @@ int MMFileFormatIsValidWAV (const char *mmfileuri)
 		goto exit;
 	}
 
-
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -571,11 +521,11 @@ exit:
 /*                     MP4 Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidMP4 (const char *mmfileuri)
+int MMFileFormatIsValidMP4 (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_MP4_HEADER_LENGTH 4
 #define _MMFILE_MP4_CHECK_LIMIT		(1024*10)	/*10Kbyte*/
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MP4_HEADER_LENGTH] = {0,};
 	long long     filesize = 0;
 	int           readed = 0;
@@ -583,16 +533,15 @@ int MMFileFormatIsValidMP4 (const char *mmfileuri)
 	int ret = 0;
 	unsigned int check_limit = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	/* Initialize the members of handle */
 	mmfile_seek (fp, 0, MMFILE_SEEK_END);
@@ -630,9 +579,8 @@ int MMFileFormatIsValidMP4 (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -642,45 +590,27 @@ exit:
 /*                     AVI Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidAVI (const char *mmfileuri)
+int MMFileFormatIsValidAVI (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_AVI_HEADER_LENGTH 12
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_AVI_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	 /* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_AVI_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;        
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);    
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_AVI_HEADER_LENGTH);
+
 	if (_MMFILE_AVI_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -696,9 +626,8 @@ int MMFileFormatIsValidAVI (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -709,44 +638,26 @@ exit:
 /*                     ASF Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidASF (const char *mmfileuri)
+int MMFileFormatIsValidASF (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_ASF_HEADER_LENGTH 16
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_ASF_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_ASF_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);        
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_ASF_HEADER_LENGTH);
+
 	if (_MMFILE_ASF_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -762,9 +673,8 @@ int MMFileFormatIsValidASF (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -773,44 +683,26 @@ exit:
 /*                     WMA Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidWMA (const char *mmfileuri)
+int MMFileFormatIsValidWMA (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_ASF_HEADER_LENGTH 16
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_ASF_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_ASF_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);        
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_ASF_HEADER_LENGTH);
+
 	if (_MMFILE_ASF_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -826,9 +718,8 @@ int MMFileFormatIsValidWMA (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -839,44 +730,26 @@ exit:
 /*                     WMV Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidWMV (const char *mmfileuri)
+int MMFileFormatIsValidWMV (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
  #define _MMFILE_ASF_HEADER_LENGTH 16
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_ASF_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_ASF_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);        
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_ASF_HEADER_LENGTH);
+
 	if (_MMFILE_ASF_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -892,9 +765,8 @@ int MMFileFormatIsValidWMV (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -904,45 +776,27 @@ exit:
 /*                     MMF Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidMMF (const char *mmfileuri)
+int MMFileFormatIsValidMMF (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_MMF_HEADER_LENGTH 18
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MMF_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_MMF_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);    
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_MMF_HEADER_LENGTH);
+
 	if (_MMFILE_MMF_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -958,9 +812,8 @@ int MMFileFormatIsValidMMF (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -971,45 +824,27 @@ exit:
 /*                     MMF Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidIMY (const char *mmfileuri)
+int MMFileFormatIsValidIMY (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_IMY_HEADER_LENGTH 13
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_IMY_HEADER_LENGTH] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	 /* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_IMY_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);    
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_IMY_HEADER_LENGTH);
+
 	if (_MMFILE_IMY_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -1025,9 +860,8 @@ int MMFileFormatIsValidIMY (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -1038,46 +872,28 @@ exit:
 /*                     AMR Header Check API                            */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidAMR (const char *mmfileuri)
+int MMFileFormatIsValidAMR (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_AMR_MAX_HEADER_SIZE 15
 #define _MMFILE_AMR_MIN_HEADER_SIZE 6
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_AMR_MAX_HEADER_SIZE] = {0,};
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_AMR_MAX_HEADER_SIZE) {
-		debug_error ("header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);        
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_AMR_MAX_HEADER_SIZE);
+
 	if (_MMFILE_AMR_MAX_HEADER_SIZE != readed) {
 		debug_error ("read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -1093,9 +909,8 @@ int MMFileFormatIsValidAMR (const char *mmfileuri)
 	}
 
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -1103,45 +918,27 @@ exit:
 /***********************************************************************/
 /*                     Matroska Header Check API                       */
 /***********************************************************************/
-
 EXPORT_API
-int MMFileFormatIsValidMatroska (const char *mmfileuri)
+int MMFileFormatIsValidMatroska (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_EBML_MARKER_LENGTH	4
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char* buffer = NULL;
-	long long     filesize = 0;
 	int           readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
-
 	int len_mask = 0x80, size = 1, n = 1, total = 0;
 	char probe_data[] = { 'm', 'a', 't', 'r', 'o', 's', 'k', 'a' };
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	debug_msg ( "[%s][%d]\n", __func__, __LINE__);
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	 /* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	ret = 0;
-
-	/* set begin and end point at the file */
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	buffer = mmfile_malloc (_MMFILE_EBML_MARKER_LENGTH * sizeof(char));
 	readed = mmfile_read (fp, buffer, _MMFILE_EBML_MARKER_LENGTH);
@@ -1199,9 +996,8 @@ exit:
 		mmfile_free (buffer);
 	}
 
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
 	return ret;
 }
@@ -1210,7 +1006,7 @@ exit:
 /*                     QT Header Check API                       */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidQT (const char *mmfileuri)
+int MMFileFormatIsValidQT (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 	return 1;
 }
@@ -1219,47 +1015,27 @@ int MMFileFormatIsValidQT (const char *mmfileuri)
 /*                     Flac Header Check API                       */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidFLAC (const char *mmfileuri)
+int MMFileFormatIsValidFLAC (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_FLAC_HEADER_LENGTH 5	/*fLaC*/
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_FLAC_HEADER_LENGTH] = {0,};
-	long long	  filesize = 0;
 	int 		  readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_FLAC_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-
-	/* set begin and end point at the file */
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_FLAC_HEADER_LENGTH);
+
 	if (_MMFILE_FLAC_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -1274,60 +1050,38 @@ int MMFileFormatIsValidFLAC (const char *mmfileuri)
 		goto exit;
 	}
 
-
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
-return ret;
+	return ret;
 }
 
 /***********************************************************************/
 /*                     FLV(flash video) Header Check API                       */
 /***********************************************************************/
 EXPORT_API
-int MMFileFormatIsValidFLV (const char *mmfileuri)
+int MMFileFormatIsValidFLV (MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 #define _MMFILE_FLV_HEADER_LENGTH 4	/*FLV*/
 
-	MMFileIOHandle *fp = NULL;
+	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_FLV_HEADER_LENGTH] = {0,};
-	long long	  filesize = 0;
 	int 		  readed = 0;
-	unsigned int  startoffset = 0;
 	int ret = 0;
 
-	if (NULL == mmfileuri) {
-		debug_error ("file source is NULL\n");
-		return ret;
+	if(fp == NULL) {
+		ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
+		if (ret == MMFILE_IO_FAILED) {
+			debug_error ("error: mmfile_open\n");
+			goto exit;
+		}
 	}
 
-	ret = mmfile_open (&fp, mmfileuri, MMFILE_RDONLY);
-	if (ret == MMFILE_UTIL_FAIL) {
-		debug_error ("error: mmfile_open\n");
-		goto exit;
-	}
-
-	/* Initialize the members of handle */
-	mmfile_seek (fp, 0, MMFILE_SEEK_END);
-	filesize = mmfile_tell(fp);
-	mmfile_seek (fp, 0, MMFILE_SEEK_SET);
-
-	if (filesize < _MMFILE_FLV_HEADER_LENGTH) {
-		debug_error ( "header is too small.\n");
-		ret = 0;
-		goto exit;
-	}
-
-	ret = 0;
-
-	/* set begin and end point at the file */
-	startoffset = 0;
-
-	mmfile_seek (fp, startoffset, MMFILE_SEEK_SET);
+	mmfile_seek (fp, 0L, MMFILE_SEEK_SET);
 
 	readed = mmfile_read (fp, buffer, _MMFILE_FLV_HEADER_LENGTH);
+
 	if (_MMFILE_FLV_HEADER_LENGTH != readed) {
 		debug_error ( "read error. size = %d. Maybe end of file.\n", readed);
 		ret = 0;
@@ -1342,14 +1096,13 @@ int MMFileFormatIsValidFLV (const char *mmfileuri)
 		goto exit;
 	}
 
-
 exit:
-	if (fp) {
-		mmfile_close (fp);
-	}
+	if(pFileIO == NULL && fp != NULL)
+		mmfile_close(fp);
 
-return ret;
+	return ret;
 }
+
 
 /***********************************************************************/
 /*            Implementation of Internal Functions                     */

@@ -66,27 +66,34 @@ inline unsigned short   mmfile_io_le_uint16 (unsigned short value);
 inline short            mmfile_io_be_int16  (unsigned short value);
 inline short            mmfile_io_le_int16  (unsigned short value);
 
+typedef struct MMFileIOHandle
+{
+    struct MMFileIOFunc *iofunc;
+    int     flags;         /* file flags */
+    void   *privateData;
+    char   *fileName;
+} MMFileIOHandle;
 
 ////////////////////////////////////////////////////////////////////////
 //                     FILE HEADER CHECK API                          //
 ////////////////////////////////////////////////////////////////////////
-int MMFileFormatIsValidMP3 (const char *mmfileuri, int frameCnt);
-int MMFileFormatIsValidAAC (const char *mmfileuri);
-int MMFileFormatIsValidASF (const char *mmfileuri);
-int MMFileFormatIsValidMP4 (const char *mmfileuri);
-int MMFileFormatIsValidAVI (const char *mmfileuri);
-int MMFileFormatIsValidAMR (const char *mmfileuri);
-int MMFileFormatIsValidWAV (const char *mmfileuri);
-int MMFileFormatIsValidMMF (const char *mmfileuri);
-int MMFileFormatIsValidMID (const char *mmfileuri);
-int MMFileFormatIsValidIMY (const char *mmfileuri);
-int MMFileFormatIsValidWMA (const char *mmfileuri);
-int MMFileFormatIsValidWMV (const char *mmfileuri);
-int MMFileFormatIsValidOGG (const char *mmfileuri);
-int MMFileFormatIsValidMatroska (const char *mmfileuri);
-int MMFileFormatIsValidQT (const char *mmfileuri);
-int MMFileFormatIsValidFLAC (const char *mmfileuri);
-int MMFileFormatIsValidFLV (const char *mmfileuri);
+int MMFileFormatIsValidMP3 (MMFileIOHandle *pFileIO, const char *mmfileuri, int frameCnt);
+int MMFileFormatIsValidAAC (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidASF (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidMP4 (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidAVI (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidAMR (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidWAV (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidMMF (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidMID (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidIMY (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidWMA (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidWMV (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidOGG (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidMatroska (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidQT (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidFLAC (MMFileIOHandle *pFileIO, const char *mmfileuri);
+int MMFileFormatIsValidFLV (MMFileIOHandle *pFileIO, const char *mmfileuri);
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -109,14 +116,6 @@ int MMFileFormatIsValidFLV (const char *mmfileuri);
 #define MMFILE_SEEK_SET		SEEK_SET
 #define MMFILE_SEEK_CUR		SEEK_CUR
 #define MMFILE_SEEK_END		SEEK_END
-
-typedef struct MMFileIOHandle
-{
-    struct MMFileIOFunc *iofunc;
-    int     flags;         /* file flags */
-    void   *privateData;
-    char   *fileName;
-} MMFileIOHandle;
 
 typedef struct MMFileIOFunc
 {

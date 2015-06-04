@@ -607,7 +607,7 @@ int mmfile_format_open_mmf (MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->pre_checked == 0) {
-		ret = MMFileFormatIsValidMMF (formatContext->uriFileName);
+		ret = MMFileFormatIsValidMMF (NULL, formatContext->uriFileName);
 		if (ret == 0) {
 			debug_error ("error: it is not MMF file\n");
 			return MMFILE_FORMAT_FAIL;         

@@ -135,8 +135,19 @@ static int __getMimeType(int formatId, char *mimeType)
 static int __get_fileformat(const char *urifilename, int *format)
 {
 	int index;
+	int ret = 0;
+	MMFileIOHandle *fp = NULL;
 
 	debug_error("%s\n", urifilename);
+
+	ret = mmfile_open (&fp, urifilename, MMFILE_RDONLY);
+
+	if (ret == MMFILE_IO_FAILED) {
+		debug_error ("error: mmfile_open\n");
+		if(fp)
+			mmfile_close(fp);
+		return MMFILE_FORMAT_FAIL;
+	}
 
 	for (index = 0; index < MM_FILE_FORMAT_NUM; index++) {
 		debug_msg ("search index = [%d]\n", index);
@@ -144,9 +155,9 @@ static int __get_fileformat(const char *urifilename, int *format)
 			case MM_FILE_FORMAT_QT:
 			case MM_FILE_FORMAT_3GP:
 			case MM_FILE_FORMAT_MP4: {
-				if (MMFileFormatIsValidMP4 (urifilename)) {
+				if (MMFileFormatIsValidMP4 (fp, NULL)) {
 					*format = MM_FILE_FORMAT_3GP;
-					return MMFILE_FORMAT_SUCCESS;
+					goto FILE_FORMAT_SUCCESS;
 				}
 				break;
 			}
@@ -154,34 +165,34 @@ static int __get_fileformat(const char *urifilename, int *format)
 			case MM_FILE_FORMAT_ASF:
 			case MM_FILE_FORMAT_WMA:
 			case MM_FILE_FORMAT_WMV: {
-				if (MMFileFormatIsValidASF (urifilename)) {
+				if (MMFileFormatIsValidASF (fp, NULL)) {
 					*format = MM_FILE_FORMAT_ASF;
-					return MMFILE_FORMAT_SUCCESS;
+					goto FILE_FORMAT_SUCCESS;
 				}
 				break;
 			}
 
 			case MM_FILE_FORMAT_DIVX:
 			case MM_FILE_FORMAT_AVI: {
-				if (MMFileFormatIsValidAVI(urifilename)) {
+				if (MMFileFormatIsValidAVI(fp, NULL)) {
 					*format = MM_FILE_FORMAT_AVI;
-					return MMFILE_FORMAT_SUCCESS;
+					goto FILE_FORMAT_SUCCESS;
 				}
 				break;
 			}
 
 			case MM_FILE_FORMAT_MATROSKA: {
-				if (MMFileFormatIsValidMatroska (urifilename)) {
+				if (MMFileFormatIsValidMatroska (fp, NULL)) {
 					*format = MM_FILE_FORMAT_MATROSKA;
-					return MMFILE_FORMAT_SUCCESS;
+					goto FILE_FORMAT_SUCCESS;
 				}
 				break;
 			}
 
 			case MM_FILE_FORMAT_FLV: {
-				if (MMFileFormatIsValidFLV (urifilename)) {
+				if (MMFileFormatIsValidFLV (fp, NULL)) {
 					*format = MM_FILE_FORMAT_FLV;
-					return MMFILE_FORMAT_SUCCESS;
+					goto FILE_FORMAT_SUCCESS;
 				}
 				break;
 			}
@@ -217,7 +228,17 @@ static int __get_fileformat(const char *urifilename, int *format)
 	}
 
 	*format = -1;
+
+	if(fp)
+		mmfile_close(fp);
+
 	return MMFILE_FORMAT_FAIL;
+
+FILE_FORMAT_SUCCESS:
+	if(fp)
+		mmfile_close(fp);
+
+	return MMFILE_FORMAT_SUCCESS;
 }
 
 static int __mmfile_get_frame(AVFormatContext *pFormatCtx, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height)
