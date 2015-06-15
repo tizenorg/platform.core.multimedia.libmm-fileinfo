@@ -66,6 +66,15 @@
 #define MMFILE_EXT_MOV		0x6D6F76
 #define MMFILE_EXT_FLAC		0x666C6163
 #define MMFILE_EXT_FLV		0x666C76
+#define MMFILE_EXT_AIF		0x616966
+#define MMFILE_EXT_AIFF		0x61696666
+#define MMFILE_EXT_RMVB		0x726D7662
+#define MMFILE_EXT_RM		0x726D
+#define MMFILE_EXT_M2TS		0x6D327473
+#define MMFILE_EXT_MTS		0x6D7473
+#define MMFILE_EXT_TS		0x7473
+#define MMFILE_EXT_TP		0x7470
+#define MMFILE_EXT_MPEG		0x6D706567
 
 int (*MMFileOpenFunc[MM_FILE_FORMAT_NUM+1]) (MMFileFormatContext *fileContext) = {
 	mmfile_format_open_ffmpg,	/* 3GP */
@@ -75,12 +84,12 @@ int (*MMFileOpenFunc[MM_FILE_FORMAT_NUM+1]) (MMFileFormatContext *fileContext) =
 	mmfile_format_open_ffmpg,	/* MP4 */
 	mmfile_format_open_ffmpg,	/* OGG */
 	NULL,						/* NUT */
-	mmfile_format_open_ffmpg,						/* QT */
-	NULL,						/* REAL */
+	mmfile_format_open_ffmpg,	/* QT */
+	mmfile_format_open_ffmpg,	/* REAL */
 	mmfile_format_open_amr,		/* AMR */
 	mmfile_format_open_aac,		/* AAC */
 	mmfile_format_open_mp3,		/* MP3 */
-	NULL,						/* AIFF */
+	mmfile_format_open_ffmpg,	/* AIFF */
 	NULL,						/* AU */
 	mmfile_format_open_wav,		/* WAV */
 	mmfile_format_open_mid,		/* MID */
@@ -93,6 +102,10 @@ int (*MMFileOpenFunc[MM_FILE_FORMAT_NUM+1]) (MMFileFormatContext *fileContext) =
 	mmfile_format_open_ffmpg,	/* WMV */
 	NULL,						/* JPG */
 	mmfile_format_open_ffmpg,	/* FLAC */
+	mmfile_format_open_ffmpg,	/* MPEG-TS */
+	mmfile_format_open_ffmpg,	/* MPEG-PS */
+	mmfile_format_open_ffmpg,	/* MPEG 1 VIDEO*/
+	mmfile_format_open_ffmpg,	/* MPEG 1 AUDIO */
 	NULL,
 };
 
@@ -135,7 +148,12 @@ static int _CleanupFrameContext (MMFileFormatContext *formatContext, bool clean_
 
 		if (formatContext->nbStreams > 0) {
 			int i = 0;
-			for (i = 0; (i < formatContext->nbStreams) && (i < MAXSTREAMS); i++) {
+
+			/*formatContext->streams[0] is video, formatContext->streams[1] is audio.*/
+			if (formatContext->streams[0]) mmfile_free(formatContext->streams[0]);
+			if (formatContext->streams[1]) mmfile_free(formatContext->streams[1]);
+
+			for (i = 2; (i < formatContext->nbStreams) && (i < MAXSTREAMS); i++) {
 				if (formatContext->streams[i]) mmfile_free(formatContext->streams[i]);
 			}
 		}
@@ -149,6 +167,10 @@ static int _CleanupFrameContext (MMFileFormatContext *formatContext, bool clean_
 
 			mmfile_free (formatContext->thumbNail);
 		}
+
+		formatContext->videoTotalTrackNum = 0;
+		formatContext->audioTotalTrackNum = 0;
+		formatContext->nbStreams = 0;
 	}
 
 	return MMFILE_FORMAT_SUCCESS;
@@ -160,6 +182,9 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 	const char	*fileName = NULL;
 	int			filename_len = 0;
 	int			index = 0, skip_index = 0;
+#ifdef DRM_SUPPORT
+	drm_content_info_s	contentInfo;
+#endif
 	int ret = 0;
 	MMFileIOHandle *fp = NULL;
 
@@ -176,7 +201,6 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 		drm_bool_type_e res = DRM_TRUE;
 		drm_file_type_e file_type = DRM_TYPE_UNDEFINED;
 		int ret = 0;
-		bool is_drm = FALSE;
 
 		ret = drm_is_drm_file (fileSrc->file.path, &res);
 		if (ret == DRM_RETURN_SUCCESS && DRM_TRUE == res)
@@ -186,7 +210,11 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 			{
 				char extansion_name[_MMF_FILE_FILEEXT_MAX];
 				int i = 0;
-				is_drm = TRUE;
+
+				*isdrm = MM_FILE_DRM_OMA;
+				#ifdef __MMFILE_TEST_MODE__
+				debug_msg ("OMA DRM detected.\n");
+				#endif
 
 				memset(&contentInfo, 0x0, sizeof(drm_content_info_s));
 
@@ -218,13 +246,11 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				strncat (*urifilename, fileName, filename_len);
 				(*urifilename)[MMFILE_DRM_URI_LEN + filename_len] = '\0';
 			}
-		}
-
-		if (is_drm)
-		{
-			*isdrm = MM_FILE_DRM_OMA;
-			debug_error ("OMA DRM detected. Not Support DRM Content\n");
-			goto FILE_FORMAT_FAIL;		/*Not Support DRM Content*/
+			else if ((ret == DRM_RETURN_SUCCESS) &&
+				((file_type == DRM_TYPE_PLAYREADY) ||(file_type == DRM_TYPE_PLAYREADY_ENVELOPE) ||(file_type == DRM_TYPE_PIFF)))
+			{
+				*isdrm = MM_FILE_DRM_PROTECTED;
+			}
 		}
 		else
 #endif // DRM_SUPPORT
@@ -278,7 +304,7 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 		///////////////////////////////////////////////////////////////////////
 
 		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ("Get codec type of [%s].\n", extansion_name);
+		//debug_msg ("Get codec type of [%s].\n", extansion_name);
 		#endif
 
 		switch(file_extansion) {
@@ -472,6 +498,46 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				}
 				skip_index = MM_FILE_FORMAT_FLV;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
+
+			case MMFILE_EXT_RM:
+			case MMFILE_EXT_RMVB:
+				if (MMFileFormatIsValidREAL (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_REAL;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_REAL;
+				goto PROBE_PROPER_FILE_TYPE;
+				break;
+
+			case MMFILE_EXT_M2TS:
+			case MMFILE_EXT_MTS:
+			case MMFILE_EXT_TP:
+			case MMFILE_EXT_TS:
+				if (MMFileFormatIsValidMPEGTS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2TS;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M2TS;
+				goto PROBE_PROPER_FILE_TYPE;
+				break;
+
+			case MMFILE_EXT_MPEG:
+				if (MMFileFormatIsValidMPEGPS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2PS;
+					goto FILE_FORMAT_SUCCESS;
+				} else if (MMFileFormatIsValidMPEGVIDEO (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M1VIDEO;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M2PS;
+				goto PROBE_PROPER_FILE_TYPE;
+				break;
+
+			case MMFILE_EXT_AIF:
+			case MMFILE_EXT_AIFF:
+				*formatEnum = MM_FILE_FORMAT_AIFF;
+				goto FILE_FORMAT_SUCCESS;
 				break;
 
 			default :
@@ -687,6 +753,51 @@ _PreprocessFile (MMFileSourceType *fileSrc, char **urifilename, int *formatEnum,
 				goto PROBE_PROPER_FILE_TYPE;
 			}
 
+			case MM_FILE_FORMAT_REAL: {
+				if (MMFileFormatIsValidREAL (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_REAL;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_REAL;
+				goto PROBE_PROPER_FILE_TYPE;
+			}
+
+			case MM_FILE_FORMAT_M2TS: {
+				if (MMFileFormatIsValidMPEGTS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2TS;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M2TS;
+				goto PROBE_PROPER_FILE_TYPE;
+			}
+
+			case MM_FILE_FORMAT_M2PS: {
+				if (MMFileFormatIsValidMPEGPS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2PS;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M2PS;
+				goto PROBE_PROPER_FILE_TYPE;
+			}
+
+			case MM_FILE_FORMAT_M1AUDIO: {
+				if (MMFileFormatIsValidMPEGAUDIO (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M1AUDIO;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M1AUDIO;
+				goto PROBE_PROPER_FILE_TYPE;
+			}
+
+			case MM_FILE_FORMAT_M1VIDEO: {
+				if (MMFileFormatIsValidMPEGVIDEO (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M1VIDEO;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				skip_index = MM_FILE_FORMAT_M1VIDEO;
+				goto PROBE_PROPER_FILE_TYPE;
+			}
+
 			default: {
 				debug_warning ("probe fileformat type=%d (%d: autoscan)\n", fileSrc->memory.format, MM_FILE_FORMAT_INVALID);
 				skip_index = -1;
@@ -704,7 +815,10 @@ PROBE_PROPER_FILE_TYPE:
 		if (index == skip_index)
 			continue;
 
+		#ifdef __MMFILE_TEST_MODE__
 		debug_msg ("search index = [%d]\n", index);
+		#endif
+
 		switch (index) {
 			case MM_FILE_FORMAT_QT:
 			case MM_FILE_FORMAT_3GP:
@@ -846,9 +960,53 @@ PROBE_PROPER_FILE_TYPE:
 				break;
 			}
 
+			case MM_FILE_FORMAT_REAL: {
+				if (MMFileFormatIsValidREAL (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_REAL;
+					if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) fileSrc->memory.format = MM_FILE_FORMAT_REAL;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_M2TS: {
+				if (MMFileFormatIsValidMPEGTS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2TS;
+					if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) fileSrc->memory.format = MM_FILE_FORMAT_M2TS;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_M2PS: {
+				if (MMFileFormatIsValidMPEGPS (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M2PS;
+					if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) fileSrc->memory.format = MM_FILE_FORMAT_M2PS;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_M1AUDIO: {
+				if (MMFileFormatIsValidMPEGAUDIO (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M1AUDIO;
+					if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) fileSrc->memory.format = MM_FILE_FORMAT_M1AUDIO;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
+			case MM_FILE_FORMAT_M1VIDEO: {
+				if (MMFileFormatIsValidMPEGVIDEO (fp, NULL)) {
+					*formatEnum = MM_FILE_FORMAT_M1VIDEO;
+					if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) fileSrc->memory.format = MM_FILE_FORMAT_M1VIDEO;
+					goto FILE_FORMAT_SUCCESS;
+				}
+				break;
+			}
+
 			/* not supported file */
 			case MM_FILE_FORMAT_NUT:
-			case MM_FILE_FORMAT_REAL:
 			case MM_FILE_FORMAT_AIFF:
 			case MM_FILE_FORMAT_AU:
 			case MM_FILE_FORMAT_VOB:
@@ -955,7 +1113,8 @@ int mmfile_format_open (MMFileFormatContext **formatContext, MMFileSourceType *f
 	if (MMFILE_FORMAT_FAIL == ret) {
 		debug_error ("error: Try other formats\n");
 		ret = MMFILE_FORMAT_FAIL;
-		goto find_valid_handler;
+//		goto find_valid_handler;
+		goto exception;
 	}
 
 	*formatContext = formatObject;

@@ -259,6 +259,7 @@ int _parse_id3_tag(tMMFILE_AAC_HANDLE* pData)
   pData->tagInfo.author = hTag->pAuthor;
   pData->tagInfo.artist = hTag->pArtist;
   pData->tagInfo.album = hTag->pAlbum;
+  pData->tagInfo.album_artist = hTag->pAlbum_Artist;
   pData->tagInfo.year = hTag->pYear;
   pData->tagInfo.copyright = hTag->pCopyright;
   pData->tagInfo.comment = hTag->pComment;
@@ -267,23 +268,23 @@ int _parse_id3_tag(tMMFILE_AAC_HANDLE* pData)
   pData->tagInfo.composer = hTag->pComposer;
   pData->tagInfo.classification = hTag->pContentGroup;
   pData->tagInfo.rating = hTag->pRating;
-  pData->tagInfo.recordDate = hTag->pRecDate;  
-  pData->tagInfo.conductor = hTag->pConductor;  
-  pData->tagInfo.artworkMime = hTag->imageInfo.imageMIMEType;  
+  pData->tagInfo.recordDate = hTag->pRecDate;
+  pData->tagInfo.conductor = hTag->pConductor;
+  pData->tagInfo.artworkMime = hTag->imageInfo.imageMIMEType;
   pData->tagInfo.artworkSize = hTag->imageInfo.imageLen;
   pData->tagInfo.artwork = hTag->imageInfo.pImageBuf;
 
   ret = MMFILE_AAC_PARSER_SUCCESS;
 
-  
+
 failure:
   if(tagBuff) {
     mmfile_free(tagBuff);
     tagBuff = NULL;
   }
-  
+
   return ret;
-  
+
 }
 
 
@@ -291,9 +292,9 @@ int _get_range_bits_value (unsigned char* buff, int fieldOffset, int fieldSize)
 {
   int pos = 0;
   unsigned int srcByteStartOff = 0;
-  unsigned int srcByteEndOff = 0;  
+  unsigned int srcByteEndOff = 0;
   unsigned int srcBitStartOff = 0;
-  unsigned int srcBitEndOff = 0;  
+  unsigned int srcBitEndOff = 0;
   unsigned char dest[4] = {0,};
   unsigned int res = 0;
   unsigned int i,j, temp;
@@ -852,7 +853,7 @@ exception:
 EXPORT_API
 int mmfile_format_read_tag_aac (MMFileFormatContext *formatContext)
 {
-  MMFileAACHandle     handle = NULL;  
+  MMFileAACHandle     handle = NULL;
   tMMFILE_AAC_TAG_INFO  aacinfo = {0,};
   int ret= MMFILE_FORMAT_FAIL;
 
@@ -861,9 +862,9 @@ int mmfile_format_read_tag_aac (MMFileFormatContext *formatContext)
     ret = MMFILE_FORMAT_FAIL;
     goto exception;
   }
-    
+
   handle = formatContext->privateFormatData;
-  
+
   ret = mmfile_aacparser_get_tag_info (handle, &aacinfo);
   if (MMFILE_FORMAT_SUCCESS != ret) {
     debug_warning ("error: mmfile_aacparser_get_tag_info\n");
@@ -872,34 +873,36 @@ int mmfile_format_read_tag_aac (MMFileFormatContext *formatContext)
   }
 
   if(aacinfo.title)
-    formatContext->title = mmfile_strdup(aacinfo.title); 
+    formatContext->title = mmfile_strdup(aacinfo.title);
   if(aacinfo.author)
     formatContext->author = mmfile_strdup(aacinfo.author);
-  if(aacinfo.artist) 
-    formatContext->artist = mmfile_strdup(aacinfo.artist); 
-  if(aacinfo.album) 
+  if(aacinfo.artist)
+    formatContext->artist = mmfile_strdup(aacinfo.artist);
+  if(aacinfo.album)
     formatContext->album = mmfile_strdup(aacinfo.album);
-  if(aacinfo.year) 
+  if(aacinfo.album_artist)
+    formatContext->album_artist = mmfile_strdup(aacinfo.album_artist);
+  if(aacinfo.year)
     formatContext->year = mmfile_strdup(aacinfo.year);
-  if(aacinfo.copyright) 
-    formatContext->copyright = mmfile_strdup(aacinfo.copyright); 
-  if(aacinfo.comment) 
+  if(aacinfo.copyright)
+    formatContext->copyright = mmfile_strdup(aacinfo.copyright);
+  if(aacinfo.comment)
     formatContext->comment = mmfile_strdup(aacinfo.comment);
-  if(aacinfo.genre) 
+  if(aacinfo.genre)
     formatContext->genre = mmfile_strdup(aacinfo.genre);
   if(aacinfo.tracknum)
     formatContext->tagTrackNum= mmfile_strdup(aacinfo.tracknum);
-  if(aacinfo.composer) 
+  if(aacinfo.composer)
     formatContext->composer = mmfile_strdup(aacinfo.composer);
-  if(aacinfo.classification) 
+  if(aacinfo.classification)
     formatContext->classification = mmfile_strdup(aacinfo.classification);
-  if(aacinfo.rating) 
+  if(aacinfo.rating)
     formatContext->rating = mmfile_strdup(aacinfo.rating);	/*not exist rating tag in id3*/
-  if(aacinfo.conductor) 
+  if(aacinfo.conductor)
     formatContext->conductor = mmfile_strdup(aacinfo.conductor);
-  if(aacinfo.artworkMime) 
+  if(aacinfo.artworkMime)
     formatContext->artworkMime = mmfile_strdup(aacinfo.artworkMime);
-  if(aacinfo.artwork) { 
+  if(aacinfo.artwork) {
     formatContext->artworkSize = aacinfo.artworkSize;
     formatContext->artwork = mmfile_malloc(aacinfo.artworkSize);
     if(formatContext->artwork == NULL) {
@@ -933,28 +936,28 @@ int mmfile_format_read_frame_aac (MMFileFormatContext *formatContext,
 EXPORT_API
 int mmfile_format_close_aac (MMFileFormatContext *formatContext)
 {
-  MMFileAACHandle  handle = NULL;  
+  MMFileAACHandle  handle = NULL;
   int ret = MMFILE_FORMAT_FAIL;
-   
+
   if (NULL == formatContext ) {
     debug_error ("error: invalid params\n");
     return MMFILE_FORMAT_FAIL;
   }
-    
+
   handle = formatContext->privateFormatData;
-   
+
   if(NULL != handle) {
     ret = mmfile_aacparser_close(handle);
     if(ret == MMFILE_AAC_PARSER_FAIL) {
       debug_error("error: mmfile_format_close_aac\n");
     }
   }
-  
+
   if(formatContext->streams[MMFILE_AUDIO_STREAM]) {
     mmfile_free(formatContext->streams[MMFILE_AUDIO_STREAM]);
     formatContext->streams[MMFILE_AUDIO_STREAM] = NULL;
   }
-  
+
   formatContext->ReadStream   = NULL;
   formatContext->ReadFrame    = NULL;
   formatContext->ReadTag      = NULL;
