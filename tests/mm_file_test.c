@@ -40,11 +40,12 @@
 gettimeofday(&finish, NULL); \
 double end_time = (finish.tv_sec + 1e-6*finish.tv_usec); \
 double start_time = (start.tv_sec + 1e-6*start.tv_usec); \
+if(msg_tmp_fp != NULL) { \
 fprintf(msg_tmp_fp, "%s\n", title); \
 fprintf(msg_tmp_fp, " - start_time:   %3.5lf sec\n", start_time); \
 fprintf(msg_tmp_fp, " - finish_time:  %3.5lf sec\n", end_time); \
 fprintf(msg_tmp_fp, " - elapsed time: %3.5lf sec\n", end_time - start_time); \
-fflush(msg_tmp_fp); fclose(msg_tmp_fp); }
+fflush(msg_tmp_fp); fclose(msg_tmp_fp); }}
 
 typedef struct _mmfile_value {
 	int len;
@@ -53,7 +54,7 @@ typedef struct _mmfile_value {
 		double d_val;
 		char *s_val;
 		void *p_val;
-	} value;
+	}value;
 }mmfile_value_t;
 
 typedef struct _TagContext {
@@ -98,26 +99,31 @@ typedef struct _ContentContext {
 	int audio_samplerate;
 	int audio_track_id;
 	int audio_track_num;
+	int audio_bitpersample;
 	mmfile_value_t thumbnail;
 }ContentContext_t;
 
 
 char * AudioCodecTypeString [] = {
-	"AMR", "G723.1", "MP3", "OGG", "AAC", "WMA", "MMF", "ADPCM", "WAVE", "WAVE NEW", "MIDI", "IMELODY", "MXMF", "MPEG1-Layer1 codec", "MPEG1-Layer2 codec",
-	"G711", "G722", "G722.1",	"G722.2  (AMR-WB)",	"G723 wideband speech",	"G726 (ADPCM)",	"G728 speech",	"G729",	"G729a",	"G729.1",
-	"Real",
-	"AAC-Low complexity",	"AAC-Main profile",	"AAC-Scalable sample rate",	"AAC-Long term prediction",	"AAC-High Efficiency v1",	"AAC-High efficiency v2",
-	"DolbyDigital",	"Apple Lossless",	"Sony proprietary",	"SPEEX",	"Vorbis",	"AIFF",	"AU",	"None (will be deprecated)",
-	"PCM",	"ALAW",	"MULAW",	"MS ADPCM",	"FLAC"
+	"AMR", "G723.1", "MP3", "OGG", "AAC", "WMA", "MMF", "ADPCM", "WAVE", "WAVE NEW",	// 0~9
+	"MIDI", "IMELODY", "MXMF", "MPEG1-Layer1 codec", "MPEG1-Layer2 codec",	// 10~14
+	"G711", "G722", "G722.1", "G722.2  (AMR-WB)", "G723 wideband speech",	// 15~19
+	"G726 (ADPCM)", "G728 speech", "G729", "G729a", "G729.1",	// 20~24
+	"Real", "AAC-Low complexity", "AAC-Main profile", "AAC-Scalable sample rate", "AAC-Long term prediction",	// 25~29
+	"AAC-High Efficiency v1", "AAC-High efficiency v2",	"DolbyDigital",	"Apple Lossless", "Sony proprietary",	// 30~34
+	"SPEEX", "Vorbis", "AIFF", "AU", "None (will be deprecated)",	//35~39
+	"PCM", "ALAW", "MULAW", "MS ADPCM", "FLAC"	// 40~44
 };
 
 
 char * VideoCodecTypeString [] = {
-	"None (will be deprecated)",
-	"H263", "H264", "H26L", "MPEG4", "MPEG1", "WMV", "DIVX", "XVID", "H261", "H262/MPEG2-part2", "H263v2",  "H263v3",
-	"Motion JPEG", "MPEG2", "MPEG4 part-2 Simple profile",	"MPEG4 part-2 Advanced Simple profile",	"MPEG4 part-2 Main profile",
-	"MPEG4 part-2 Core profile", "MPEG4 part-2 Adv Coding Eff profile",	"MPEG4 part-2 Adv RealTime Simple profile",
-	"MPEG4 part-10 (h.264)",	"Real",	"VC-1",	"AVS",	"Cinepak",	"Indeo",	"Theora", "Flv"
+	"None (will be deprecated)",	// 0
+	"H263", "H264", "H26L", "MPEG4", "MPEG1",	// 1~5
+	"WMV", "DIVX", "XVID", "H261", "H262/MPEG2-part2",	// 6~10
+	"H263v2", "H263v3", "Motion JPEG", "MPEG2", "MPEG4 part-2 Simple profile",	// 11~15
+	"MPEG4 part-2 Advanced Simple profile", "MPEG4 part-2 Main profile", "MPEG4 part-2 Core profile", "MPEG4 part-2 Adv Coding Eff profile", "MPEG4 part-2 Adv RealTime Simple profile",	// 16~20
+	"MPEG4 part-10 (h.264)", "Real", "VC-1", "AVS", "Cinepak",	// 21~25
+	"Indeo", "Theora", "Flv"	// 26~28
 };
 
 
@@ -139,8 +145,8 @@ do{	\
 			fseek (fp, 0, SEEK_END);	\
 			size = ftell(fp);	\
 			fseek (fp, 0, SEEK_SET);	\
-			data = malloc (size);	\
-			if (fread (data, size, sizeof(char), fp) != size) { printf("fread error\n"); }	\
+			if(size > 0) data = malloc (size);	\
+			if(data != NULL ) { if (fread (data, size, sizeof(char), fp) != size) { printf("fread error\n"); } }	\
 			fclose (fp);	\
 			printf("file size = %d\n", size );	\
 	}	\
@@ -189,7 +195,7 @@ int main(int argc, char **argv)
 		}
     }
 
-    exit(0);
+    return 0;//exit(0);
 }
 
 static int mmfile_get_file_infomation (void *data, void* user_data, bool file_test)
@@ -252,6 +258,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 									MM_FILE_CONTENT_AUDIO_CHANNELS, &ccontent.audio_channel,
 									MM_FILE_CONTENT_AUDIO_TRACK_INDEX, &ccontent.audio_track_id,
 									MM_FILE_CONTENT_AUDIO_TRACK_COUNT, &ccontent.audio_track_num,
+									MM_FILE_CONTENT_AUDIO_BITPERSAMPLE, &ccontent.audio_bitpersample,
 									NULL);
 
 			if(ret != MM_ERROR_NONE) {
@@ -265,6 +272,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 				printf("# audio channel: %d\n", ccontent.audio_channel);
 				printf("# audio track id: %d\n", ccontent.audio_track_id);
 				printf("# audio track num: %d\n", ccontent.audio_track_num);
+				printf("# audio bit per sample: %d\n", ccontent.audio_bitpersample);
 			}
 		}
 	
@@ -354,7 +362,7 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 				fclose (msg_tmp_fp);
 				msg_tmp_fp = NULL;
 			}
-
+			mm_file_destroy_tag_attrs(tag_attrs);
 			return -1;
 		}
 
@@ -405,7 +413,15 @@ static int mmfile_get_file_infomation (void *data, void* user_data, bool file_te
 		}
 		
 		/* release tag */
-		mm_file_destroy_tag_attrs(tag_attrs);
+		ret = mm_file_destroy_tag_attrs(tag_attrs);
+		if (ret != MM_ERROR_NONE) {
+			printf("Error mm_file_destroy_tag_attrs: %d", ret);
+			if (msg_tmp_fp) {
+				fclose (msg_tmp_fp);
+				msg_tmp_fp = NULL;
+			}
+			return -1;
+		}
 	} else {
 		printf ("Failed to mm_file_create_tag_attrs() error=[%x]\n", ret);
 	}

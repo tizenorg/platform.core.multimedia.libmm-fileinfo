@@ -98,6 +98,8 @@ extern "C" {
 #define	MM_FILE_TAG_SYNCLYRICS_NUM  	"tag-synclyrics-num"  	/**< Synchronized Lyrics Information*/
 #define	MM_FILE_TAG_RECDATE			"tag-recdate"			/**< Recoding date */
 #define	MM_FILE_TAG_ROTATE			"tag-rotate"			/**< Rotate(Orientation) Information*/
+#define	MM_FILE_TAG_CDIS			"tag-cdis"				/**< CDIS in User Data Information*/
+#define	MM_FILE_TAG_SMTA			"tag-smta"				/**< SMTA in User Data Information*/
 
 
 
@@ -130,6 +132,7 @@ ret = mm_file_get_attrs( tag_attrs,
 							MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
 							MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
 							MM_FILE_TAG_TITLE, &ctag.title.value.s_val, &ctag.title.len,
+							MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
 							MM_FILE_TAG_GENRE, &ctag.genre.value.s_val, &ctag.genre.len,
 							NULL);
 if (ret != MM_ERROR_NONE)
@@ -173,6 +176,7 @@ ret = mm_file_get_attrs( tag_attrs,
 							MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
 							MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
 							MM_FILE_TAG_TITLE, &ctag.title.value.s_val, &ctag.title.len,
+							MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
 							MM_FILE_TAG_GENRE, &ctag.genre.value.s_val, &ctag.genre.len,
 							NULL);
 if (ret != MM_ERROR_NONE)
@@ -450,6 +454,7 @@ mm_file_get_attrs(tag_attrs,
 				NULL,
 				MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
 				MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
+				MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
 				NULL);
 
 // Destory tag handle
@@ -555,10 +560,12 @@ mm_file_destroy_content_attrs(content_attrs);
    */
 int mm_file_create_content_attrs_simple(MMHandleType *content_attrs, const char *filename);
 
+int mm_file_create_content_attrs_safe(MMHandleType *content_attrs, const char *filename);
+
 int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long *time_info, char **lyrics);
 
 /**
- * @brief Get a frame of video media
+ * @brief Get a frame of video media. Not support for DRM Contents.
  *
  * @remarks @a frame must be released with @c free() by you
  *
@@ -582,6 +589,8 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 int mm_file_get_video_frame(const char* path, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
 
 int mm_file_get_video_frame_from_memory(const void *data, unsigned int datasize, double timestamp, bool is_accurate, unsigned char **frame, int *size, int *width, int *height);
+
+int mm_file_check_uhqa(const char* filename, bool *is_uhqa);
 
 /**
 	@}

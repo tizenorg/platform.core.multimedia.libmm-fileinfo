@@ -6,6 +6,9 @@ Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1001:    libmm-fileinfo.manifest
+Requires(post): /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
+
 BuildRequires: pkgconfig(mm-common)
 BuildRequires: pkgconfig(mm-log)
 BuildRequires: pkgconfig(libswscale)
@@ -13,12 +16,15 @@ BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavutil)
 BuildRequires: pkgconfig(libavformat)
+BuildRequires: pkgconfig(icu-i18n)
+BuildRequires: pkgconfig(vconf)
 
 %define use_drm 0
 
 %if %{use_drm}
 BuildRequires: libss-client-devel
-BuildRequires: pkgconfig(drm-client)
+#BuildRequires: pkgconfig(drm-client)
+#BuildRequires: pkgconfig(drm-trusted)
 %endif
 
 %description
@@ -47,9 +53,9 @@ export CFLAGS
     --disable-iommap \
     --disable-gtk \
 %if %{use_drm}
-    --enable-drm
+CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure  --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --enable-drm --disable-gtk
 %else
-    --disable-drm
+CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --disable-drm --disable-gtk
 %endif
 
 %__make

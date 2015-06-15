@@ -9,7 +9,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
+#m4_pattern_allow([AM_PROG_AR])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+AM_PROG_AR
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
@@ -85,6 +87,14 @@ PKG_CHECK_MODULES(SWSCALE, libswscale)
 AC_SUBST(SWSCALE_CFLAGS)
 AC_SUBST(SWSACLE_LIBS)
 
+PKG_CHECK_MODULES(ICU, icu-i18n)
+AC_SUBST(ICU_CFLAGS)
+AC_SUBST(ICU_LIBS)
+
+PKG_CHECK_MODULES(VCONF, vconf)
+AC_SUBST(VCONF_CFLAGS)
+AC_SUBST(VCONF_LIBS)
+
 dnl use drm  --------------------------------------------------------------------------
 AC_ARG_ENABLE(drm, AC_HELP_STRING([--enable-drm], [using drm]),
 [
@@ -98,9 +108,13 @@ if test "x$USE_DRM" = "xyes"; then
      PKG_CHECK_MODULES(DRMCLIENT, drm-client)
      AC_SUBST(DRMCLIENT_CFLAGS)
      AC_SUBST(DRMCLIENT_LIBS)
+
+     PKG_CHECK_MODULES(DRMTRUSTED, drm-trusted)
+     AC_SUBST(DRMTRUSTED_CFLAGS)
+     AC_SUBST(DRMTRUSTED_LIBS)
 fi
 AM_CONDITIONAL(USE_DRM, test "x$USE_DRM" = "xyes")
- 
+
 dnl use dyn --------------------------------------------------------------------------
 AC_ARG_ENABLE(dyn, AC_HELP_STRING([--enable-dyn], [using dyn]),
 [
