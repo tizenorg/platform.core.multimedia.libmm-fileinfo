@@ -88,8 +88,10 @@ int mmfile_format_open_mp3 (MMFileFormatContext *formatContext)
     AvFileContentInfo *privateData = NULL;;
     int ret = 0;
 
+#ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
-
+#endif
+	
     if (NULL == formatContext)
     {
         debug_error("formatContext is NULL\n");
@@ -101,10 +103,11 @@ int mmfile_format_open_mp3 (MMFileFormatContext *formatContext)
 		if ( ret == 0 )
 		{
 			debug_error("It is not mp3 file\n");
-			return MMFILE_FORMAT_FAIL;
+			return MMFILE_FORMAT_FAIL;        
 		}
 	}
 
+    
     formatContext->ReadStream   = mmfile_format_read_stream_mp3;
     formatContext->ReadFrame    = mmfile_format_read_frame_mp3;
     formatContext->ReadTag      = mmfile_format_read_tag_mp3;
@@ -141,7 +144,10 @@ EXPORT_API
 int mmfile_format_read_stream_mp3 (MMFileFormatContext *formatContext)
 {
     AvFileContentInfo *privateData = NULL;
+
+#ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
+#endif
 
     if (!formatContext || !formatContext->privateFormatData)
     {
@@ -185,7 +191,10 @@ EXPORT_API
 int mmfile_format_read_tag_mp3    (MMFileFormatContext *formatContext)
 {
     AvFileContentInfo *privateData = NULL;
+
+#ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
+#endif
 
     if (!formatContext || !formatContext->privateFormatData)
     {
@@ -223,7 +232,9 @@ int mmfile_format_read_tag_mp3    (MMFileFormatContext *formatContext)
 			if (strlen(privateData->imageInfo.imageMIMEType) > 0)
 				formatContext->artworkMime= mmfile_strdup(privateData->imageInfo.imageMIMEType);
 			else if(strlen(privateData->imageInfo.imageExt) > 0) {
+				#ifdef __MMFILE_TEST_MODE__
 				debug_msg("ID3 tag V2 File");
+				#endif
 				formatContext->artworkMime= mmfile_strdup(privateData->imageInfo.imageExt);
 			}
 			else {
@@ -1155,19 +1166,19 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 {
 	MMFileIOHandle	*hFile;
 	unsigned char	header[256];
-	unsigned long   numOfFrames=0;
 	unsigned long   frameSamples=0;
 	unsigned char	*buf = NULL;	
 	unsigned char*	v2TagExistCheck = NULL;
-	unsigned int 		tempNumFrames = 0;
 	int 	readAmount = 0, readedDataLen = 0;
-  	unsigned long long 	tempduration = 0;
 	unsigned char	TagBuff[MP3TAGINFO_SIZE + TAGV1_SEEK_GAP];
 	unsigned char		TagV1ID[4] = { 0x54, 0x41, 0x47}; //TAG
 	int		tagHeaderPos = 0;
 	int ret = 0;
 	unsigned int head_offset = 0;
+
+#ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
+#endif
 	
 	if (pInfo == NULL || filename == NULL)
 		return -1;
@@ -1382,20 +1393,42 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 	if (mmfile_read (hFile, TagBuff, MP3TAGINFO_SIZE + TAGV1_SEEK_GAP) <= 0)
 		goto EXCEPTION;
 
-	if ((tagHeaderPos = __AvMemstr(TagBuff, TagV1ID, 3, TAGV1_SEEK_GAP+5)) >= 0)
-	{
-		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ( "Mp3 File Tag is existing\n");
-		#endif
+		if ((tagHeaderPos = __AvMemstr(TagBuff, TagV1ID, 3, TAGV1_SEEK_GAP+5)) >= 0)
+		{
+			#ifdef __MMFILE_TEST_MODE__
+			debug_msg ( "Mp3 File Tag is existing\n");
+			#endif
 
-		pInfo ->bV1tagFound = true;
-		memcpy(TagBuff, (TagBuff + tagHeaderPos), MP3TAGINFO_SIZE);
-
-		if(!mm_file_id3tag_parse_v110(pInfo, TagBuff))
-			goto EXCEPTION;
-	}
+			pInfo ->bV1tagFound = true;
+			/* In this case, V2 Tag alreay exist So, ignore V1 tag  */
+			if (pInfo->tagV2Info.tagLen == 0) {
+				memcpy(TagBuff, (TagBuff + tagHeaderPos), MP3TAGINFO_SIZE);
+				if(!mm_file_id3tag_parse_v110(pInfo, TagBuff))
+					goto EXCEPTION;
+			}
+		}
 
 	mm_file_id3tag_restore_content_info (pInfo);
+
+	if(pInfo->mpegVersion== 1)
+	{
+		if(pInfo->layer== 1)
+			frameSamples = MPEG_1_SIZE_LAYER_1;
+		else
+			frameSamples = MPEG_1_SIZE_LAYER_2_3;
+	}
+	else
+	{
+		if(pInfo->layer == 1)
+			frameSamples = MPEG_2_SIZE_LAYER_1;
+		else
+			frameSamples = MPEG_2_SIZE_LAYER_2_3;
+	}
+
+#if 0
+	unsigned long   numOfFrames=0;
+	unsigned long long 	tempduration = 0;
+	unsigned int 		tempNumFrames = 0;
 
 	if(pInfo->bVbr) 
 		numOfFrames = pInfo->frameNum*10;
@@ -1405,8 +1438,6 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 		-(pInfo->headerPos + (pInfo ->bV1tagFound ? MP3TAGINFO_SIZE : 0) ) )*10) / pInfo->frameSize;
   	}
 	tempNumFrames = (unsigned int)(numOfFrames/10);
-
-	
 
 	if((numOfFrames - tempNumFrames * 10 ) > 5)
 		numOfFrames = (numOfFrames/10) + 1;
@@ -1432,7 +1463,9 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 			frameSamples = MPEG_2_SIZE_LAYER_2_3;
 	}
 
+#ifdef __MMFILE_TEST_MODE__
 	debug_msg("frameSamples : %d, tempduration : %ld", frameSamples, tempduration);
+#endif
 
 	if(tempduration < (unsigned long long)pInfo->sampleRate)
 	{
@@ -1443,6 +1476,18 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 		tempduration = (tempduration*frameSamples)/pInfo->sampleRate;
 
 	pInfo->duration = tempduration;
+#else
+	if(pInfo->bVbr) {
+		pInfo->duration =  ((double)(frameSamples * 1000) / pInfo->sampleRate) * pInfo->frameNum;
+		debug_msg("duration for VBR : %lld", pInfo->duration);
+	} else {
+		unsigned long long frame_duration = (((unsigned long long)frameSamples * 1000000000) / pInfo->sampleRate / 1000);
+		int file_size_except_header = pInfo->fileLen - (pInfo->headerPos + (pInfo->bV1tagFound ? MP3TAGINFO_SIZE : 0));
+		pInfo->duration = ((double)file_size_except_header / (double)pInfo->frameSize) * frame_duration / 1000;
+		//pInfo->duration = ((double)file_size_except_header / (double)pInfo->frameSize) * (frameSamples * 1000 / pInfo->sampleRate);
+		debug_msg("duration from new algorithm : %lld", pInfo->duration);
+	}
+#endif
 
 	mmfile_close(hFile);
 	
@@ -1461,6 +1506,7 @@ static int mmf_file_mp3_get_infomation (char *filename, AvFileContentInfo* pInfo
 	debug_msg ( "Title       : %s\n", pInfo->pTitle);
 	debug_msg ( "Artist      : %s\n", pInfo->pArtist);
 	debug_msg ( "Album       : %s\n", pInfo->pAlbum);
+	debug_msg ( "Album_Artist: %s\n", pInfo->pAlbum_Artist);
 	debug_msg ( "Year        : %s\n", pInfo->pYear);
 	debug_msg ( "Comment     : %s\n", pInfo->pComment);
 	debug_msg ( "TrackNum    : %s\n", pInfo->pTrackNum);

@@ -98,10 +98,11 @@ typedef enum {
 
 
 typedef enum {
-	AV_ID3V2_ISO_8859,
+	AV_ID3V2_ISO_8859 = 0,
 	AV_ID3V2_UTF16,
 	AV_ID3V2_UTF16_BE,
-	AV_ID3V2_UTF8
+	AV_ID3V2_UTF8,
+	AV_ID3V2_MAX
 	
 } AvID3v2EncodingType;
 
@@ -128,6 +129,7 @@ typedef struct{
 	bool	bTitleMarked;
 	bool	bArtistMarked;
 	bool	bAlbumMarked;
+	bool	bAlbum_ArtistMarked;
 	bool	bYearMarked;
 	bool	bDescriptionMarked;
 	bool	bGenreMarked;
