@@ -24,7 +24,6 @@
 #include "mm_debug.h"
 #include "mm_file_utils.h"
 
-
 typedef struct _mmfileavmimetype
 {
     char    mimetype[MMFILE_MIMETYPE_MAX_LEN];    
@@ -32,7 +31,6 @@ typedef struct _mmfileavmimetype
     char    extension[MMFILE_FILE_EXT_MAX_LEN];
 } MMFileAVMimeType;
 
-#define __FFMPEG_MIME_TABLE_SIZE 75
 const MMFileAVMimeType MMFILE_FFMPEG_MIME_TABLE [] =
 {
     {"audio/mpeg",          "mp3",      "mp3"},
@@ -52,6 +50,7 @@ const MMFileAVMimeType MMFILE_FFMPEG_MIME_TABLE [] =
     {"video/3gpp",          "mov,mp4,m4a,3gp,3g2,mj2",      "3gp"},
     {"video/mp4v-es",       "mov,mp4,m4a,3gp,3g2,mj2",      "mp4"},
     {"video/mpeg",          "mov,mp4,m4a,3gp,3g2,mj2",      "mpeg"},
+    {"video/dvd",          "mov,mp4,m4a,3gp,3g2,mj2",      "mpeg"},
     {"audio/3gpp",          "mov,mp4,m4a,3gp,3g2,mj2",      "3gp"},  //17
 
     {"video/mpeg4",         "mov,mp4,m4a,3gp,3g2,mj2",      "mp4"},
@@ -124,8 +123,11 @@ const MMFileAVMimeType MMFILE_FFMPEG_MIME_TABLE [] =
     {"audio/x-ogg",         "ogg",      "ogg"},
     {"audio/vorbis",        "ogg",      "ogg"},  //73
 
-	{"audio/x-flac",        "flac",      "flac"},  //74
-	{"video/x-flv",        "flv",      "flv"},  //75
+    {"audio/x-flac",        "flac",      "flac"},  //74
+    {"video/x-flv",        "flv",      "flv"},  //75
+    {"video/MP2T",        "mpegts",      "ts"},
+    {"video/MP2P",        "mpeg",      "mpg"},
+    {"video/mpeg",          "mpegvideo",      "mpeg"}, //mpeg 1 video
 };
 
 
@@ -133,6 +135,7 @@ EXPORT_API
 int mmfile_util_get_ffmpeg_format (const char *mime, char *ffmpegFormat)
 {
     int i = 0;
+	int table_size = sizeof(MMFILE_FFMPEG_MIME_TABLE) / sizeof(MMFileAVMimeType);
 
     if ( NULL == mime || NULL == ffmpegFormat)
     {
@@ -140,7 +143,7 @@ int mmfile_util_get_ffmpeg_format (const char *mime, char *ffmpegFormat)
         return MMFILE_UTIL_FAIL;
     }
 
-    for (i = 0; i < __FFMPEG_MIME_TABLE_SIZE; i++)
+    for (i = 0; i < table_size; i++)
     {
         if (!strcasecmp (MMFILE_FFMPEG_MIME_TABLE[i].mimetype, mime))
         {
@@ -148,7 +151,7 @@ int mmfile_util_get_ffmpeg_format (const char *mime, char *ffmpegFormat)
         }
     }
 
-    if (i == __FFMPEG_MIME_TABLE_SIZE)
+    if (i == table_size)
     {
         debug_error ("error: not found[%s]\n", mime);
         return MMFILE_UTIL_FAIL;    
@@ -164,6 +167,7 @@ EXPORT_API
 int mmfile_util_get_file_ext (const char *mime, char *ext)
 {
     int i = 0;
+	int table_size = sizeof(MMFILE_FFMPEG_MIME_TABLE) / sizeof(MMFileAVMimeType);
 
     if ( NULL == mime || NULL == ext)
     {
@@ -171,7 +175,7 @@ int mmfile_util_get_file_ext (const char *mime, char *ext)
         return MMFILE_UTIL_FAIL;
     }
 
-    for (i = 0; i < __FFMPEG_MIME_TABLE_SIZE; i++)
+    for (i = 0; i < table_size; i++)
     {
         if (!strcasecmp (MMFILE_FFMPEG_MIME_TABLE[i].mimetype, mime))
         {
@@ -179,7 +183,7 @@ int mmfile_util_get_file_ext (const char *mime, char *ext)
         }
     }
 
-    if (i == __FFMPEG_MIME_TABLE_SIZE)
+    if (i == table_size)
     {
         debug_error ("error: not found[%s]\n", mime);
         return MMFILE_UTIL_FAIL;    

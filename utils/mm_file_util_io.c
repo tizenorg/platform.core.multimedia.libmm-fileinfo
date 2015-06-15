@@ -302,10 +302,16 @@ int mmfile_register_io_all ()
 	initialized = 1;
 
 	extern MMFileIOFunc mmfile_file_io_handler;
+#ifdef DRM_SUPPORT
+	extern MMFileIOFunc mmfile_drm_io_handler;
+#endif
 	extern MMFileIOFunc mmfile_mem_io_handler;
 	extern MMFileIOFunc mmfile_mmap_io_handler;
 
 	mmfile_register_io_func (&mmfile_file_io_handler);
+#ifdef DRM_SUPPORT
+	mmfile_register_io_func (&mmfile_drm_io_handler);
+#endif
 	mmfile_register_io_func (&mmfile_mem_io_handler);    
 	mmfile_register_io_func (&mmfile_mmap_io_handler);
 
