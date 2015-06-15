@@ -532,7 +532,7 @@ __AvGetMidiDuration(char* szFileName, MIDI_INFO_SIMPLE *info)
 	if ( szFileName == NULL ||  info == NULL)
 		return -1;
 
-	// printf ("URI: %s\n", szFileName);
+	// debug_msg ("URI: %s\n", szFileName);
 	/*open*/
 	ret = mmfile_open (&hFile, szFileName, MMFILE_RDONLY);
 	if (ret == MMFILE_UTIL_FAIL) {
@@ -823,7 +823,7 @@ __AvMidGetTrackTime(PMIDINFO pI, UINT32 dTrack)
 		dTemp = (UINT32)pMt->pbBase[pMt->dOffset++];
 		dTime = (dTime << 7) + (dTemp & 0x7f);
 	} while (dTemp >= 0x80);
-	//printf("dTime is %d\n", dTime);
+	//debug_msg("dTime is %d\n", dTime);
 	pMt->sdTicks += dTime;
 
 	return (0);
@@ -1159,14 +1159,16 @@ __AvGetSizeOfFileInfo(PMIDINFO pI)
 				case 0x00:	/* Bank select(MSB) */
 					dBank[dCh] = (dBank[dCh] & 0x00FF) | (pMt->pbBase[pMt->dOffset + 1] << 8);
 					break;
-    
+
     			case 0x20:	/* Bank select (LSB) */
 					dBank[dCh] = (dBank[dCh] & 0xFF00) | pMt->pbBase[pMt->dOffset + 1];
+					break;
+				default :
 					break;
 				}
 				pMt->dOffset += 2;
 				break;
-			
+
 			default:
 				pMt->dOffset += 2;
 			}
@@ -1260,7 +1262,7 @@ __AvGetSizeOfFileInfo(PMIDINFO pI)
 					}
 					break;
 
-				case 0x03:	/* Title */
+				case 0x06:	/* Title */
 					if (pI->pbTitle == NULL)
 					{
 						pI->pbTitle = &pMt->pbBase[pMt->dOffset];
@@ -1285,22 +1287,26 @@ __AvGetSizeOfFileInfo(PMIDINFO pI)
 			
 						/*<== I Think that Below Code is Trash!! and Erase it! (Actually I Don Know ^^)
 						dTime = (dTime << 7) / 125; */
-						
+
 						sdDelta = (UINT32)(dTime / pI->dTimeResolution);
 					}
 					break;
-					
+
 				case 0x58:		/* Set TimeSignature */
-					if ((sdTotalTicks == 0) && 
+					if ((sdTotalTicks == 0) &&
 					    (pMt->pbBase[pMt->dOffset] == 1) &&
 					    (pMt->pbBase[pMt->dOffset + 1] == 2)) dSetup |= 0x01;
+					break;
+				default :
 					break;
 				}
 				pMt->dOffset += dSize;
 				break;
+			default :
+				break;
 			}
 		}
-		
+
 		if((UINT32)sdTr >= MAX_SMF_TRACKS)
 		{
 			debug_error ("__AvGetSizeOfFileInfo:  Num of tracks is over MAX track number. !!\n");
@@ -1340,7 +1346,7 @@ __AvGetSizeOfFileInfo(PMIDINFO pI)
 	}
 	if ((pI->sdDataEndTime >> 10) <= MINIMUM_LENGTH) return (AvSMW_ERROR_SHORT_LENGTH);
 
-	// printf("__AvGetSizeOfFileInfo/Done\n");
+	// debug_msg("__AvGetSizeOfFileInfo/Done\n");
 
 	return pI->sdDataEndTime;
 }
@@ -1368,7 +1374,7 @@ __AvCheckSizeOfMidFile(UINT8* src_fp, UINT32 dFsize)
 	UINT32	dNumOfTracks;
 	UINT32	i;
 	UINT8 *fp = src_fp;
-	// printf ("input param: %p, %d\n", fp , dFsize);
+	// debug_msg ("input param: %p, %d\n", fp , dFsize);
 	while (dFsize >= 22)
 	{
 		dTemp = ((UINT32)fp[0] << 24) + ((UINT32)fp[1] << 16) +
@@ -1377,9 +1383,9 @@ __AvCheckSizeOfMidFile(UINT8* src_fp, UINT32 dFsize)
 		fp ++;
 		dFsize --;
 	}
-	
-	// printf("__AvCheckSizeOfMidFile(): MThd Position is dFsize(%d)\n", dFsize);
-	
+
+	// debug_msg("__AvCheckSizeOfMidFile(): MThd Position is dFsize(%d)\n", dFsize);
+
 	if (dFsize < 22) 
 	{
 		debug_error ("__AvCheckSizeOfMidFile Error / Too small size\n");
@@ -1511,8 +1517,8 @@ __AvParseSkipXmf2Mid(UINT8* pbFile, UINT32 dFSize)
 		}
 	}
 
-	// printf("__AvParseSkipForXMF : skip value(%d)\n", skipVal);
-	
+	// debug_msg("__AvParseSkipForXMF : skip value(%d)\n", skipVal);
+
 	return skipVal;
 }
 

@@ -162,10 +162,10 @@ int mmfile_format_read_stream_imy (MMFileFormatContext *formatContext)
 		debug_error ("failed to convert.");
 		goto exception;
 	}
-	
+
 	/*make uri*/
 	memset (src2, 0x00, MMFILE_URI_MAX_LEN);
-	sprintf (src2, "%s%u:%u", MMFILE_MEM_URI, (unsigned int)midi, midi_size);
+	snprintf (src2, sizeof(src2), "%s%u:%u", MMFILE_MEM_URI, (unsigned int)midi, midi_size);
 
 	/*get infomation*/
 	info = mmfile_format_get_midi_infomation (src2);
@@ -416,24 +416,30 @@ static int __get_imelody_tag (const char *uriname, tMMFileImelodyTagInfo *tags)
             {
                 if (!strncmp (imy_key_buffer, "NAME", 4))
                 {
+                    if(tags->title != NULL)
+						mmfile_free(tags->title);
                     tags->title = mmfile_strdup (imy_value_buffer);
                 }
                 else if (!strncmp (imy_key_buffer, "COMPOSER", 8))
                 {
+                    if(tags->composer != NULL)
+						mmfile_free(tags->composer);
                     tags->composer = mmfile_strdup (imy_value_buffer);
                 }
                 else if (!strncmp (imy_key_buffer, "COPYRIGHT", 9))
                 {
+                    if(tags->copyright != NULL)
+						mmfile_free(tags->copyright);
                     tags->copyright = mmfile_strdup (imy_value_buffer);
                 }
-                                
+
                 memset (imy_key_buffer, 0x00, _MMFILE_IMY_KEY_BUFFER_LENGTH);
                 memset (imy_value_buffer, 0x00, _MMFILE_IMY_VALUE_BUFFER_LENGTH);
                 imy_key_buffer_index = 0;
                 imy_value_buffer_index = 0;
                 isDone = 0;
             }
-                        
+
             j++;
         }
         
@@ -722,6 +728,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case 'g': noteData[number].note = octaveValue + 8;
 					  break;
 			case 'a': noteData[number].note = octaveValue + 10;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -739,6 +748,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case 'a': noteData[number].note = octaveValue + 8;
 					  break;
 			case 'b': noteData[number].note = octaveValue + 10;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -759,6 +771,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case 'a': noteData[number].note = octaveValue + 9;
 					  break;
 			case 'b': noteData[number].note = octaveValue + 11;
+					  break;
+			default :
+					  break;
 			}
 		}
 	}
@@ -790,6 +805,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 					  break;
 			case '5': noteData[number].duration_on = 5;
 					  noteData[number].duration_off = 1;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -815,6 +833,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 					  break;
 			case '5': noteData[number].duration_on = 6;
 					  noteData[number].duration_off = 0;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -839,6 +860,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 					  break;
 			case '5': noteData[number].duration_on = 3;
 					  noteData[number].duration_off = 3;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -855,6 +879,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 		case '4': durationSpec[number] = 12;
 				  break;
 		case '5': durationSpec[number] = 6;
+				  break;
+		default :
+				  break;
 		}
 
 		if(Melody[number].duration_specifier != '%')
@@ -866,6 +893,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case ':': noteData[number].duration_on += durationSpec[number];
 					  break;
 			case ';': noteData[number].duration_on -= (durationSpec[number] / 3);
+					  break;
+			default :
+					  break;
 			}
 
 			if(noteData[number].duration_on > MIDI_MAX)
@@ -896,6 +926,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 					  break;
 			case '5': noteData[number-1].duration_off += 6;
 					  restSpec[number] = 6;
+					  break;
+			default :
+					  break;
 			}
 
 			if(noteData[number-1].duration_off > MIDI_MAX && Melody[number].rest_specifier == '%')
@@ -911,6 +944,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case ':': noteData[number-1].duration_off += restSpec[number];
 					  break;
 			case ';': noteData[number-1].duration_off -= (restSpec[number] / 3);
+					  break;
+			default :
+					  break;
 			}
 
 			if(noteData[number-1].duration_off > MIDI_MAX)
@@ -939,8 +975,11 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				  break;
 		case '5': midiData[50] += 6;
 				  restSpec[0] = 6;
+				  break;
+		default :
+				  break;
 		}
-	
+
 		if(Melody[0].rest_specifier != '%')
 		{
 			switch(Melody[0].rest_specifier)
@@ -950,6 +989,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case ':': midiData[50] += restSpec[0];
 					  break;
 			case ';': midiData[50] -= (restSpec[0] / 3);
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -995,6 +1037,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 		case '+': noteTotal[6*number+1] = noteTotal[6*(number-1)+1] + VOL_INTERVAL;
 				  break;
 		case '-': noteTotal[6*number+1] = noteTotal[6*(number-1)+1] - VOL_INTERVAL;
+				  break;
+		default :
+				  break;
 		}
 
 		if(noteTotal[6*number+1] > MIDI_LIMIT)
@@ -1027,6 +1072,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 		case '+': midiData[52+(6*noteCount+1)] = midiData[52+(6*(noteCount-1)+1)] + VOL_INTERVAL;
 				  break;
 		case '-': midiData[52+(6*noteCount+1)] = midiData[52+(6*(noteCount-1)+1)] - VOL_INTERVAL;
+				  break;
+		default :
+				  break;
 		}
 
 		if(Melody[0].vol != '%')
@@ -1036,6 +1084,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case '+': midiData[52+(6*noteCount+1)] += VOL_INTERVAL;
 					  break;
 			case '-': midiData[52+(6*noteCount+1)] -= VOL_INTERVAL;
+					  break;
+			default :
+					  break;
 			}
 		}
 
@@ -1062,6 +1113,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 		case '+': midiData[52+(6*noteCount+1)] = midiData[52+(6*(noteCount-1)+1)] + VOL_INTERVAL;
 				  break;
 		case '-': midiData[52+(6*noteCount+1)] = midiData[52+(6*(noteCount-1)+1)] - VOL_INTERVAL;
+				  break;
+		default :
+				  break;
 		}
 
 		if(midiData[52+(6*noteCount+1)] > MIDI_LIMIT)
@@ -1180,13 +1234,13 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			}
 		}
 
-		for(octaveCount = count;octaveCount < noteCount;octaveCount++)
+		for(octaveCount = count; octaveCount < noteCount && octaveCount < AV_MIDI_NOTE_MAX; octaveCount++)
 		{
-		if(octave[octaveCount] == '%')
-			octave[octaveCount] = octave[octaveCount-1];
+			if(octave[octaveCount] == '%')
+				octave[octaveCount] = octave[octaveCount-1];
 		}
-	
-		for(number = count;number < noteCount;number++)
+
+		for(number = count; number < noteCount && number < AV_MIDI_NOTE_MAX; number++)
 		{
 			octaveValue = octave[number] - '0';
 
@@ -1205,6 +1259,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case 'g': noteData[number].note = octaveValue + 8;
 						  break;
 				case 'a': noteData[number].note = octaveValue + 10;
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1222,6 +1279,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case 'a': noteData[number].note = octaveValue + 8;
 						  break;
 				case 'b': noteData[number].note = octaveValue + 10;
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1242,6 +1302,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case 'a': noteData[number].note = octaveValue + 9;
 						  break;
 				case 'b': noteData[number].note = octaveValue + 11;
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1267,6 +1330,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 						  break;
 				case '5': noteData[number].duration_on = 5;
 						  noteData[number].duration_off = 1;
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1292,6 +1358,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 						  break;
 				case '5': noteData[number].duration_on = 6;
 						  noteData[number].duration_off = 0;
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1316,9 +1385,12 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 						  break;
 				case '5': noteData[number].duration_on = 3;
 						  noteData[number].duration_off = 3;
+						  break;
+				default :
+						  break;
 				}
 			}
-		
+
 			switch(Melody[number].duration)
 			{
 			case '0': durationSpec[number] = 192;
@@ -1332,6 +1404,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case '4': durationSpec[number] = 12;
 					  break;
 			case '5': durationSpec[number] = 6;
+					  break;
+			default :
+					  break;
 			}
 
 			if(Melody[number].duration_specifier != '%')
@@ -1343,6 +1418,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case ':': noteData[number].duration_on += durationSpec[number];
 						  break;
 				case ';': noteData[number].duration_on -= (durationSpec[number] / 3);
+						  break;
+				default :
+						  break;
 				}
 
 			if(noteData[number].duration_on > MIDI_MAX)
@@ -1350,7 +1428,7 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			}
 		}
 
-		for(number = count + 1;number < noteCount;number++)
+		for(number = count + 1; number < noteCount && number < AV_MIDI_NOTE_MAX; number++)
 		{
 			if(Melody[number].rest >= '0' && Melody[number].rest <= '5')
 			{
@@ -1373,6 +1451,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 						  break;
 				case '5': noteData[number-1].duration_off += 6;
 						  restSpec[number] = 6;
+						  break;
+				default :
+						  break;
 				}
 
 			if(noteData[number-1].duration_off > MIDI_MAX && Melody[number].rest_specifier == '%')
@@ -1388,6 +1469,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case ':': noteData[number-1].duration_off += restSpec[number];
 						  break;
 				case ';': noteData[number-1].duration_off -= (restSpec[number] / 3);
+						  break;
+				default :
+						  break;
 				}
 
 				if(noteData[number-1].duration_off > MIDI_MAX)
@@ -1416,6 +1500,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 					  break;
 			case '5': midiData[52+(6*count*(repeat+1)-1)] += 6;
 					  restSpec[count] = 6;
+					  break;
+			default :
+					  break;
 			}
 
 			if(Melody[count].rest_specifier != '%')
@@ -1427,6 +1514,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 				case ':': midiData[52+(6*count*(repeat+1)-1)] += restSpec[count];
 						  break;
 				case ';': midiData[52+(6*count*(repeat+1)-1)] -= (restSpec[count] / 3);
+						  break;
+				default :
+						  break;
 				}
 			}
 
@@ -1478,6 +1568,9 @@ __AvConvertIMelody2MIDI(char* pMelodyBuf, unsigned int* pBufLen)
 			case '+': noteTotal[6*number+1] = noteTotal[6*(number-1)+1] + VOL_INTERVAL;
 					  break;
 			case '-': noteTotal[6*number+1] = noteTotal[6*(number-1)+1] - VOL_INTERVAL;
+					  break;
+			default :
+					  break;
 			}
 
 			if(noteTotal[6*number+1] > MIDI_LIMIT)
@@ -1569,9 +1662,10 @@ __AvMIDISetVolume(char* pMelodyBuf)
 			case '5': midiVol = AV_MIDI_VOL_MAX;
 					  break;
 			default : midiVol = AV_MIDI_VOL_MAX;
+					  break;
 			}
 		}
-		
+
 		else
 		switch(*pMelodyBuf)
 		{
@@ -1594,6 +1688,7 @@ __AvMIDISetVolume(char* pMelodyBuf)
 		case '9': midiVol = AV_MIDI_VOL_MAX;
 				  break;
 		default : midiVol = AV_MIDI_VOL_MAX;
+				  break;
 		}
 	}
 

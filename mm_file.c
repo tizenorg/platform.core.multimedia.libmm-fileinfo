@@ -78,12 +78,14 @@ enum {
 	MM_FILE_PARSE_TYPE_SIMPLE,		/*parse audio/video track num only*/
 	MM_FILE_PARSE_TYPE_NORMAL,		/*parse infomation without thumbnail*/
 	MM_FILE_PARSE_TYPE_ALL,			/*parse all infomation*/
+	MM_FILE_PARSE_TYPE_SAFE,		/*parse infomation without both thumbnail and stream full-searching*/
 };
 
 typedef struct {
 	int	type;
 	int	audio_track_num;
 	int	video_track_num;
+	bool is_uhqa;
 } MMFILE_PARSE_INFO;
 
 typedef struct {
@@ -97,49 +99,52 @@ typedef struct {
  * global values.
  */
 static mmf_attrs_construct_info_t g_tag_attrs[] = {
-	{"tag-artist",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-title",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-album",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-album-artist",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-genre",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-author",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-copyright",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-date",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-description",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-comment",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-artwork",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-artwork-size",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"tag-artwork-mime",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-track-num",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-classification",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-rating",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-longitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
-	{"tag-latitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
-	{"tag-altitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
-	{"tag-conductor",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-unsynclyrics",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-synclyrics-num",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"tag-synclyrics",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-recdate",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"tag-rotate",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-artist",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-title",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-album",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-album-artist",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-genre",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-author",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-copyright",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-date",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-description",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-comment",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-artwork",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-artwork-size",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-artwork-mime",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-track-num",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-classification",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-rating",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-longitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-latitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-altitude",		MM_ATTRS_TYPE_DOUBLE,	MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-conductor",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-unsynclyrics",	MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-synclyrics-num",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-synclyrics",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-recdate",		MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-rotate",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"tag-cdis",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-smta",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
 };
 
 static mmf_attrs_construct_info_t g_content_attrs[] = {
-	{"content-duration",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-codec",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-bitrate",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-fps",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-width",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-height",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-thumbnail",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
-	{"content-video-track-index",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-video-track-count",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-codec",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-bitrate",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-channels",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-samplerate",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-track-index",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
-	{"content-audio-track-count",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-duration",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-codec",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-bitrate",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-fps",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-width",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-height",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-thumbnail",		MMF_VALUE_TYPE_DATA,	MM_ATTRS_FLAG_RW, (void *)NULL},
+	{(char *)"content-video-track-index",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-video-track-count",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-codec",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-bitrate",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-channels",		MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-samplerate",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-track-index",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-track-count",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"content-audio-bitpersample",	MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
 };
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -238,18 +243,22 @@ exception:
 
 static void _unload_dynamic_functions (MMFILE_FUNC_HANDLE* pHandle)
 {
-	debug_fenter ();	
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
-	if (pHandle->formatFuncHandle) 
+	if (pHandle->formatFuncHandle)
 	{
-		dlclose (pHandle->formatFuncHandle);		
+		dlclose (pHandle->formatFuncHandle);	
 	}
-	if (pHandle->codecFuncHandle)  
+	if (pHandle->codecFuncHandle)
 	{
-		dlclose (pHandle->codecFuncHandle);		
+		dlclose (pHandle->codecFuncHandle);
 	}
-	
-	debug_fleave ();
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 }
 
 
@@ -302,12 +311,14 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 											mm_attrs_set_double_by_name(hattrs, MM_FILE_TAG_LATIDUE, formatContext->latitude);
 											mm_attrs_set_double_by_name(hattrs, MM_FILE_TAG_ALTIDUE, formatContext->altitude); 
 											mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_SYNCLYRICS_NUM, formatContext->syncLyricsNum);
+											mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_CDIS, formatContext->cdis);
+											mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_SMTA, formatContext->smta);
 
 		if ((formatContext->syncLyricsNum > 0) && (formatContext->syncLyrics))
 			mm_attrs_set_data_by_name (hattrs, MM_FILE_TAG_SYNCLYRICS, formatContext->syncLyrics, formatContext->syncLyricsNum);
 
 		if (formatContext->unsyncLyrics)		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_UNSYNCLYRICS, formatContext->unsyncLyrics);
-		
+
 		if (formatContext->artwork && formatContext->artworkSize > 0) {
 			void *artworkCopy = NULL;
 			artworkCopy = mmfile_malloc ((formatContext->artworkSize));
@@ -361,9 +372,10 @@ _info_set_attr_media (mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 			mm_attrs_set_int_by_name (hattrs, MM_FILE_CONTENT_AUDIO_CHANNELS, audioStream->nbChannel);
 			mm_attrs_set_int_by_name (hattrs, MM_FILE_CONTENT_AUDIO_BITRATE, audioStream->bitRate);
 			mm_attrs_set_int_by_name (hattrs, MM_FILE_CONTENT_AUDIO_SAMPLERATE, audioStream->samplePerSec);
-		}	
-	} 
-	else 
+			mm_attrs_set_int_by_name (hattrs, MM_FILE_CONTENT_AUDIO_BITPERSAMPLE, audioStream->bitPerSample);
+		}
+	}
+	else
 	{
 		ret = -1;
 	}
@@ -395,13 +407,9 @@ _get_contents_info (mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO
 		goto exception;
 	}
 
-	/**
-	 * if MM_FILE_PARSE_TYPE_SIMPLE, just get number of each stream.
-	 */
-	parse->audio_track_num = formatContext->audioTotalTrackNum;
-	parse->video_track_num = formatContext->videoTotalTrackNum;
-
 	if (parse->type >= MM_FILE_PARSE_TYPE_NORMAL) {
+		if (parse->type == MM_FILE_PARSE_TYPE_SAFE)
+			formatContext->cdis = 1;
 		ret = mmfile_format_read_stream (formatContext);
 		if (MMFILE_FORMAT_FAIL == ret) {
 			debug_error ("error: mmfile_format_read_stream\n");
@@ -409,8 +417,21 @@ _get_contents_info (mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO
 			goto exception;
 		}
 
+		parse->audio_track_num = formatContext->audioTotalTrackNum;
+		parse->video_track_num = formatContext->videoTotalTrackNum;
+
+		/* check uhqa content*/
+		if (parse->is_uhqa = formatContext->streams[MMFILE_AUDIO_STREAM] != NULL)
+			parse->is_uhqa = formatContext->streams[MMFILE_AUDIO_STREAM]->is_uhqa;
+
 		if (parse->type >= MM_FILE_PARSE_TYPE_ALL) {
 			if (formatContext->videoTotalTrackNum > 0) {
+
+				if (parse->type != MM_FILE_PARSE_TYPE_SAFE) {
+					if (formatContext->formatType == MM_FILE_FORMAT_3GP ||formatContext->formatType == MM_FILE_FORMAT_MP4) {
+						MMFileUtilGetMetaDataFromMP4 (formatContext);
+					}
+				}
 				MMFileFormatStream *videoStream = formatContext->streams[MMFILE_VIDEO_STREAM];
 				unsigned int timestamp = _SEEK_POINT_;
 
@@ -475,6 +496,12 @@ _get_contents_info (mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO
 				}
 			}
 		}
+	} else {
+		/**
+		 * if MM_FILE_PARSE_TYPE_SIMPLE, just get number of each stream.
+		 */
+		parse->audio_track_num = formatContext->audioTotalTrackNum;
+		parse->video_track_num = formatContext->videoTotalTrackNum;
 	}
 
 #ifdef __MMFILE_TEST_MODE__
@@ -666,8 +693,10 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 	int ret = MM_ERROR_NONE;
 	AvSynclyricsInfo* sync_lyric_item = NULL;
 	GList *synclyrics_list = NULL;
-	
-	debug_fenter ();
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	if ( (mmf_attrs_t*)tag_attrs == NULL) {
 		debug_error ("invalid handle");
@@ -702,9 +731,9 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 		#endif
 		return MM_ERROR_COMMON_ATTR_NOT_EXIST;
 	}
-	
+
 	return ret;
-	
+
 }
 
 int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
@@ -713,7 +742,9 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	/* Check argument here */
 	if (tag_attrs == NULL) {
@@ -744,31 +775,36 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
 
 	ret = _is_file_exist (filename);
-	if (!ret)
-		return MM_ERROR_FILE_NOT_FOUND;
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
 
 	/*set attrs*/
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("tag", g_tag_attrs, ARRAY_SIZE (g_tag_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error ("attribute internal error.\n");
-		return MM_ERROR_FILE_INTERNAL;
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
 	}
 
 	ret = _get_tag_info (attrs, &src);
-
-#ifdef __MMFILE_TEST_MODE__
 	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
 		debug_error ("failed to get tag: %s\n", filename);
 	}
-#endif
 
 	*tag_attrs = (MMHandleType)attrs;
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 	_unload_dynamic_functions (&func_handle);
 #endif
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -780,7 +816,10 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 	void *artwork = NULL;
 	GList *synclyrics_list = NULL;
 	int ret = MM_ERROR_NONE;
-	debug_fenter ();
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	if ( (mmf_attrs_t*)tag_attrs == NULL) {
 		debug_error ("invalid handle.\n");
@@ -788,7 +827,7 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 	}
 
 	ret = mm_attrs_get_data_by_name (tag_attrs, MM_FILE_TAG_ARTWORK, &artwork);
-	
+
 	if (artwork != NULL) {
 		mmfile_free (artwork);
 	}
@@ -801,7 +840,9 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 
 	mmf_attrs_free (tag_attrs);
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -814,7 +855,9 @@ int mm_file_create_content_attrs (MMHandleType *contents_attrs, const char *file
 	MMFILE_PARSE_INFO parse = {0,};
 	int ret = 0;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	/* Check argument here */
 	if (contents_attrs == NULL) {
@@ -837,8 +880,8 @@ int mm_file_create_content_attrs (MMHandleType *contents_attrs, const char *file
 	#ifdef CHECK_TIME
 	 int64_t ti;
 	ti = gettime();
-	#endif 
-	
+	#endif
+
 	ret = _load_dynamic_functions (&func_handle);
 	if (ret == 0) {
 		debug_error ("load library error\n");
@@ -846,51 +889,58 @@ int mm_file_create_content_attrs (MMHandleType *contents_attrs, const char *file
 	}
 
 	#ifdef CHECK_TIME
-	printf ("%s, %d, _load_dynamic_functions() = %lld\n", __func__, __LINE__, gettime() - ti);
+	debug_msg("_load_dynamic_functions() = %lld\n", gettime() - ti);
        #endif
-	 
+
 #endif
 
 	/*set source file infomation*/
 	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
 
 	ret = _is_file_exist (filename);
-	if (!ret)
-		return MM_ERROR_FILE_NOT_FOUND;
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
 
 	/*set attrs*/
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("content", g_content_attrs, ARRAY_SIZE (g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error ("attribute internal error.\n");
-		return MM_ERROR_FILE_INTERNAL;
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
 	}
-	
+
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info (attrs, &src, &parse);
 	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
 		debug_error ("failed to get contents: %s\n", filename);
 	}
 
 	*contents_attrs = (MMHandleType) attrs;
 
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 
-	#ifdef CHECK_TIME 
+	#ifdef CHECK_TIME
 	ti = gettime();
 	#endif
 
 	_unload_dynamic_functions (&func_handle);
 
 	#ifdef CHECK_TIME
-	printf ("%s, %d, _unload_dynamic_functions() = %lld\n", __func__, __LINE__, gettime() - ti);
+	debug_msg("_unload_dynamic_functions() = %lld\n", gettime() - ti);
 	#endif
 
 #endif
 
-
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -904,7 +954,9 @@ int mm_file_create_tag_attrs_from_memory (MMHandleType *tag_attrs, const void *d
 	MMFILE_PARSE_INFO parse = {0,};
 	int ret = 0;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	/* Check argument here */
 	if (tag_attrs == NULL || data == NULL) {
@@ -928,19 +980,28 @@ int mm_file_create_tag_attrs_from_memory (MMHandleType *tag_attrs, const void *d
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("tag", g_tag_attrs, ARRAY_SIZE (g_tag_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error ("attribute internal error.\n");
-		return MM_ERROR_FILE_INTERNAL;
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_tag_info (attrs, &src);
+	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
+		debug_error ("failed to get tag");
+	}
 
 	*tag_attrs = (MMHandleType)attrs;
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 	_unload_dynamic_functions (&func_handle);
 #endif
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -954,7 +1015,9 @@ int mm_file_create_content_attrs_from_memory (MMHandleType *contents_attrs, cons
 	MMFILE_PARSE_INFO parse = {0,};
 	int ret = 0;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	/* Check argument here */
 	if (contents_attrs == NULL || data == NULL) {
@@ -964,7 +1027,7 @@ int mm_file_create_content_attrs_from_memory (MMHandleType *contents_attrs, cons
 
 #ifdef __MMFILE_DYN_LOADING__
 	MMFILE_FUNC_HANDLE func_handle;
-	
+
 	ret = _load_dynamic_functions (&func_handle);
 	if (ret == 0) {
 		debug_error ("load library error\n");
@@ -978,22 +1041,28 @@ int mm_file_create_content_attrs_from_memory (MMHandleType *contents_attrs, cons
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("content", g_content_attrs, ARRAY_SIZE (g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error ("attribute internal error.\n");
-		return MM_ERROR_FILE_INTERNAL;
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info (attrs, &src, &parse);
 	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
 		debug_error ("failed to get contents");
 	}
 
 	*contents_attrs = (MMHandleType)attrs;
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 	_unload_dynamic_functions (&func_handle);
 #endif
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -1004,7 +1073,10 @@ int mm_file_destroy_content_attrs (MMHandleType contents_attrs)
 {
 	void *thumbnail = NULL;
 	int ret = MM_ERROR_NONE;
-	debug_fenter ();
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	if ((mmf_attrs_t*)contents_attrs == NULL) {
 		debug_error ("invalid handle.\n");
@@ -1018,7 +1090,9 @@ int mm_file_destroy_content_attrs (MMHandleType contents_attrs)
 
 	mmf_attrs_free (contents_attrs);
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -1032,7 +1106,9 @@ int mm_file_get_stream_info(const char* filename, int *audio_stream_num, int *vi
 
 	int ret = 0;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 	if (filename == NULL || strlen (filename) == 0 || audio_stream_num == NULL || video_stream_num == NULL) {
 		debug_error ("Invalid arguments\n");
@@ -1053,24 +1129,35 @@ int mm_file_get_stream_info(const char* filename, int *audio_stream_num, int *vi
 	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
 
 	ret = _is_file_exist (filename);
-	if (!ret)
-		return MM_ERROR_FILE_NOT_FOUND;
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
 
 	parse.type = MM_FILE_PARSE_TYPE_SIMPLE;
 	ret = _get_contents_info (NULL, &src, &parse);
 	if (ret != MM_ERROR_NONE) {
 		debug_error ("failed to get stream info: %s\n", filename);
+	} else {
+		if(parse.audio_track_num == 0 && parse.video_track_num == 0) {
+			debug_error ("empty header. retry to get stream info: %s\n", filename);
+			parse.type = MM_FILE_PARSE_TYPE_NORMAL;
+			ret = _get_contents_info (NULL, &src, &parse);
+		}
 	}
 
 	/*set number of each stream*/
 	*audio_stream_num = parse.audio_track_num;
 	*video_stream_num = parse.video_track_num;
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 	_unload_dynamic_functions (&func_handle);
 #endif
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -1083,51 +1170,134 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 	MMFILE_PARSE_INFO parse = {0,};
 	int ret = 0;
 
-	debug_fenter ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
 
 #ifdef __MMFILE_DYN_LOADING__
 	MMFILE_FUNC_HANDLE func_handle;
-	
+
 	ret = _load_dynamic_functions (&func_handle);
 	if (ret == 0) {
 		debug_error ("load library error\n");
 		return MM_ERROR_FILE_INTERNAL;
 	}
 #endif
-	if (filename == NULL) { 
-		return MM_ERROR_INVALID_ARGUMENT;
+	if (filename == NULL) {
+		ret =  MM_ERROR_INVALID_ARGUMENT;
+		goto END;
 	} else {
-		if (strlen (filename) == 0)
-			return MM_ERROR_INVALID_ARGUMENT;
+		if (strlen (filename) == 0) {
+			ret =  MM_ERROR_INVALID_ARGUMENT;
+			goto END;
+		}
 	}
 
 	/*set source file infomation*/
 	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
 
 	ret = _is_file_exist (filename);
-	if (!ret)
-		return MM_ERROR_FILE_NOT_FOUND;
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
 
 	/*set attrs*/
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("content", g_content_attrs, ARRAY_SIZE (g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error ("attribute internal error.\n");
-		return MM_ERROR_FILE_INTERNAL;
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
 	ret = _get_contents_info (attrs, &src, &parse);
 	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
 		debug_error ("failed to get contents: %s\n", filename);
 	}
 
 	*contents_attrs = (MMHandleType) attrs;
 
+END:
 #ifdef __MMFILE_DYN_LOADING__
 	_unload_dynamic_functions (&func_handle);
 #endif
 
-	debug_fleave ();
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
+
+	return ret;
+}
+
+EXPORT_API
+int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *filename)
+{
+	mmf_attrs_t *attrs = NULL;
+	MMFileSourceType src = {0,};
+	MMFILE_PARSE_INFO parse = {0,};
+	int ret = 0;
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fenter();
+#endif
+
+#ifdef __MMFILE_DYN_LOADING__
+	MMFILE_FUNC_HANDLE func_handle;
+
+	ret = _load_dynamic_functions (&func_handle);
+	if (ret == 0) {
+		debug_error ("load library error\n");
+		return MM_ERROR_FILE_INTERNAL;
+	}
+#endif
+	if (filename == NULL) {
+		ret = MM_ERROR_INVALID_ARGUMENT;
+		goto END;
+	} else {
+		if (strlen (filename) == 0) {
+			ret = MM_ERROR_INVALID_ARGUMENT;
+			goto END;
+		}
+	}
+
+	/*set source file infomation*/
+	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
+
+	ret = _is_file_exist (filename);
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
+
+	/*set attrs*/
+	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("content", g_content_attrs, ARRAY_SIZE (g_content_attrs), NULL, NULL);
+	if (!attrs) {
+		debug_error ("attribute internal error.\n");
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
+	}
+
+	parse.type = MM_FILE_PARSE_TYPE_SAFE;
+	ret = _get_contents_info (attrs, &src, &parse);
+	if (ret != MM_ERROR_NONE) {
+		mmf_attrs_free ((MMHandleType)attrs);
+		attrs = NULL;
+		debug_error ("failed to get contents: %s\n", filename);
+	}
+
+	*contents_attrs = (MMHandleType) attrs;
+
+END:
+#ifdef __MMFILE_DYN_LOADING__
+	_unload_dynamic_functions (&func_handle);
+#endif
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
 
 	return ret;
 }
@@ -1227,4 +1397,72 @@ exception:
 	if (formatFuncHandle) dlclose (formatFuncHandle);
 
 	return MM_ERROR_FILE_INTERNAL;
+}
+
+EXPORT_API
+int mm_file_check_uhqa(const char* filename, bool *is_uhqa)
+{
+	mmf_attrs_t *attrs = NULL;
+	MMFileSourceType src = {0,};
+	MMFILE_PARSE_INFO parse = {0,};
+	int ret = 0;
+
+#ifdef __MMFILE_DYN_LOADING__
+	MMFILE_FUNC_HANDLE func_handle;
+
+	ret = _load_dynamic_functions (&func_handle);
+	if (ret == 0) {
+		debug_error ("load library error\n");
+		return MM_ERROR_FILE_INTERNAL;
+	}
+#endif
+	if (filename == NULL) {
+		ret = MM_ERROR_INVALID_ARGUMENT;
+		goto END;
+	} else {
+		if (strlen (filename) == 0) {
+			ret = MM_ERROR_INVALID_ARGUMENT;
+			goto END;
+		}
+	}
+
+	/*set source file infomation*/
+	MM_FILE_SET_MEDIA_FILE_SRC (src, filename);
+
+	ret = _is_file_exist (filename);
+	if (!ret) {
+		ret = MM_ERROR_FILE_NOT_FOUND;
+		goto END;
+	}
+
+	/*set attrs*/
+	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data ("content", g_content_attrs, ARRAY_SIZE (g_content_attrs), NULL, NULL);
+	if (!attrs) {
+		debug_error ("attribute internal error.\n");
+		ret = MM_ERROR_FILE_INTERNAL;
+		goto END;
+	}
+
+	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
+	ret = _get_contents_info (attrs, &src, &parse);
+	if (ret == MM_ERROR_NONE) {
+		*is_uhqa = parse.is_uhqa;
+	} else {
+		debug_error ("_get_contents_info failed\n");
+		*is_uhqa = FALSE;
+	}
+
+	mmf_attrs_free ((MMHandleType)attrs);
+	attrs = NULL;
+
+END:
+#ifdef __MMFILE_DYN_LOADING__
+	_unload_dynamic_functions (&func_handle);
+#endif
+
+#ifdef __MMFILE_TEST_MODE__
+	debug_fleave();
+#endif
+
+	return ret;
 }
