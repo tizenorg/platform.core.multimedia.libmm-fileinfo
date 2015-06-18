@@ -69,7 +69,6 @@ CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility
 
 %files
 %manifest %{name}.manifest
-%{_bindir}/memtrace_reader
 %{_bindir}/mm_file_test
 %{_libdir}/libmmffile.so.*
 %{_libdir}/libmmfile_codecs.so.*
