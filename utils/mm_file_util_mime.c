@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 typedef struct _mmfileavmimetype

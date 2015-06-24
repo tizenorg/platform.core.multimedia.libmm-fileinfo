@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <vconf.h>
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 #define ENABLE_ITUNES_META		//All itunes metadata extracted by ffmpeg. see mov_read_udta_string() but Some cover art not support.

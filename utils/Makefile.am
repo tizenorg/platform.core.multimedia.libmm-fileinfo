@@ -36,5 +36,5 @@ libmmfile_utils_la_CFLAGS += $(DRMCLIENT_CFLAGS) $(DRMTRUSTED_CFLAGS) -DDRM_SUPP
 libmmfile_utils_la_LIBADD += $(DRMCLIENT_LIBS) $(DRMTRUSTED_LIBS)
 endif
 
-libmmfile_utils_la_CFLAGS += $(MMLOG_CFLAGS) -DMMF_LOG_OWNER=0x040 -DMMF_DEBUG_PREFIX=\"MMF-FILE-UTILS\"
-libmmfile_utils_la_LIBADD += $(MMLOG_LIBS)
+libmmfile_utils_la_CFLAGS += $(DLOG_CFLAGS)
+libmmfile_utils_la_LIBADD += $(DLOG_LIBS)

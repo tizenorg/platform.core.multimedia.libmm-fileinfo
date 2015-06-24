@@ -23,7 +23,7 @@
 #include <string.h>	/*memcmp*/
 #include <stdlib.h>	/*malloc*/
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 #include "mm_file_format_private.h"
 #include "mm_file_format_imelody.h"

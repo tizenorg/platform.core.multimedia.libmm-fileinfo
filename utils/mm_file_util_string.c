@@ -23,7 +23,7 @@
 #include <string.h>
 #include <glib.h>
 #include <unicode/ucsdet.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 #ifdef __MMFILE_MEM_TRACE__

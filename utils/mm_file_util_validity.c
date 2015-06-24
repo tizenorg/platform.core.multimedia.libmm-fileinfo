@@ -22,7 +22,7 @@
 #include <string.h>	/*memcmp*/
 #include <stdlib.h>	/*malloc*/
 #include <mm_error.h>
-#include <mm_debug.h>
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 /* Description of return value
