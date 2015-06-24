@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 #include "mm_file_codec_private.h"
 
