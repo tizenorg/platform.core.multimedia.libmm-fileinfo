@@ -24,7 +24,7 @@
 #include <libswscale/swscale.h>
 
 #include <mm_types.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_formats.h"
 #include "mm_file_utils.h"
 #include "mm_file_format_ffmpeg_mem.h"

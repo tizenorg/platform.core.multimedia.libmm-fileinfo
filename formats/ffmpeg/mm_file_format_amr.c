@@ -19,13 +19,13 @@
  *
  */
 
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>	/*memcmp*/
 #include <stdlib.h>	/*malloc*/
 
 
 #include <mm_error.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 
 #include "mm_file_utils.h"
 #include "mm_file_format_private.h"

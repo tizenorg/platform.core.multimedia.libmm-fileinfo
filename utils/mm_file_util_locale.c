@@ -18,8 +18,8 @@
  * limitations under the License.
  *
  */
- 
-#include <stdlib.h> 
+
+#include <stdlib.h>
 #include <string.h>
 #include <vconf.h>
 
@@ -27,7 +27,7 @@
 #include <gconf/gconf-client.h>
 #endif
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 /* This macro is the same with global-gconf.h */

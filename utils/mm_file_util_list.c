@@ -20,10 +20,10 @@
  */
 
 #include <glib.h>
-#include <mm_debug.h>
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
-EXPORT_API 
+EXPORT_API
 MMFileList mmfile_list_alloc ()
 {
     return g_list_alloc ();

@@ -32,9 +32,9 @@
 
 /* internal MM header files */
 #include <mm_attrs_private.h>
-#include <mm_debug.h>
 
 /* internal MM File headers */
+#include "mm_file_debug.h"
 #include "mm_file_formats.h"
 #include "mm_file_format_frame.h"
 #include "mm_file_codecs.h"

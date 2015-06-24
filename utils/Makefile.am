@@ -14,7 +14,7 @@ libmmfile_utils_la_SOURCES = mm_file_util_memory.c \
 			   mm_file_util_locale.c \
 			   mm_file_util_validity.c \
 			   mm_file_util_tag.c
-			
+
 libmmfile_utils_la_CFLAGS = -I$(srcdir)/include \
 		       -I$(srcdir)/../include \
 		       $(MMCOMMON_CFLAGS) \
@@ -24,17 +24,17 @@ libmmfile_utils_la_CFLAGS = -I$(srcdir)/include \
 		       $(VCONF_CFLAGS)
 if USE_TESTMODE
 libmmfile_utils_la_CFLAGS += -D__MMFILE_TEST_MODE__
-endif  
+endif
 
 libmmfile_utils_la_LIBADD = $(MMCOMMON_LIBS) \
 			    $(ICU_LIBS) \
 			    $(VCONF_LIBS)
 
 if USE_DRM
-libmmfile_utils_la_SOURCES += mm_file_util_io_drm.c 
+libmmfile_utils_la_SOURCES += mm_file_util_io_drm.c
 libmmfile_utils_la_CFLAGS += $(DRMCLIENT_CFLAGS) $(DRMTRUSTED_CFLAGS) -DDRM_SUPPORT
 libmmfile_utils_la_LIBADD += $(DRMCLIENT_LIBS) $(DRMTRUSTED_LIBS)
 endif
 
-libmmfile_utils_la_CFLAGS += $(MMLOG_CFLAGS) -DMMF_LOG_OWNER=0x040 -DMMF_DEBUG_PREFIX=\"MMF-FILE-UTILS\"
-libmmfile_utils_la_LIBADD += $(MMLOG_LIBS)
+libmmfile_utils_la_CFLAGS += $(DLOG_CFLAGS)
+libmmfile_utils_la_LIBADD += $(DLOG_LIBS)
