@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 static unsigned char is_little_endian = 0;

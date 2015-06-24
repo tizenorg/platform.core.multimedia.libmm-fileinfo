@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_format_tag_id3.h"
 
 #define MMFILE_ID3V1TAG_SIZE 128

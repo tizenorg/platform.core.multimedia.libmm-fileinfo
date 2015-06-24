@@ -24,7 +24,7 @@
 
 #include <mm_error.h>
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 
 #include "mm_file_codec_private.h"
 #include "mm_file_codec_dummy.h"

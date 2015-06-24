@@ -1,6 +1,6 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
-Version:    0.6.31
+Version:    0.6.32
 Release:    0
 Group:      System/Libraries
 License:    Apache-2.0
@@ -10,7 +10,7 @@ Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
 BuildRequires: pkgconfig(mm-common)
-BuildRequires: pkgconfig(mm-log)
+BuildRequires: pkgconfig(dlog)
 BuildRequires: pkgconfig(libswscale)
 BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(libavcodec)

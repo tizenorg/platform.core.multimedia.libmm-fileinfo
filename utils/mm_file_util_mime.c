@@ -21,12 +21,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
 typedef struct _mmfileavmimetype
 {
-    char    mimetype[MMFILE_MIMETYPE_MAX_LEN];    
+    char    mimetype[MMFILE_MIMETYPE_MAX_LEN];
     char    ffmpegFormat[MMFILE_FILE_FMT_MAX_LEN];
     char    extension[MMFILE_FILE_EXT_MAX_LEN];
 } MMFileAVMimeType;

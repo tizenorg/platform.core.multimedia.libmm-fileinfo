@@ -19,13 +19,13 @@
  *
  */
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <string.h>	/*memcmp*/
 #include <stdlib.h>	/*malloc*/
 
 #include <mm_error.h>
 
-#include "mm_debug.h"
+#include "mm_file_debug.h"
 #include "mm_file_utils.h"
 #include "mm_file_format_private.h"
 #include "mm_file_format_aac.h"
@@ -33,7 +33,7 @@
 
 // Internal Error Type
 #define MMFILE_AAC_PARSER_FILE_END 2
-  
+
 // Media specific definations
 #define MMFILE_AAC_ADIF_HEADER_MAX_SIZE 30
 #define MMFILE_AAC_ADTS_HEADER_MAX_SIZE 7
