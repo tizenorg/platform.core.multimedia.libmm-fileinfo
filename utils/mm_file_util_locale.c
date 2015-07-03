@@ -32,8 +32,7 @@
 
 /* This macro is the same with global-gconf.h */
 #define MMFILE_LANGUAGETYPE_REPOSITORY      "/Apps/Settings/language_type"
-typedef enum
-{
+typedef enum {
 	MMFILE_LANGUAGE_ENGLISH = 0x00,	/**<Language - English*/
 	MMFILE_LANGUAGE_GERMAN,			/**<Language - German*/
 	MMFILE_LANGUAGE_FRENCH,			/**<Language - French*/
@@ -47,15 +46,14 @@ typedef enum
 	MMFILE_LANGUAGE_SIM_CHINA,		/**<Language - Simplified Chinese*/
 	MMFILE_LANGUAGE_TRA_CHINA,		/**<Language - Traditional Chinese*/
 	MMFILE_LANGUAGE_JAPAN,			/**<Language - Japanease*/
-#if 0        
+#if 0
 	MMFILE_LANGUAGE_BULGARIAN,		/**<Language - Bulgarian*/
 	MMFILE_LANGUAGE_ARABIC,			/**<Language - Arabic*/
 #endif
-    MMFILE_LANGUAGE_MAX
+	MMFILE_LANGUAGE_MAX
 } eMMFileSettingPhoneLanguage;
 
-const char *MMFILE_LOCALE_TABLE [MMFILE_LANGUAGE_MAX] =
-{
+const char *MMFILE_LOCALE_TABLE[MMFILE_LANGUAGE_MAX] = {
 	"EUC-KR",		/* Temporally - Language - English */
 	"ISO8859-1",		/* Language - German */
 	"ISO8859-1",		/* Language - French */
@@ -70,8 +68,8 @@ const char *MMFILE_LOCALE_TABLE [MMFILE_LANGUAGE_MAX] =
 	"BIG5",			/* Language - Traditional Chinese */
 	"SHIFT_JIS"		/* Language - Japanease */
 #if 0
-					/* Language - Bulgarian */
-					/* Language - Arabic */
+	/* Language - Bulgarian */
+	/* Language - Arabic */
 #endif
 };
 
@@ -85,14 +83,14 @@ static int _MMFileUtilGetLocaleindex()
 	const char *eng_prefix = "en";
 
 	const char *china_lang = "zh_CN";
-	const char *hongkong_lang = "zh_HK";
-	const char *taiwan_lang = "zh_TW";
+	/*const char *hongkong_lang = "zh_HK";*/
+	/*const char *taiwan_lang = "zh_TW";*/
 	const char *jpn_lang = "ja_JP";
 
 	lang = vconf_get_str(VCONFKEY_LANGSET);
 
 	if (lang != NULL) {
-		if (strncmp(lang,china_prefix, strlen(china_prefix)) == 0) {
+		if (strncmp(lang, china_prefix, strlen(china_prefix)) == 0) {
 			/* This case is selected language is china */
 			if (strncmp(lang, china_lang, strlen(china_lang)) == 0) {
 				debug_msg("[%s]character set is simplified chinese", lang);
@@ -119,7 +117,7 @@ static int _MMFileUtilGetLocaleindex()
 		index = MMFILE_LANGUAGE_ENGLISH;
 	}
 
-	if(lang) {
+	if (lang) {
 		free(lang);
 		lang = NULL;
 	}
@@ -128,22 +126,20 @@ static int _MMFileUtilGetLocaleindex()
 }
 
 EXPORT_API
-char *MMFileUtilGetLocale (int *error)
+char *MMFileUtilGetLocale(int *error)
 {
 	int index = 0;
 	int err = 0;
 	index = _MMFileUtilGetLocaleindex();
 
-	if (index < 0 || index >= MMFILE_LANGUAGE_MAX)
-	{
-		debug_error ("invalid index\n");
+	if (index < 0 || index >= MMFILE_LANGUAGE_MAX) {
+		debug_error("invalid index\n");
 		err = MMFILE_UTIL_FAIL;
 		return NULL;
 	}
 
 	err = MMFILE_UTIL_SUCCESS;
-	if (error)
-	{
+	if (error) {
 		*error = err;
 	}
 

@@ -28,11 +28,10 @@
 #include "mm_file_utils.h"
 #include "mm_file_debug.h"
 
-typedef struct
-{
-    DRM_DECRYPT_HANDLE hfile;
-    long long offset;
-    long long fsize;
+typedef struct {
+	DRM_DECRYPT_HANDLE hfile;
+	long long offset;
+	long long fsize;
 } MMFileDRMHandle;
 
 static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
@@ -49,35 +48,30 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 
 	pseudofilename += strlen(h->prot->name) + 3; /* :// */
 
-	ret = drm_is_drm_file (pseudofilename, &res);
-	if (DRM_FALSE == res)
-	{
-		debug_error ("error: %s is not DRM file\n", pseudofilename);
+	ret = drm_is_drm_file(pseudofilename, &res);
+	if (DRM_FALSE == res) {
+		debug_error("error: %s is not DRM file\n", pseudofilename);
 		return -2;
 	}
-	if(ret != DRM_RETURN_SUCCESS)
-	{
-		debug_error ("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
+	if (ret != DRM_RETURN_SUCCESS) {
+		debug_error("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
 		return -2;
 	}
 
 	/* Checks the DRM file type (supports only for OMA) if it is DRM */
 	ret = drm_get_file_type(pseudofilename, &file_type);
-	if(ret != DRM_RETURN_SUCCESS)
-	{
-		debug_error ("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
+	if (ret != DRM_RETURN_SUCCESS) {
+		debug_error("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
 		return -2;
 	}
-	if((file_type != DRM_TYPE_OMA_V1) && (file_type != DRM_TYPE_OMA_V2))
-	{
-		debug_error ("error: %s is not DRM file. file_type[%d]\n", pseudofilename, file_type);
+	if ((file_type != DRM_TYPE_OMA_V1) && (file_type != DRM_TYPE_OMA_V2)) {
+		debug_error("error: %s is not DRM file. file_type[%d]\n", pseudofilename, file_type);
 		return -2;
 	}
 
-	drmHandle = mmfile_malloc (sizeof(MMFileDRMHandle));
-	if (NULL == drmHandle)
-	{
-		debug_error ("error: mmfile_malloc\n");
+	drmHandle = mmfile_malloc(sizeof(MMFileDRMHandle));
+	if (NULL == drmHandle) {
+		debug_error("error: mmfile_malloc\n");
 		return -2;
 	}
 
@@ -89,14 +83,13 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 	memset(&open_output_data, 0x0, sizeof(drm_trusted_open_decrypt_resp_data_s));
 
 	memcpy(open_input_data.filePath, pseudofilename, strlen(pseudofilename));
-	if(file_type == DRM_TYPE_OMA_V1)	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V1;
+	if (file_type == DRM_TYPE_OMA_V1)	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V1;
 	else	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V2;
 	open_input_data.permission = DRM_TRUSTED_PERMISSION_TYPE_DISPLAY;
 
-	ret = drm_trusted_open_decrypt_session(&open_input_data,&open_output_data, &drmHandle->hfile);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_open_decrypt_session() [%x]\n", ret);
+	ret = drm_trusted_open_decrypt_session(&open_input_data, &open_output_data, &drmHandle->hfile);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_open_decrypt_session() [%x]\n", ret);
 		ret = -2;
 		goto exception;
 	}
@@ -107,9 +100,8 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 	seek_input_data.seek_mode = DRM_SEEK_END; /* Set cursor to end */
 
 	ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
 		ret = -2;
 		goto exception;
 	}
@@ -117,9 +109,8 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 	/* Tell to get the file size */
 	memset(&tell_output_data, 0x0, sizeof(drm_trusted_tell_decrypt_resp_data_s));
 	ret = drm_trusted_tell_decrypt_session(drmHandle->hfile, &tell_output_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
 		ret = -2;
 		goto exception;
 	}
@@ -132,9 +123,8 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 	seek_input_data.seek_mode = DRM_SEEK_SET;
 
 	ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
 		ret = -2;
 		goto exception;
 	}
@@ -144,27 +134,24 @@ static int mmfile_drm_open(URLContext *h, const char *pseudofilename, int flags)
 	h->max_packet_size = 0;
 
 	/* Set Consumption state*/
-	memset(&state_input_data,0x0,sizeof(drm_trusted_set_consumption_state_info_s));
+	memset(&state_input_data, 0x0, sizeof(drm_trusted_set_consumption_state_info_s));
 	state_input_data.state = DRM_CONSUMPTION_PREVIEW;
 	ret = drm_trusted_set_decrypt_state(drmHandle->hfile, &state_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_set_decrypt_state [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_set_decrypt_state [%x]\n", ret);
 		ret = -2;
 		goto exception;
 	}
 
 #ifdef __MMFILE_TEST_MODE__
-	debug_msg ("ffmpeg drm open success==============\n");
+	debug_msg("ffmpeg drm open success==============\n");
 #endif
 
 	return 0;
 
 exception:
-	if (drmHandle)
-	{
-		if (drmHandle->hfile)
-		{
+	if (drmHandle) {
+		if (drmHandle->hfile) {
 			drm_trusted_close_decrypt_session(&drmHandle->hfile);
 		}
 
@@ -177,25 +164,23 @@ exception:
 
 static int mmfile_drm_read(URLContext *h, unsigned char *buf, int size)
 {
-	//unsigned int readSize = 0;
+	/*unsigned int readSize = 0; */
 	MMFileDRMHandle *drmHandle = h->priv_data;
 	drm_trusted_payload_info_s read_input_data;
 	drm_trusted_read_decrypt_resp_data_s read_output_data;
 	int ret = 0;
 
-	memset(&read_input_data,0x0,sizeof(drm_trusted_payload_info_s));
-	memset(&read_output_data,0x0,sizeof(drm_trusted_read_decrypt_resp_data_s));
+	memset(&read_input_data, 0x0, sizeof(drm_trusted_payload_info_s));
+	memset(&read_output_data, 0x0, sizeof(drm_trusted_read_decrypt_resp_data_s));
 
 	read_input_data.payload_data = buf;
 	read_input_data.payload_data_len = (unsigned int)size;
 	read_input_data.payload_data_output = buf;
 
-	if (drmHandle)
-	{
+	if (drmHandle) {
 		ret = drm_trusted_read_decrypt_session(drmHandle->hfile, &read_input_data, &read_output_data);
-		if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-		{
-			debug_error ("error: drm_trusted_read_decrypt_session() [%x]\n", ret);
+		if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+			debug_error("error: drm_trusted_read_decrypt_session() [%x]\n", ret);
 			return -2;
 		}
 		drmHandle->offset += read_output_data.read_size;
@@ -207,8 +192,8 @@ static int mmfile_drm_read(URLContext *h, unsigned char *buf, int size)
 
 static int mmfile_drm_write(URLContext *h, const unsigned char *buf, int size)
 {
-    debug_warning ("Permission Deny: DRM writing\n");
-    return 0;
+	debug_warning("Permission Deny: DRM writing\n");
+	return 0;
 }
 
 static long long mmfile_drm_seek(URLContext *h, long long pos, int whence)
@@ -219,9 +204,9 @@ static long long mmfile_drm_seek(URLContext *h, long long pos, int whence)
 	int ret = 0;
 
 	if (drmHandle) {
-		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ("handle:%p, pos:%lld, whence:%d\n", h, pos, whence);
-		#endif
+#ifdef __MMFILE_TEST_MODE__
+		debug_msg("handle:%p, pos:%lld, whence:%d\n", h, pos, whence);
+#endif
 
 		switch (whence) {
 			case SEEK_SET:
@@ -236,7 +221,7 @@ static long long mmfile_drm_seek(URLContext *h, long long pos, int whence)
 			case AVSEEK_SIZE:	/*FFMPEG specific*/
 				return drmHandle->fsize;
 			default:
-				debug_error ("invalid whence[%d]\n", whence);
+				debug_error("invalid whence[%d]\n", whence);
 				return -2;
 		}
 
@@ -246,7 +231,7 @@ static long long mmfile_drm_seek(URLContext *h, long long pos, int whence)
 
 		ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
 		if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
-			debug_error ("error: drm_trusted_seek_decrypt_session() [%x] [mode=%d]\n", ret, drm_whence);
+			debug_error("error: drm_trusted_seek_decrypt_session() [%x] [mode=%d]\n", ret, drm_whence);
 			return -2;
 		}
 
@@ -275,54 +260,51 @@ static long long mmfile_drm_seek(URLContext *h, long long pos, int whence)
 	return -1;
 }
 
-static int mmfile_drm_close(URLContext* h)
+static int mmfile_drm_close(URLContext *h)
 {
 	MMFileDRMHandle *drmHandle = NULL;
 	drm_trusted_set_consumption_state_info_s state_input_data;
 	int ret = 0;
 
-	if (!h || !h->priv_data)
-	{
-		debug_error ("invalid para\n");
+	if (!h || !h->priv_data) {
+		debug_error("invalid para\n");
 		return MMFILE_UTIL_FAIL;
 	}
 
 	drmHandle = h->priv_data;
 
 	/* Set Consumption state*/
-	memset(&state_input_data,0x0,sizeof(drm_trusted_set_consumption_state_info_s));
+	memset(&state_input_data, 0x0, sizeof(drm_trusted_set_consumption_state_info_s));
 	state_input_data.state = DRM_CONSUMPTION_STOPPED;
 	ret = drm_trusted_set_decrypt_state(drmHandle->hfile, &state_input_data);
-	if(ret != DRM_TRUSTED_RETURN_SUCCESS) {
-		debug_error ("error: drm_trusted_set_decrypt_state() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_set_decrypt_state() [%x]\n", ret);
 	} else {
-		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ("Success : drm_trusted_set_decrypt_state\n");
-		#endif
+#ifdef __MMFILE_TEST_MODE__
+		debug_msg("Success : drm_trusted_set_decrypt_state\n");
+#endif
 	}
 
-	if (drmHandle)
-	{
-		if (drmHandle->hfile)
-		{
+	if (drmHandle) {
+		if (drmHandle->hfile) {
 			ret = drm_trusted_close_decrypt_session(&drmHandle->hfile);
-			if(ret != DRM_TRUSTED_RETURN_SUCCESS) {
-				debug_error ("error: drm_trusted_close_decrypt_session() [%x]\n", ret);
+			if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+				debug_error("error: drm_trusted_close_decrypt_session() [%x]\n", ret);
 			} else {
-				#ifdef __MMFILE_TEST_MODE__
-				debug_msg ("Success : drm_trusted_close_decrypt_session\n");
-				#endif
+#ifdef __MMFILE_TEST_MODE__
+				debug_msg("Success : drm_trusted_close_decrypt_session\n");
+#endif
 			}
 
 			drmHandle->hfile = NULL;
 		}
 
-		mmfile_free (drmHandle);
+		mmfile_free(drmHandle);
 		h->priv_data = NULL;
 	}
 
 #ifdef __MMFILE_TEST_MODE__
-	debug_msg ("ffmpeg drm close success==============\n");
+	debug_msg("ffmpeg drm close success==============\n");
 #endif
 
 	return 0;

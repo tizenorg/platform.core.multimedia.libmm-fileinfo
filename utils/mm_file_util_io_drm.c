@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  */
- 
+
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -28,11 +28,10 @@
 #include "mm_file_debug.h"
 #include "mm_file_utils.h"
 
-typedef struct
-{
-    DRM_DECRYPT_HANDLE hfile;
-    long long offset;
-    long long fsize;
+typedef struct {
+	DRM_DECRYPT_HANDLE hfile;
+	long long offset;
+	long long fsize;
 } MMFileDRMHandle;
 
 
@@ -48,45 +47,39 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	drm_trusted_set_consumption_state_info_s state_input_data;
 	int ret = 0;
 
-	if (!h || !pseudofilename || !h->iofunc || !h->iofunc->handleName)
-	{
-		debug_error ("invalid param\n");
+	if (!h || !pseudofilename || !h->iofunc || !h->iofunc->handleName) {
+		debug_error("invalid param\n");
 		return MMFILE_IO_FAILED;
 	}
 
 	pseudofilename += strlen(h->iofunc->handleName) + 3; /* :// */
 
 	/* Check is DRM */
-	ret = drm_is_drm_file (pseudofilename, &res);
-	if (DRM_FALSE == res)
-	{
-		debug_error ("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
+	ret = drm_is_drm_file(pseudofilename, &res);
+	if (DRM_FALSE == res) {
+		debug_error("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
 		return MMFILE_IO_FAILED;
 	}
-	if(ret != DRM_RETURN_SUCCESS)
-	{
-		debug_error ("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
+	if (ret != DRM_RETURN_SUCCESS) {
+		debug_error("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
 		return MMFILE_IO_FAILED;
 	}
 
 	/* Checks the DRM file type (supports only for OMA) if it is DRM */
 	ret = drm_get_file_type(pseudofilename, &file_type);
-	if(ret != DRM_RETURN_SUCCESS)
-	{
-		debug_error ("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
+	if (ret != DRM_RETURN_SUCCESS) {
+		debug_error("error: %s is not DRM file. ret[%x]\n", pseudofilename, ret);
 		return MMFILE_IO_FAILED;
 	}
-	if((file_type != DRM_TYPE_OMA_V1) && (file_type != DRM_TYPE_OMA_V2))
-	{
-		debug_error ("error: %s is not DRM file. file_type[%d]\n", pseudofilename, file_type);
+	if ((file_type != DRM_TYPE_OMA_V1) && (file_type != DRM_TYPE_OMA_V2)) {
+		debug_error("error: %s is not DRM file. file_type[%d]\n", pseudofilename, file_type);
 		return MMFILE_IO_FAILED;
 	}
 
 	/* Set DRM handle*/
-	drmHandle = mmfile_malloc (sizeof(MMFileDRMHandle));
-	if (NULL == drmHandle)
-	{
-		debug_error ("error: mmfile_malloc\n");
+	drmHandle = mmfile_malloc(sizeof(MMFileDRMHandle));
+	if (NULL == drmHandle) {
+		debug_error("error: mmfile_malloc\n");
 		return MMFILE_IO_FAILED;
 	}
 
@@ -98,15 +91,14 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	memset(&open_output_data, 0x0, sizeof(drm_trusted_open_decrypt_resp_data_s));
 
 	memcpy(open_input_data.filePath, pseudofilename, strlen(pseudofilename));
-	if(file_type == DRM_TYPE_OMA_V1)	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V1;
+	if (file_type == DRM_TYPE_OMA_V1)	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V1;
 	else	open_input_data.file_type = DRM_TRUSTED_TYPE_OMA_V2;
 	open_input_data.permission = DRM_TRUSTED_PERMISSION_TYPE_DISPLAY;
-	//open_input_data.operation_callback.callback;
+	/*open_input_data.operation_callback.callback; */
 
-	ret = drm_trusted_open_decrypt_session(&open_input_data,&open_output_data, &drmHandle->hfile);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_open_decrypt_session() [%x]\n", ret);
+	ret = drm_trusted_open_decrypt_session(&open_input_data, &open_output_data, &drmHandle->hfile);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_open_decrypt_session() [%x]\n", ret);
 		ret = MMFILE_IO_FAILED;
 		goto exception;
 	}
@@ -117,9 +109,8 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	seek_input_data.seek_mode = DRM_SEEK_END; /* Set cursor to end */
 
 	ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
 		ret = MMFILE_IO_FAILED;
 		goto exception;
 	}
@@ -127,9 +118,8 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	/* Tell to get the file size */
 	memset(&tell_output_data, 0x0, sizeof(drm_trusted_tell_decrypt_resp_data_s));
 	ret = drm_trusted_tell_decrypt_session(drmHandle->hfile, &tell_output_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
 		ret = MMFILE_IO_FAILED;
 		goto exception;
 	}
@@ -141,9 +131,8 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	seek_input_data.offset = 0;
 	seek_input_data.seek_mode = DRM_SEEK_SET;
 	ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_seek_decrypt_session() [%x]\n", ret);
 		ret = MMFILE_IO_FAILED;
 		goto exception;
 	}
@@ -154,25 +143,22 @@ static int mmfile_drm_open(MMFileIOHandle *h, const char *pseudofilename, int fl
 	memset(&state_input_data, 0x0, sizeof(drm_trusted_set_consumption_state_info_s));
 	state_input_data.state = DRM_CONSUMPTION_PREVIEW;
 	ret = drm_trusted_set_decrypt_state(drmHandle->hfile, &state_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_set_decrypt_state [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_set_decrypt_state [%x]\n", ret);
 		ret = MMFILE_IO_FAILED;
 		goto exception;
 	}
 
 #ifdef __MMFILE_TEST_MODE__
-	debug_msg ("drm open success===============\n");
+	debug_msg("drm open success===============\n");
 #endif
 
 	return MMFILE_IO_SUCCESS;
 
 exception:
-	if (drmHandle)
-	{
-		if (drmHandle->hfile)
-		{
-		    drm_trusted_close_decrypt_session(&drmHandle->hfile);
+	if (drmHandle) {
+		if (drmHandle->hfile) {
+			drm_trusted_close_decrypt_session(&drmHandle->hfile);
 		}
 
 		mmfile_free(drmHandle);
@@ -184,30 +170,28 @@ exception:
 
 static int mmfile_drm_read(MMFileIOHandle *h, unsigned char *buf, int size)
 {
-	MMFileDRMHandle *drmHandle =NULL;
+	MMFileDRMHandle *drmHandle = NULL;
 	drm_trusted_payload_info_s read_input_data;
 	drm_trusted_read_decrypt_resp_data_s read_output_data;
 	int ret = 0;
 
-	if (!h || !h->privateData || !buf)
-	{
-		debug_error ("invalid param\n");
+	if (!h || !h->privateData || !buf) {
+		debug_error("invalid param\n");
 		return MMFILE_IO_FAILED;
 	}
 
 	drmHandle = h->privateData;
 
-	memset(&read_input_data,0x0,sizeof(drm_trusted_payload_info_s));
-	memset(&read_output_data,0x0,sizeof(drm_trusted_read_decrypt_resp_data_s));
+	memset(&read_input_data, 0x0, sizeof(drm_trusted_payload_info_s));
+	memset(&read_output_data, 0x0, sizeof(drm_trusted_read_decrypt_resp_data_s));
 
 	read_input_data.payload_data = buf;
 	read_input_data.payload_data_len = (unsigned int)size;
 	read_input_data.payload_data_output = buf;
 
 	ret = drm_trusted_read_decrypt_session(drmHandle->hfile, &read_input_data, &read_output_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_read_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_read_decrypt_session() [%x]\n", ret);
 		return MMFILE_IO_FAILED;
 	}
 
@@ -225,7 +209,7 @@ static long long mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
 	int ret = 0;
 
 	if (!h || !h->privateData) {
-		debug_error ("invalid param\n");
+		debug_error("invalid param\n");
 		return MMFILE_IO_FAILED;
 	}
 
@@ -242,7 +226,7 @@ static long long mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
 			drm_whence = DRM_SEEK_END;
 			break;
 		default:
-			debug_error ("invalid whence[%d]\n", whence);
+			debug_error("invalid whence[%d]\n", whence);
 			return MMFILE_IO_FAILED;
 	}
 
@@ -251,25 +235,24 @@ static long long mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
 	seek_input_data.seek_mode = drm_whence;
 
 	ret = drm_trusted_seek_decrypt_session(drmHandle->hfile, &seek_input_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_seek_decrypt_session() [%x] [mode=%d]\n", ret, drm_whence);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_seek_decrypt_session() [%x] [mode=%d]\n", ret, drm_whence);
 		return MMFILE_IO_FAILED;
 	}
 
 	switch (drm_whence) {
 		case DRM_SEEK_SET: {
-			drmHandle->offset = pos;
-			break;
-		}
+				drmHandle->offset = pos;
+				break;
+			}
 		case DRM_SEEK_CUR: {
-			drmHandle->offset += pos;
-			break;
-		}
+				drmHandle->offset += pos;
+				break;
+			}
 		case DRM_SEEK_END: {
-			drmHandle->offset = drmHandle->fsize + pos;
-			break;
-		}
+				drmHandle->offset = drmHandle->fsize + pos;
+				break;
+			}
 	}
 
 	if (drmHandle->offset > drmHandle->fsize) {
@@ -279,15 +262,14 @@ static long long mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
 	return drmHandle->offset;
 }
 
-static long long mmfile_drm_tell (MMFileIOHandle *h)
+static long long mmfile_drm_tell(MMFileIOHandle *h)
 {
 	MMFileDRMHandle *drmHandle = NULL;
 	drm_trusted_tell_decrypt_resp_data_s tell_output_data;
 	int ret = 0;
 
-	if (!h || !h->privateData)
-	{
-		debug_error ("invalid param\n");
+	if (!h || !h->privateData) {
+		debug_error("invalid param\n");
 		return MMFILE_IO_FAILED;
 	}
 
@@ -295,9 +277,8 @@ static long long mmfile_drm_tell (MMFileIOHandle *h)
 
 	memset(&tell_output_data, 0x0, sizeof(drm_trusted_tell_decrypt_resp_data_s));
 	ret = drm_trusted_tell_decrypt_session(drmHandle->hfile, &tell_output_data);
-	if (ret != DRM_TRUSTED_RETURN_SUCCESS)
-	{
-		debug_error ("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_tell_decrypt_session() [%x]\n", ret);
 		return MMFILE_IO_FAILED;
 	}
 
@@ -306,54 +287,51 @@ static long long mmfile_drm_tell (MMFileIOHandle *h)
 	return drmHandle->offset;
 }
 
-static int mmfile_drm_close(MMFileIOHandle* h)
+static int mmfile_drm_close(MMFileIOHandle *h)
 {
 	MMFileDRMHandle *drmHandle = NULL;
 	drm_trusted_set_consumption_state_info_s state_input_data;
 	int ret = 0;
 
-	if (!h || !h->privateData)
-	{
-		debug_error ("invalid param\n");
+	if (!h || !h->privateData) {
+		debug_error("invalid param\n");
 		return MMFILE_IO_FAILED;
 	}
 
 	drmHandle = h->privateData;
 
 	/* Set Consumption state*/
-	memset(&state_input_data,0x0,sizeof(drm_trusted_set_consumption_state_info_s));
+	memset(&state_input_data, 0x0, sizeof(drm_trusted_set_consumption_state_info_s));
 	state_input_data.state = DRM_CONSUMPTION_STOPPED;
 	ret = drm_trusted_set_decrypt_state(drmHandle->hfile, &state_input_data);
-	if(ret != DRM_TRUSTED_RETURN_SUCCESS) {
-		debug_error ("error: drm_trusted_set_decrypt_state() [%x]\n", ret);
+	if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+		debug_error("error: drm_trusted_set_decrypt_state() [%x]\n", ret);
 	} else {
-		#ifdef __MMFILE_TEST_MODE__
-		debug_msg ("Success : drm_trusted_set_decrypt_state\n");
-		#endif
+#ifdef __MMFILE_TEST_MODE__
+		debug_msg("Success : drm_trusted_set_decrypt_state\n");
+#endif
 	}
 
-	if (drmHandle)
-	{
-		if (drmHandle->hfile)
-		{
+	if (drmHandle) {
+		if (drmHandle->hfile) {
 			ret = drm_trusted_close_decrypt_session(&drmHandle->hfile);
-			if(ret != DRM_TRUSTED_RETURN_SUCCESS) {
-				debug_error ("error: drm_trusted_close_decrypt_session() [%x]\n", ret);
+			if (ret != DRM_TRUSTED_RETURN_SUCCESS) {
+				debug_error("error: drm_trusted_close_decrypt_session() [%x]\n", ret);
 			} else {
-				#ifdef __MMFILE_TEST_MODE__
-				debug_msg ("Success : drm_trusted_close_decrypt_session\n");
-				#endif
+#ifdef __MMFILE_TEST_MODE__
+				debug_msg("Success : drm_trusted_close_decrypt_session\n");
+#endif
 			}
 
 			drmHandle->hfile = NULL;
 		}
 
-		mmfile_free (drmHandle);
+		mmfile_free(drmHandle);
 		h->privateData = NULL;
 	}
 
 #ifdef __MMFILE_TEST_MODE__
-	debug_msg ("drm close success===============\n");
+	debug_msg("drm close success===============\n");
 #endif
 
 	return MMFILE_IO_SUCCESS;
