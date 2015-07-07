@@ -226,7 +226,7 @@ int mmfile_write(MMFileIOHandle *handle, unsigned char *buf, int size)
 }
 
 EXPORT_API
-long long mmfile_seek(MMFileIOHandle *handle, long long pos, int whence)
+int64_t mmfile_seek(MMFileIOHandle *handle, int64_t pos, int whence)
 {
 	long long ret = 0;
 	if (!handle || !handle->iofunc || !handle->iofunc->mmfile_seek) {

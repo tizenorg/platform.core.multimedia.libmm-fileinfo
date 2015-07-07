@@ -1,6 +1,6 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
-Version:    0.6.33
+Version:    0.6.34
 Release:    0
 Group:      System/Libraries
 License:    Apache-2.0
@@ -46,7 +46,7 @@ cp %{SOURCE1001} .
 export CFLAGS+=" -Wextra -Wno-array-bounds"
 export CFLAGS+=" -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow"
 export CFLAGS+=" -Wwrite-strings -Wswitch-default -Werror"
-export CFLAGS+=" -Wno-int-to-pointer-cast"
+export CFLAGS+=" -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast"
 CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
 export CFLAGS
 

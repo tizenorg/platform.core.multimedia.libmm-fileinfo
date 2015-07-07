@@ -164,7 +164,7 @@ static int mmf_mem_write(MMFileIOHandle *h, unsigned char *buf, int size)
 }
 
 
-static long long mmf_mem_seek(MMFileIOHandle *h, long long pos, int whence)
+static int64_t mmf_mem_seek(MMFileIOHandle *h, int64_t pos, int whence)
 {
 	MMFmemIOHandle *memHandle = NULL;
 	long tmp_offset = 0;

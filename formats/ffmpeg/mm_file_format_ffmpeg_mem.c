@@ -160,7 +160,7 @@ static int mmf_mem_write(URLContext *h, const unsigned char *buf, int size)
 }
 
 
-static long long mmf_mem_seek(URLContext *h, long long pos, int whence)
+static int64_t mmf_mem_seek(URLContext *h, int64_t pos, int whence)
 {
 	MMFmemIOHandle *memHandle = NULL;
 	long long tmp_offset = 0;
