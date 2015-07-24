@@ -256,13 +256,13 @@ HANDLING_DRM_DIVX:
 			formatContext->audioTotalTrackNum += 1;
 		}
 #else
-		if (pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_VIDEO) {
+		if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
 #ifdef __MMFILE_TEST_MODE__
 			debug_msg("FFMPEG video codec id: 0x%08X\n", pFormatCtx->streams[i]->codec->codec_id);
 #endif
 			formatContext->videoTotalTrackNum += 1;
 		}
-		if (pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_AUDIO) {
+		if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) {
 #ifdef __MMFILE_TEST_MODE__
 			debug_msg("FFMPEG audio codec id: 0x%08X\n", pFormatCtx->streams[i]->codec->codec_id);
 #endif
@@ -371,7 +371,7 @@ int mmfile_format_read_stream_ffmpg(MMFileFormatContext *formatContext)
 #ifdef __MMFILE_FFMPEG_V085__
 		if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
 #else
-		if ( pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_VIDEO) {
+		if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
 #endif
 			if (formatContext->videoStreamId == -1) {
 				videoStream = mmfile_malloc(sizeof(MMFileFormatStream));
@@ -408,13 +408,12 @@ int mmfile_format_read_stream_ffmpg(MMFileFormatContext *formatContext)
 					                                             pFormatCtx->streams[i]->time_base,
 					                                             1);
 
-					if (videoStream->framePerSec == 0) {
+					if (videoStream->framePerSec == 0)
 #ifndef __MMFILE_LIBAV_VERSION__
 						videoStream->framePerSec = av_q2d(pFormatCtx->streams[i]->r_frame_rate);
 #else
 						videoStream->framePerSec = av_q2d(pFormatCtx->streams[i]->avg_frame_rate);
 #endif
-					}
 
 					videoStream->width			= pVideoCodecCtx->width;
 					videoStream->height			= pVideoCodecCtx->height;
@@ -425,7 +424,7 @@ int mmfile_format_read_stream_ffmpg(MMFileFormatContext *formatContext)
 #ifdef __MMFILE_FFMPEG_V085__
 		else if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
 #else
-		else if ( pFormatCtx->streams[i]->codec->codec_type == AV_CODEC_TYPE_AUDIO ) {
+		else if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) {
 #endif
 			if (formatContext->audioStreamId == -1) {
 				audioStream = mmfile_malloc(sizeof(MMFileFormatStream));
@@ -929,7 +928,6 @@ int mmfile_format_close_ffmpg(MMFileFormatContext *formatContext)
 #endif
 			formatContext->privateFormatData = NULL;
 		}
-
 	}
 
 	return MMFILE_FORMAT_SUCCESS;
@@ -1082,8 +1080,8 @@ static void _dump_av_packet(AVPacket *pkt)
 	debug_msg(" flags: 0x%08X, %s\n", pkt->flags, (pkt->flags & PKT_FLAG_KEY) ? "Keyframe" : "_");
 #endif
 	debug_msg(" duration: %d\n", pkt->duration);
-	debug_msg(" destruct: %p\n", pkt->destruct);
-	debug_msg(" priv: %p\n", pkt->priv);
+	/*debug_msg(" destruct: %p\n", pkt->destruct);*/
+	/*debug_msg(" priv: %p\n", pkt->priv);*/
 	debug_msg(" pos: %lld\n", pkt->pos);
 	debug_msg(" convergence_duration: %lld\n", pkt->convergence_duration);
 	debug_msg("-------------------------------\n");
@@ -1343,7 +1341,7 @@ static int ConvertVideoCodecEnum(int AVVideoCodecID)
 			ret_codecid = MM_VIDEO_CODEC_CINEPAK;
 			break;
 #if (!defined __MMFILE_FFMPEG_V085__ && !defined __MMFILE_LIBAV_VERSION__)
-		case AV_CODEC_ID_XVID:
+		case CODEC_ID_XVID:
 			ret_codecid = MM_VIDEO_CODEC_XVID;
 			break;
 #endif
@@ -1363,9 +1361,11 @@ static int ConvertVideoCodecEnum(int AVVideoCodecID)
 		case AV_CODEC_ID_RV40:	/* RealVideo 4 */
 			ret_codecid = MM_VIDEO_CODEC_REAL;
 			break;
+#ifdef __MMFILE_LIBAV_VERSION__
 		case AV_CODEC_ID_HEVC:
 			ret_codecid = MM_VIDEO_CODEC_MPEG4;
 			break;
+#endif
 		default:
 			ret_codecid = MM_VIDEO_CODEC_NONE;
 			break;

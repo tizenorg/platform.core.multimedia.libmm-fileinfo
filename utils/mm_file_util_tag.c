@@ -1695,7 +1695,7 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 	unsigned long v2numOfFrames = 0;
 	unsigned long curPos = 0;
 	char CompTmp[4];
-	char *pExtContent = NULL;
+	unsigned char *pExtContent = NULL;
 	unsigned long purelyFramelen = 0;
 	unsigned int encodingOffSet = 0;
 	int inx = 0, realCpyFrameNum = 0,
@@ -1758,6 +1758,12 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 				if (encodingOffSet < purelyFramelen) {
 					realCpyFrameNum = purelyFramelen - encodingOffSet;
 					pExtContent = mmfile_malloc(realCpyFrameNum + 3);
+
+					if (pExtContent == NULL) {
+						debug_error("out of memory for pExtContent\n");
+						continue;
+					}
+
 					memset(pExtContent, '\0', realCpyFrameNum + 3);
 
 					memcpy(pExtContent, &buffer[curPos - purelyFramelen + encodingOffSet], purelyFramelen - encodingOffSet);
@@ -1976,8 +1982,8 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 								int cur_pos = 0;
 								int dis_len = 0;
 								int new_dis_len = 0;
-								char jpg_sign[3] = {0xff, 0xd8, 0xff};
-								char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+								unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
+								unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 								char *tmp_desc = NULL;
 
 								while (1) {
@@ -2687,8 +2693,8 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 									int cur_pos = 0;
 									int dis_len = 0;
 									int new_dis_len = 0;
-									char jpg_sign[3] = {0xff, 0xd8, 0xff};
-									char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+									unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
+									unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 									char *tmp_desc = NULL;
 
 									while (1) {
@@ -3243,12 +3249,17 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 
 								if (textEncodingType == AV_ID3V2_UTF8) {
 									pInfo->pUnsyncLyrics = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-									memset(pInfo->pUnsyncLyrics, 0, (realCpyFrameNum + 2));
-									memcpy(pInfo->pUnsyncLyrics, pExtContent + tmp, realCpyFrameNum);
-									pInfo->pUnsyncLyrics[realCpyFrameNum] = '\0';
-									/*string copy with '\0'*/
-									pInfo->unsynclyricsLen = realCpyFrameNum;
-									_STRNCPY_EX(pInfo->pUnsyncLyrics, pExtContent, pInfo->unsynclyricsLen);
+
+									if (pInfo->pUnsyncLyrics != NULL) {
+										memset(pInfo->pUnsyncLyrics, 0, (realCpyFrameNum + 2));
+										memcpy(pInfo->pUnsyncLyrics, pExtContent + tmp, realCpyFrameNum);
+										pInfo->pUnsyncLyrics[realCpyFrameNum] = '\0';
+										/*string copy with '\0'*/
+										pInfo->unsynclyricsLen = realCpyFrameNum;
+										_STRNCPY_EX(pInfo->pUnsyncLyrics, pExtContent, pInfo->unsynclyricsLen);
+									} else {
+										debug_error("out of memoryu for SyncLyrics\n");
+									}
 								} else {
 									pInfo->pUnsyncLyrics = mmfile_string_convert((const char *)&pExtContent[tmp], realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->unsynclyricsLen);
 								}
@@ -3477,8 +3488,8 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 									int cur_pos = 0;
 									int dis_len = 0;
 									int new_dis_len = 0;
-									char jpg_sign[3] = {0xff, 0xd8, 0xff};
-									char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+									unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
+									unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 									char *tmp_desc = NULL;
 
 									while (1) {

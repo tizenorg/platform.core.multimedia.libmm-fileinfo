@@ -204,7 +204,7 @@ static int mmf_mmap_write(MMFileIOHandle *h, unsigned char *buf, int size)
 }
 
 
-static int64_t mmf_mmap_seek(MMFileIOHandle *h, int64_t pos, int whence)
+static long long mmf_mmap_seek(MMFileIOHandle *h, long long pos, int whence)
 {
 	MMFMMapIOHandle *mmapHandle = NULL;
 	long tmp_offset = 0;
