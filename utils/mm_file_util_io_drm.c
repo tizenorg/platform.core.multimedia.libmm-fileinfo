@@ -201,7 +201,7 @@ static int mmfile_drm_read(MMFileIOHandle *h, unsigned char *buf, int size)
 }
 
 
-static long long mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
+static int64_t mmfile_drm_seek(MMFileIOHandle *h, long long pos, int whence)
 {
 	MMFileDRMHandle *drmHandle = NULL;
 	drm_trusted_seek_mode_e drm_whence;
