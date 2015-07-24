@@ -1,6 +1,6 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
-Version:    0.6.34
+Version:    0.6.35
 Release:    0
 Group:      System/Libraries
 License:    Apache-2.0

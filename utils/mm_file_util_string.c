@@ -198,16 +198,16 @@ done:
 EXPORT_API
 char *mmfile_string_convert(const char *str, unsigned int len,
                             const char *to_codeset, const char *from_codeset,
-                            gsize *bytes_read,
+                            unsigned int *bytes_read,
                             unsigned int *bytes_written)
 {
 	char *result = NULL;
 	GError *err = NULL;
 	/*int i = 0;*/
-	gsize written_len = 0;
+	unsigned int written_len = 0;
 
 	if (len != 0) {
-		result = g_convert(str, len, to_codeset, from_codeset, bytes_read, &written_len, &err);
+		result = g_convert(str, len, to_codeset, from_codeset, (gsize *)bytes_read, (gsize *)&written_len, &err);
 
 		/*if converting failed, return duplicated source string.*/
 		if (result == NULL) {

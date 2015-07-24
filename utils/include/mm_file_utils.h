@@ -139,7 +139,7 @@ int mmfile_register_io_all();
 int			mmfile_open(MMFileIOHandle **h, const char *filename, int flags);
 int			mmfile_read(MMFileIOHandle *h, unsigned char *buf, int size);
 int			mmfile_write(MMFileIOHandle *h, unsigned char *buf, int size);
-int64_t		mmfile_seek(MMFileIOHandle *h, int64_t pos, int whence);
+long long	mmfile_seek(MMFileIOHandle *h, long long pos, int whence);
 long long	mmfile_tell(MMFileIOHandle *h);
 int			mmfile_close(MMFileIOHandle *h);
 
@@ -178,7 +178,7 @@ short *mmfile_swap_2byte_string(short *mszOutput, short *mszInput, int length);
 char *mmfile_get_charset(const char *str);
 char *mmfile_string_convert(const char *str, unsigned int len,
                             const char *to_codeset, const char *from_codeset,
-                            gsize *bytes_read,
+                            unsigned int *bytes_read,
                             unsigned int *bytes_written);
 char *mmfile_strdup(const char *str);
 
