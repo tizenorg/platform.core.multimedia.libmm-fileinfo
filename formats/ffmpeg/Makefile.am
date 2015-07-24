@@ -37,7 +37,7 @@ libmmfile_formats_la_CFLAGS = -I$(srcdir)/include \
 			  $(AVUTIL_CFLAGS) \
 			   $(AVCODEC_CFLAGS) \
 			   $(SWSCALE_CFLAGS) \
-			  $(AVFORMAT_CFLAGS) 
+			  $(AVFORMAT_CFLAGS)
 
 if USE_TESTMODE
 libmmfile_formats_la_CFLAGS += -D__MMFILE_TEST_MODE__
