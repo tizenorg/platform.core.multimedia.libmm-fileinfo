@@ -113,7 +113,7 @@ static int file_write(MMFileIOHandle *handle, unsigned char *buf, int size)
 	return writtenSize;
 }
 
-static int64_t file_seek(MMFileIOHandle *handle, int64_t pos, int whence)
+static long long file_seek(MMFileIOHandle *handle, long long pos, int whence)
 {
 	tMMFORMAT_FILEIO_DATA *privateData = handle->privateData;
 	privateData->offset = lseek(privateData->fd, pos, whence);
