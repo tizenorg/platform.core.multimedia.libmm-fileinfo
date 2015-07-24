@@ -671,12 +671,12 @@ int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *firs
 	va_list var_args;
 
 	if (!attrs) {
-		debug_error("Invalid arguments [attrs 0]\n");
+		debug_error("tomoryu Invalid arguments [attrs 0]\n");
 		return MM_ERROR_INVALID_ARGUMENT;
 	}
 
 	if (first_attribute_name == NULL) {
-		debug_error("Invalid arguments [first_attribute_name null]\n");
+		debug_error("tomoryu Invalid arguments [first_attribute_name null]\n");
 		return MM_ERROR_INVALID_ARGUMENT;
 	}
 

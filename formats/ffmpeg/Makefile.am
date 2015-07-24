@@ -41,11 +41,11 @@ libmmfile_formats_la_CFLAGS = -I$(srcdir)/include \
 
 if USE_TESTMODE
 libmmfile_formats_la_CFLAGS += -D__MMFILE_TEST_MODE__
-endif
+endif  
 
 if USE_DUMP
 libmmfile_formats_la_CFLAGS += -DMMFILE_FORMAT_DEBUG_DUMP
-endif
+endif  
 
 if USE_DRM
 noinst_HEADERS += include/mm_file_format_ffmpeg_drm.h
@@ -55,7 +55,7 @@ endif
 
 if USE_IOMMAP
 libmmfile_formats_la_CFLAGS += -D__MMFILE_MMAP_MODE__
-endif
+endif  
 
 
 libmmfile_formats_la_LIBADD = $(MMCOMMON_LIBS) \
@@ -63,7 +63,7 @@ libmmfile_formats_la_LIBADD = $(MMCOMMON_LIBS) \
 				$(AVCODEC_LIBS) \
 				$(AVFORMAT_LIBS) \
 				$(SWSCALE_LIBS) \
-      			  $(top_builddir)/utils/libmmfile_utils.la
+      			  $(top_builddir)/utils/libmmfile_utils.la 
 
 if USE_DRM
 libmmfile_formats_la_LIBADD += $(DRMCLIENT_LIBS) $(DRMTRUSTTED_LIBS)
