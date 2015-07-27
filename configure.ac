@@ -91,27 +91,7 @@ AC_SUBST(ICU_LIBS)
 PKG_CHECK_MODULES(VCONF, vconf)
 AC_SUBST(VCONF_CFLAGS)
 AC_SUBST(VCONF_LIBS)
-
-dnl use drm  --------------------------------------------------------------------------
-AC_ARG_ENABLE(drm, AC_HELP_STRING([--enable-drm], [using drm]),
-[
-   case "${enableval}" in
-       yes) USE_DRM=yes ;;
-        no) USE_DRM=no ;;
-         *) AC_MSG_ERROR(bad value ${enableval} for --enable-drm) ;;
-   esac
-],[USE_DRM=yes])
-if test "x$USE_DRM" = "xyes"; then
-     PKG_CHECK_MODULES(DRMCLIENT, drm-client)
-     AC_SUBST(DRMCLIENT_CFLAGS)
-     AC_SUBST(DRMCLIENT_LIBS)
-
-     PKG_CHECK_MODULES(DRMTRUSTED, drm-trusted)
-     AC_SUBST(DRMTRUSTED_CFLAGS)
-     AC_SUBST(DRMTRUSTED_LIBS)
-fi
-AM_CONDITIONAL(USE_DRM, test "x$USE_DRM" = "xyes")
-
+ 
 dnl use dyn --------------------------------------------------------------------------
 AC_ARG_ENABLE(dyn, AC_HELP_STRING([--enable-dyn], [using dyn]),
 [

@@ -18,7 +18,7 @@ libmmfile_codecs_la_CFLAGS = -I$(srcdir)/include \
 			 -D_FILE_OFFSET_BITS=64
 
 libmmfile_codecs_la_LIBADD = $(MMCOMMON_LIBS)	\
-			     $(top_builddir)/utils/libmmfile_utils.la
+			     $(top_builddir)/utils/libmmfile_utils.la 
 
 libmmfile_codecs_la_CFLAGS += $(DLOG_CFLAGS)
 libmmfile_codecs_la_LIBADD += $(DLOG_LIBS)

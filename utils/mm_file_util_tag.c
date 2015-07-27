@@ -2941,6 +2941,12 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 				if (encodingOffSet < purelyFramelen) {
 					realCpyFrameNum = purelyFramelen - encodingOffSet;
 					pExtContent = mmfile_malloc(realCpyFrameNum + 3);
+
+					if (pExtContent == NULL) {
+						debug_error("out of memoryu for id3tag parse\n");
+						continue;
+					}
+
 					memset(pExtContent, '\0', realCpyFrameNum + 3);
 
 					if (textEncodingType != AV_ID3V2_UTF16 && textEncodingType != AV_ID3V2_UTF16_BE) {

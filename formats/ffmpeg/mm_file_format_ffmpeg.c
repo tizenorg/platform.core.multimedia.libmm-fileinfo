@@ -31,20 +31,10 @@
 #endif
 #include <mm_error.h>
 #include <mm_types.h>
-
-#ifdef DRM_SUPPORT
-#include <drm_client.h>
-#endif
-
 #include "mm_file_debug.h"
 #include "mm_file_formats.h"
 #include "mm_file_utils.h"
 #include "mm_file_format_ffmpeg.h"
-
-#ifdef DRM_SUPPORT
-#include "mm_file_format_ffmpeg_drm.h"
-#endif
-
 #include "mm_file_format_ffmpeg_mem.h"
 #include <sys/time.h>
 
@@ -83,9 +73,6 @@ int mmfile_format_open_ffmpg(MMFileFormatContext *formatContext)
 	AVInputFormat       *grab_iformat = NULL;
 	int ret = 0;
 	unsigned int i;
-#ifdef DRM_SUPPORT
-	drm_content_info_s contentInfo = {0, };
-#endif
 	char ffmpegFormatName[MMFILE_FILE_FMT_MAX_LEN] = {0, };
 	char mimeType[MMFILE_MIMETYPE_MAX_LEN] = {0, };
 
@@ -154,73 +141,17 @@ int mmfile_format_open_ffmpg(MMFileFormatContext *formatContext)
 	}
 
 	if (formatContext->filesrc->type  == MM_FILE_SRC_TYPE_FILE) {
-
-		if (formatContext->isdrm == MM_FILE_DRM_OMA) {
-#ifdef DRM_SUPPORT
-			if (formatContext->formatType == MM_FILE_FORMAT_DIVX || formatContext->formatType == MM_FILE_FORMAT_AVI) {
-				goto HANDLING_DRM_DIVX;
-			}
-
 #ifdef __MMFILE_FFMPEG_V085__
-			ffurl_register_protocol(&MMFileDRMProtocol, sizeof(URLProtocol));
+		ret = avformat_open_input(&pFormatCtx, formatContext->filesrc->file.path, NULL, NULL);
 #else
-			ffurl_register_protocol(&MMFileDRMProtocol);
+		ret = av_open_input_file(&pFormatCtx, formatContext->filesrc->file.path, NULL, 0, NULL);
 #endif
-			memset(&contentInfo, 0x0, sizeof(drm_content_info_s));
-			if (DRM_RETURN_SUCCESS != drm_get_content_info(formatContext->filesrc->file.path, &contentInfo)) {
-				debug_error("error: drm_get_content_info\n");
-				return MMFILE_FORMAT_FAIL;
-			}
-
-			memset(ffmpegFormatName, 0x00, MMFILE_FILE_FMT_MAX_LEN);
-
-			ret = mmfile_util_get_ffmpeg_format(contentInfo.mime_type, ffmpegFormatName);
-			if (MMFILE_UTIL_SUCCESS != ret) {
-				debug_error("error: mmfile_util_get_ffmpeg_format\n");
-				return MMFILE_FORMAT_FAIL;
-			}
-
-#ifdef __MMFILE_TEST_MODE__
-			debug_warning("FFMPEG: test........... : %s\n", ffmpegFormatName);
-			debug_warning("FFMPEG: DRM URI = %s\n", formatContext->uriFileName);
-			debug_warning("FFMPEG: ffmpeg name = %s\n", ffmpegFormatName);
-#endif
-
-			grab_iformat = av_find_input_format(ffmpegFormatName);
-
-			if (NULL == grab_iformat) {
-				debug_error("error: cannot find format\n");
-				goto exception;
-			}
-
-#ifdef __MMFILE_FFMPEG_V085__
-			ret = avformat_open_input(&pFormatCtx, formatContext->uriFileName, grab_iformat, NULL);
-#else
-			ret = av_open_input_file(&pFormatCtx, formatContext->uriFileName, grab_iformat, 0, NULL);
-#endif
-			if (ret < 0) {
-				debug_error("error: cannot open %s %d\n", formatContext->uriFileName, ret);
-				goto exception;
-			}
-			formatContext->privateFormatData = pFormatCtx;
-#endif
-		} else {
-#ifdef DRM_SUPPORT
-HANDLING_DRM_DIVX:
-#endif
-
-#ifdef __MMFILE_FFMPEG_V085__
-			ret = avformat_open_input(&pFormatCtx, formatContext->filesrc->file.path, NULL, NULL);
-#else
-			ret = av_open_input_file(&pFormatCtx, formatContext->filesrc->file.path, NULL, 0, NULL);
-#endif
-			if (ret < 0) {
-				debug_error("error: cannot open %s %d\n", formatContext->filesrc->file.path, ret);
-				goto exception;
-			}
-
-			formatContext->privateFormatData = pFormatCtx;
+		if (ret < 0) {
+			debug_error("error: cannot open %s %d\n", formatContext->filesrc->file.path, ret);
+			goto exception;
 		}
+
+		formatContext->privateFormatData = pFormatCtx;
 	}
 
 	if (!pFormatCtx/* || !(pFormatCtx->nb_streams > 0)*/) {
@@ -747,11 +678,6 @@ int mmfile_format_read_frame_ffmpg(MMFileFormatContext *formatContext, unsigned 
 		return MMFILE_FORMAT_FAIL;
 	}
 
-	if (formatContext->isdrm == MM_FILE_DRM_PROTECTED) {
-		debug_error("This is protected drm file\n");
-		return MMFILE_FORMAT_FAIL;
-	}
-
 	pFormatCtx = formatContext->privateFormatData;
 
 	if (formatContext->videoStreamId != -1) {
@@ -1099,7 +1025,7 @@ static int _get_first_good_video_frame(AVFormatContext *pFormatCtx, AVCodecConte
 	AVFrame *first_frame = NULL;
 
 	/* long long timestamp; */
-	int stream_id = videoStream;
+	/*int stream_id = videoStream;*/
 	int ret;
 	int found = 0;
 	int i, v, len, got_picture;
@@ -1156,7 +1082,7 @@ static int _get_first_good_video_frame(AVFormatContext *pFormatCtx, AVCodecConte
 			debug_error("read failed. (maybe EOF or broken)\n");
 			break;
 		} else {
-			if (pkt.stream_index == stream_id) {
+			if (avcodec_get_type(pFormatCtx->streams[pkt.stream_index]->codec->codec_id) == AVMEDIA_TYPE_VIDEO) {
 				v++;
 #ifdef __MMFILE_FFMPEG_V085__
 				if ((pkt.flags & AV_PKT_FLAG_KEY) || (key_detected == 1))

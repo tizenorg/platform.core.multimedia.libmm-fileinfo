@@ -182,7 +182,7 @@ static int _load_dynamic_functions(MMFILE_FUNC_HANDLE *pHandle)
 
 	formatFuncHandle = dlopen(MMFILE_FORMAT_SO_FILE_NAME, RTLD_LAZY);
 	if (!formatFuncHandle) {
-		debug_error("error: %s\n", dlerror());
+		debug_error("error: %s\n", "libmmfile_formats.so open error");
 		ret = 0;
 		goto exception;
 	}
@@ -199,7 +199,7 @@ static int _load_dynamic_functions(MMFILE_FUNC_HANDLE *pHandle)
 	    !mmfile_format_read_tag ||
 	    !mmfile_format_close) {
 
-		debug_error("error: %s\n", dlerror());
+		debug_error("error: %s\n", "format function load error");
 		ret = 0;
 		goto exception;
 	}
@@ -209,7 +209,7 @@ static int _load_dynamic_functions(MMFILE_FUNC_HANDLE *pHandle)
 
 	codecFuncHandle = dlopen(MMFILE_CODEC_SO_FILE_NAME, RTLD_LAZY | RTLD_GLOBAL);
 	if (!codecFuncHandle) {
-		debug_error("error: %s\n", dlerror());
+		debug_error("error: %s\n", "libmmfile_codecs.so open error");
 		ret = 0;
 		goto exception;
 	}
@@ -219,7 +219,7 @@ static int _load_dynamic_functions(MMFILE_FUNC_HANDLE *pHandle)
 	mmfile_codec_close		= dlsym(codecFuncHandle, "mmfile_codec_close");
 
 	if (!mmfile_codec_open || !mmfile_codec_decode || !mmfile_codec_close) {
-		debug_error("error: %s\n", dlerror());
+		debug_error("error: %s\n", "codec function load error");
 		ret = 0;
 		goto exception;
 	}
