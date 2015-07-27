@@ -221,9 +221,6 @@ typedef struct {
 	AvTagVer2ImageInfo			imageInfo;	/*Album art   attached feature */
 	AvTagVer2AdditionalData		tagV2Info; /*Needed data for ID3 tag parsing */
 
-/* for DRM 2.0 */
-	char			*pTransactionID;
-
 /*for ID3V1 Tag */
 	unsigned char	genre;
 
@@ -259,7 +256,6 @@ inline static void mm_file_free_AvFileContentInfo(AvFileContentInfo *pInfo)
 		if (pInfo->pOriginArtist) mmfile_free(pInfo->pOriginArtist);
 		if (pInfo->pComposer) mmfile_free(pInfo->pComposer);
 		if (pInfo->imageInfo.pImageBuf) mmfile_free(pInfo->imageInfo.pImageBuf);
-		if (pInfo->pTransactionID) mmfile_free(pInfo->pTransactionID);
 	}
 }
 

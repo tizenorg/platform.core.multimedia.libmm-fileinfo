@@ -1,6 +1,6 @@
 Name:	    libmm-fileinfo
 Summary:    Media Fileinfo
-Version:    0.6.35
+Version:    0.6.40
 Release:    0
 Group:      System/Libraries
 License:    Apache-2.0
@@ -18,14 +18,6 @@ BuildRequires: pkgconfig(libavutil)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(icu-i18n)
 BuildRequires: pkgconfig(vconf)
-
-%define use_drm 0
-
-%if %{use_drm}
-BuildRequires: libss-client-devel
-#BuildRequires: pkgconfig(drm-client)
-#BuildRequires: pkgconfig(drm-trusted)
-%endif
 
 %description
 Multimedia Framework FileInfo Library
@@ -47,20 +39,10 @@ export CFLAGS+=" -Wextra -Wno-array-bounds"
 export CFLAGS+=" -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow"
 export CFLAGS+=" -Wwrite-strings -Wswitch-default -Werror"
 export CFLAGS+=" -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast"
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "
-export CFLAGS
+./autogen.sh
 
 %reconfigure \
-    --disable-testmode \
-    --disable-dump \
-    --enable-dyn \
-    --disable-iommap \
-    --disable-gtk \
-%if %{use_drm}
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure  --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --enable-drm --disable-gtk
-%else
-CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --disable-drm --disable-gtk
-%endif
+CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " LDFLAGS="${LDFLAGS}" ./configure --disable-testmode --disable-dump --enable-dyn --disable-iommap --prefix=/usr --disable-gtk
 
 %__make
 

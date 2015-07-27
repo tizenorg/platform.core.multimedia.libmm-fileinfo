@@ -47,15 +47,9 @@ if USE_DUMP
 libmmfile_formats_la_CFLAGS += -DMMFILE_FORMAT_DEBUG_DUMP
 endif
 
-if USE_DRM
-noinst_HEADERS += include/mm_file_format_ffmpeg_drm.h
-libmmfile_formats_la_SOURCES += mm_file_format_ffmpeg_drm.c
-libmmfile_formats_la_CFLAGS += $(DRMCLIENT_CFLAGS) $(DRMTRUSTED_CFLAGS) -DDRM_SUPPORT
-endif
-
 if USE_IOMMAP
 libmmfile_formats_la_CFLAGS += -D__MMFILE_MMAP_MODE__
-endif
+endif  
 
 
 libmmfile_formats_la_LIBADD = $(MMCOMMON_LIBS) \
@@ -64,10 +58,6 @@ libmmfile_formats_la_LIBADD = $(MMCOMMON_LIBS) \
 				$(AVFORMAT_LIBS) \
 				$(SWSCALE_LIBS) \
       			  $(top_builddir)/utils/libmmfile_utils.la
-
-if USE_DRM
-libmmfile_formats_la_LIBADD += $(DRMCLIENT_LIBS) $(DRMTRUSTTED_LIBS)
-endif
 
 libmmfile_formats_la_CFLAGS += $(DLOG_CFLAGS)
 libmmfile_formats_la_LIBADD += $(DLOG_LIBS)
