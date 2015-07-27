@@ -819,7 +819,7 @@ PROBE_PROPER_FILE_TYPE:
 			case MM_FILE_FORMAT_3GP:
 			case MM_FILE_FORMAT_MP4: {
 				if (skip_index == MM_FILE_FORMAT_QT || skip_index == MM_FILE_FORMAT_3GP || skip_index == MM_FILE_FORMAT_MP4)
-					break;
+					goto FILE_FORMAT_FAIL;
 
 				if (MMFileFormatIsValidMP4(fp, NULL)) {
 					*formatEnum = MM_FILE_FORMAT_3GP;
@@ -833,7 +833,7 @@ PROBE_PROPER_FILE_TYPE:
 			case MM_FILE_FORMAT_WMA:
 			case MM_FILE_FORMAT_WMV: {
 				if (skip_index == MM_FILE_FORMAT_ASF || skip_index == MM_FILE_FORMAT_WMA || skip_index == MM_FILE_FORMAT_WMV)
-					break;
+					goto FILE_FORMAT_FAIL;
 
 				if (MMFileFormatIsValidASF(fp, NULL)) {
 					*formatEnum = MM_FILE_FORMAT_ASF;
@@ -846,7 +846,7 @@ PROBE_PROPER_FILE_TYPE:
 			case MM_FILE_FORMAT_DIVX:
 			case MM_FILE_FORMAT_AVI: {
 				if (skip_index == MM_FILE_FORMAT_DIVX || skip_index == MM_FILE_FORMAT_AVI)
-					break;
+					goto FILE_FORMAT_FAIL;
 
 				if (MMFileFormatIsValidAVI(fp, NULL)) {
 					*formatEnum = MM_FILE_FORMAT_AVI;
@@ -1008,6 +1008,7 @@ PROBE_PROPER_FILE_TYPE:
 			case MM_FILE_FORMAT_JPG:
 			default: {
 				debug_error("error: invaild format enum[%d]\n", index);
+				goto FILE_FORMAT_FAIL;
 				break;
 			}
 		}

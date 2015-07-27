@@ -55,7 +55,7 @@
 #ifdef __MMFILE_TEST_MODE__
 typedef struct {
 	short	codec;		/**< WAVE form Registration Number*/
-	const char	*name;		/**< WAVE form wFormatTag ID*/
+	char	*name;		/**< WAVE form wFormatTag ID*/
 } MMF_FILE_WAVE_CODEC_NAME;
 
 MMF_FILE_WAVE_CODEC_NAME g_audio_cdc_tbl[] = {
@@ -371,7 +371,7 @@ int mmfile_format_close_wav(MMFileFormatContext *formatContext)
 }
 
 #ifdef __MMFILE_TEST_MODE__
-static const char *
+static char *
 _dump_codec_name(short codec)
 {
 	int sz = sizeof(g_audio_cdc_tbl) / sizeof(MMF_FILE_WAVE_CODEC_NAME);
