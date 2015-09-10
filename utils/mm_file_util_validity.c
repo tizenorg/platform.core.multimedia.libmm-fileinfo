@@ -65,12 +65,11 @@ int MMFileFormatIsValidMP3(MMFileIOHandle *pFileIO, const char *mmfileuri, int f
 	unsigned char buffer[_MMFILE_MP3_BUFFER_LENGTH] = {0, };
 	long long  filesize = 0;
 	unsigned int sizeID3 = 0;
-	unsigned int readed = 0;
+	int readed = 0, i = 0, j = 0;;
 	unsigned int startoffset = 0;
-	unsigned int endoffset = 0;
-	unsigned int frameSize = 0;
-	unsigned int i = 0, j = 0;
-	int ret = 0, count, offset;
+	int endoffset = 0;
+	int frameSize = 0;
+	int ret = 0, count = 0, offset = 0;
 
 	if (fp == NULL) {
 		ret = mmfile_open(&fp, mmfileuri, MMFILE_RDONLY);
@@ -189,12 +188,12 @@ int MMFileFormatIsValidAAC(MMFileIOHandle *pFileIO, const char *mmfileuri)
 	unsigned char buffer[_MMFILE_AAC_BUFFER_LENGTH] = {0, };
 	unsigned int sizeID3 = 0;
 	long long    filesize = 0;
-	unsigned int readed = 0;
-	unsigned int startoffset = 0;
-	unsigned int endoffset = 0;
-	unsigned int i = 0, j = 0;
+	int readed = 0, i = 0, j = 0;
+	int startoffset = 0;
+	int endoffset = 0;
 	int ret = 0;
-	unsigned int sync, frameSize;
+	unsigned int sync = 0;
+	int frameSize = 0;
 
 	if (fp == NULL) {
 		ret = mmfile_open(&fp, mmfileuri, MMFILE_RDONLY);
@@ -321,12 +320,11 @@ int MMFileFormatIsValidOGG(MMFileIOHandle *pFileIO, const char *mmfileuri)
 	unsigned char buffer[_MMFILE_OGG_BUFFER_LENGTH] = {0, };
 	unsigned int sizeID3 = 0;
 	long long    filesize = 0;
-	unsigned int readed = 0;
-	unsigned int startoffset = 0;
-	unsigned int endoffset = 0;
-	unsigned int i = 0, j = 0;
+	int readed = 0, i = 0, j = 0;
+	int startoffset = 0;
+	int endoffset = 0;
 	int ret = 0;
-	unsigned int check_limit = 0;
+	int check_limit = 0;
 
 	if (fp == NULL) {
 		ret = mmfile_open(&fp, mmfileuri, MMFILE_RDONLY);
@@ -412,12 +410,11 @@ int MMFileFormatIsValidMID(MMFileIOHandle *pFileIO, const char *mmfileuri)
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MIDI_BUFFER_LENGTH] = {0, };
 	long long    filesize = 0;
-	unsigned int readed = 0;
-	unsigned int startoffset = 0;
-	unsigned int endoffset = 0;
-	unsigned int i = 0, j = 0;
+	int readed = 0, i = 0, j = 0;
+	int startoffset = 0;
+	int endoffset = 0;
 	int ret = 0;
-	unsigned int check_limit = 0;
+	int check_limit = 0;
 
 	if (fp == NULL) {
 		ret = mmfile_open(&fp, mmfileuri, MMFILE_RDONLY);
@@ -1598,8 +1595,8 @@ static int _MMFileIsMPEGAUDIOHeader(void *header)
 {
 	unsigned char *s = header;
 
-	if ((*(s + 0) & 0xFF) &&
-	    (*(s + 1) & 0xFE)) {	/* mpeg audio layer 1 header */
+	if ((*(s + 0) == 0xFF) &&
+	    (*(s + 1) == 0xFE)) {	/* mpeg audio layer 1 header */
 		return 1;
 	}
 

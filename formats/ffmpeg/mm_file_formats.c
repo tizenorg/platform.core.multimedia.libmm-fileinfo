@@ -22,12 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef DRM_SUPPORT
-#include <drm_client.h>
-#endif
-
-
 #include "mm_file_debug.h"
 #include "mm_file_format_private.h"
 #include "mm_file_utils.h"
@@ -177,14 +171,11 @@ static int _CleanupFrameContext(MMFileFormatContext *formatContext, bool clean_a
 }
 
 static int
-_PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, int *isdrm)
+_PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum)
 {
 	const char	*fileName = NULL;
 	int			filename_len = 0;
 	int			index = 0, skip_index = 0;
-#ifdef DRM_SUPPORT
-	drm_content_info_s	contentInfo;
-#endif
 	int ret = 0;
 	MMFileIOHandle *fp = NULL;
 
@@ -194,97 +185,39 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 		fileName = (const char *)(fileSrc->file.path);
 		filename_len = strlen(fileName);
 
-#ifdef DRM_SUPPORT
-		/**
-		 * Make URI name with file name
-		 */
-		drm_bool_type_e res = DRM_TRUE;
-		drm_file_type_e file_type = DRM_TYPE_UNDEFINED;
-		int ret = 0;
-
-		ret = drm_is_drm_file(fileSrc->file.path, &res);
-		if (ret == DRM_RETURN_SUCCESS && DRM_TRUE == res) {
-			ret = drm_get_file_type(fileSrc->file.path, &file_type);
-			if ((ret == DRM_RETURN_SUCCESS) && ((file_type == DRM_TYPE_OMA_V1) || (file_type == DRM_TYPE_OMA_V2))) {
-				char extansion_name[_MMF_FILE_FILEEXT_MAX];
-				int i = 0;
-
-				*isdrm = MM_FILE_DRM_OMA;
-#ifdef __MMFILE_TEST_MODE__
-				debug_msg("OMA DRM detected.\n");
-#endif
-
-				memset(&contentInfo, 0x0, sizeof(drm_content_info_s));
-
-				if (DRM_RETURN_SUCCESS != drm_get_content_info(fileSrc->file.path, &contentInfo)) {
-					debug_error("error: drm_get_content_info\n");
-					goto FILE_FORMAT_FAIL;
-				}
-
-				memset(extansion_name, 0x00, _MMF_FILE_FILEEXT_MAX);
-				if (MMFILE_UTIL_SUCCESS != mmfile_util_get_file_ext(contentInfo.mime_type, extansion_name)) {
-					debug_error("error: mmfile_util_get_ffmpeg_format\n");
-					goto FILE_FORMAT_FAIL;
-				}
-
-				file_extansion = 0;
-
-				for (i = 0; i < stlen(extansion_name); i++) {
-					file_extansion |= (extansion_name[i] >= 'A' && extansion_name[i] <= 'Z' ? extansion_name[i] + 0x20 : extansion_name[i]) << i * 8;
-				}
-
-				*urifilename = mmfile_malloc(MMFILE_DRM_URI_LEN + filename_len + 1);
-				if (!*urifilename) {
-					debug_error("error: mmfile_malloc uriname\n");
-					goto FILE_FORMAT_FAIL;
-				}
-
-				memset(*urifilename, 0x00, MMFILE_DRM_URI_LEN + filename_len + 1);
-				strncpy(*urifilename, MMFILE_DRM_URI, MMFILE_DRM_URI_LEN);
-				strncat(*urifilename, fileName, filename_len);
-				(*urifilename)[MMFILE_DRM_URI_LEN + filename_len] = '\0';
-			} else if ((ret == DRM_RETURN_SUCCESS) &&
-			           ((file_type == DRM_TYPE_PLAYREADY) || (file_type == DRM_TYPE_PLAYREADY_ENVELOPE) || (file_type == DRM_TYPE_PIFF))) {
-				*isdrm = MM_FILE_DRM_PROTECTED;
-			}
-		} else
-#endif /* DRM_SUPPORT			 */
-		{
-			int pos = filename_len;
-			*isdrm = MM_FILE_DRM_NONE;
+		int pos = filename_len;
 #ifdef __MMFILE_MMAP_MODE__
-			*urifilename = mmfile_malloc(MMFILE_MMAP_URI_LEN + filename_len + 1);
-			if (!*urifilename) {
-				debug_error("error: mmfile_malloc uriname\n");
-				goto FILE_FORMAT_FAIL;
-			}
+		*urifilename = mmfile_malloc(MMFILE_MMAP_URI_LEN + filename_len + 1);
+		if (!*urifilename) {
+			debug_error("error: mmfile_malloc uriname\n");
+			goto FILE_FORMAT_FAIL;
+		}
 
-			memset(*urifilename, 0x00, MMFILE_MMAP_URI_LEN + filename_len + 1);
-			strncpy(*urifilename, MMFILE_MMAP_URI, MMFILE_MMAP_URI_LEN);
-			strncat(*urifilename, fileName, filename_len);
-			(*urifilename)[MMFILE_MMAP_URI_LEN + filename_len] = '\0';
+		memset(*urifilename, 0x00, MMFILE_MMAP_URI_LEN + filename_len + 1);
+		strncpy(*urifilename, MMFILE_MMAP_URI, MMFILE_MMAP_URI_LEN);
+		strncat(*urifilename, fileName, filename_len);
+		(*urifilename)[MMFILE_MMAP_URI_LEN + filename_len] = '\0';
 
 #else
-			*urifilename = mmfile_malloc(MMFILE_FILE_URI_LEN + filename_len + 1);
-			if (!*urifilename) {
-				debug_error("error: mmfile_malloc uriname\n");
-				goto FILE_FORMAT_FAIL;
-			}
+		*urifilename = mmfile_malloc(MMFILE_FILE_URI_LEN + filename_len + 1);
+		if (!*urifilename) {
+			debug_error("error: mmfile_malloc uriname\n");
+			goto FILE_FORMAT_FAIL;
+		}
 
-			memset(*urifilename, 0x00, MMFILE_FILE_URI_LEN + filename_len + 1);
-			strncpy(*urifilename, MMFILE_FILE_URI, MMFILE_FILE_URI_LEN + 1);
-			strncat(*urifilename, fileName, filename_len);
-			(*urifilename)[MMFILE_FILE_URI_LEN + filename_len] = '\0';
+		memset(*urifilename, 0x00, MMFILE_FILE_URI_LEN + filename_len + 1);
+		strncpy(*urifilename, MMFILE_FILE_URI, MMFILE_FILE_URI_LEN + 1);
+		strncat(*urifilename, fileName, filename_len);
+		(*urifilename)[MMFILE_FILE_URI_LEN + filename_len] = '\0';
 #endif
-			/**
-			 * Get file extension from file's name
-			 */
-			while (pos > 0) {
-				pos--;
-				if (fileName[pos] == '.')
-					break;
-				file_extansion |= (fileName[pos] >= 'A' && fileName[pos] <= 'Z' ? fileName[pos] + 0x20 : fileName[pos]) << (filename_len - pos - 1) * 8;
-			}
+		/**
+		 * Get file extension from file's name
+		 */
+		while (pos > 0) {
+			pos--;
+			if (fileName[pos] == '.')
+				break;
+			file_extansion |= (fileName[pos] >= 'A' && fileName[pos] <= 'Z' ? fileName[pos] + 0x20 : fileName[pos]) << (filename_len - pos - 1) * 8;
 		}
 
 		ret = mmfile_open(&fp, *urifilename, MMFILE_RDONLY);
@@ -544,7 +477,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 	} else if (fileSrc->type == MM_FILE_SRC_TYPE_MEMORY) {
 		char tempURIBuffer[MMFILE_URI_MAX_LEN] = {0, };
 
-		sprintf(tempURIBuffer, "%s%u:%u", MMFILE_MEM_URI, (unsigned int)fileSrc->memory.ptr, fileSrc->memory.size);
+		snprintf(tempURIBuffer, MMFILE_URI_MAX_LEN, "%s%u:%u", MMFILE_MEM_URI, (unsigned int)fileSrc->memory.ptr, fileSrc->memory.size);
 		*urifilename = mmfile_strdup(tempURIBuffer);
 		if (!*urifilename) {
 			debug_error("error: uri is NULL\n");
@@ -570,6 +503,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_3GP;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_MP4: {
@@ -579,6 +513,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_MP4;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_AMR: {
@@ -588,6 +523,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_AMR;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_WAV: {
@@ -597,6 +533,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_WAV;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_MID: {
@@ -606,6 +543,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_MID;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_MP3: {
@@ -615,6 +553,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_MP3;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_AAC: {
@@ -624,6 +563,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_AAC;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_MMF: {
@@ -633,6 +573,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_MMF;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_IMELODY: {
@@ -642,6 +583,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_IMELODY;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_AVI: {
@@ -651,6 +593,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_AVI;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_DIVX: {
@@ -660,6 +603,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_DIVX;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_ASF: {
@@ -669,6 +613,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_ASF;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_WMA: {
@@ -678,6 +623,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_WMA;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_WMV: {
@@ -687,6 +633,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				}
 				skip_index = MM_FILE_FORMAT_WMV;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 
 			case MM_FILE_FORMAT_OGG: {
@@ -783,6 +730,7 @@ _PreprocessFile(MMFileSourceType *fileSrc, char **urifilename, int *formatEnum, 
 				debug_warning("probe fileformat type=%d (%d: autoscan)\n", fileSrc->memory.format, MM_FILE_FORMAT_INVALID);
 				skip_index = -1;
 				goto PROBE_PROPER_FILE_TYPE;
+				break;
 			}
 		}
 	} else {
@@ -1070,7 +1018,7 @@ int mmfile_format_open(MMFileFormatContext **formatContext, MMFileSourceType *fi
 	/**
 	 * Format detect and validation check.
 	 */
-	ret = _PreprocessFile(fileSrc, &formatObject->uriFileName,  &formatObject->formatType, &formatObject->isdrm);
+	ret = _PreprocessFile(fileSrc, &formatObject->uriFileName,  &formatObject->formatType);
 	if (MMFILE_FORMAT_SUCCESS != ret) {
 		debug_error("error: _PreprocessFile fail\n");
 		ret = MMFILE_FORMAT_FAIL;

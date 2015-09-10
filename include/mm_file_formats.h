@@ -54,14 +54,6 @@ enum {
 	MM_FILE_SRC_TYPE_MEMORY,
 };
 
-enum {
-	MM_FILE_DRM_NONE = 0,		/*not drm file*/
-	MM_FILE_DRM_OMA,			/*oma drm*/
-	MM_FILE_DRM_DIVX,			/*divx drm*/
-	MM_FILE_DRM_PROTECTED,	/*This is drm file but not oma or divx*/
-};
-
-
 typedef struct _mm_file_source {
 	int		type;
 	union {
@@ -118,7 +110,6 @@ struct _MMFileFormatContext {
 	/* contents information */
 	int duration;	/* milliseconds */
 	int isseekable;
-	int isdrm;		/*drm type. see MM_FILE_DRM_XXX*/
 	int videoTotalTrackNum;
 	int audioTotalTrackNum;
 	int nbStreams;

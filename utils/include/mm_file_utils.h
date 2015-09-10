@@ -106,8 +106,6 @@ int MMFileFormatIsValidMPEGAUDIO(MMFileIOHandle *pFileIO, const char *mmfileuri)
 #define MMFILE_URI_MAX_LEN     512
 #define MMFILE_FILE_URI        "file://"
 #define MMFILE_FILE_URI_LEN    7
-#define MMFILE_DRM_URI         "drm://"
-#define MMFILE_DRM_URI_LEN     6
 #define MMFILE_MEM_URI         "mem://"
 #define MMFILE_MEM_URI_LEN     6
 #define MMFILE_MMAP_URI        "mmap://"
@@ -503,9 +501,6 @@ typedef struct {
 	AvTagVer2ImageInfo			imageInfo;	/*Album art   attached feature */
 	AvTagVer2AdditionalData		tagV2Info; /*Needed data for ID3 tag parsing */
 
-/* for DRM 2.0 */
-	char			*pTransactionID;
-
 /*for ID3V1 Tag */
 	unsigned char	genre;
 
@@ -552,8 +547,6 @@ inline static void mm_file_free_AvFileContentInfo(AvFileContentInfo *pInfo)
 		if (pInfo->imageInfo.pImageBuf) mmfile_free(pInfo->imageInfo.pImageBuf);
 		if (pInfo->imageInfo.imageDescription) mmfile_free(pInfo->imageInfo.imageDescription);
 		if (strlen(pInfo->imageInfo.imageMIMEType) > 0) memset(pInfo->imageInfo.imageMIMEType, 0, MP3_ID3_IMAGE_MIME_TYPE_MAX_LENGTH);
-		if (pInfo->pTransactionID) mmfile_free(pInfo->pTransactionID);
-
 	}
 }
 
