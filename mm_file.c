@@ -27,13 +27,13 @@
 
 /* exported MM header files */
 #include <mm_types.h>
-#include <mm_error.h>
 #include <mm_file.h>
 
 /* internal MM header files */
 #include <mm_attrs_private.h>
 
 /* internal MM File headers */
+#include "mm_file_error.h"
 #include "mm_file_debug.h"
 #include "mm_file_formats.h"
 #include "mm_file_format_frame.h"
@@ -391,12 +391,12 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 	int ret = 0;
 
 	if (!src || !parse)
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 
 	ret = mmfile_format_open(&formatContext, src);
 	if (MMFILE_FORMAT_FAIL == ret || formatContext == NULL) {
 		debug_error("error: mmfile_format_open\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto exception;
 	}
 
@@ -406,7 +406,7 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 		ret = mmfile_format_read_stream(formatContext);
 		if (MMFILE_FORMAT_FAIL == ret) {
 			debug_error("error: mmfile_format_read_stream\n");
-			ret = MM_ERROR_FILE_INTERNAL;
+			ret = FILEINFO_ERROR_FILE_INTERNAL;
 			goto exception;
 		}
 
@@ -434,7 +434,7 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 				ret = mmfile_format_read_frame(formatContext, timestamp, &frameContext);
 				if (MMFILE_FORMAT_FAIL == ret) {
 					debug_error("error: mmfile_format_read_frame\n");
-					ret = MM_ERROR_FILE_INTERNAL;
+					ret = FILEINFO_ERROR_FILE_INTERNAL;
 					goto warning;
 				}
 
@@ -450,14 +450,14 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 					ret = mmfile_codec_open(&codecContext, MMFILE_VIDEO_DECODE, videoStream->codecId, &codecFrame);
 					if (MMFILE_FORMAT_FAIL == ret) {
 						debug_error("error: mmfile_codec_open\n");
-						ret = MM_ERROR_FILE_INTERNAL;
+						ret = FILEINFO_ERROR_FILE_INTERNAL;
 						goto warning;
 					}
 
 					ret = mmfile_codec_decode(codecContext, &decodedFrame);
 					if (MMFILE_FORMAT_FAIL == ret) {
 						debug_error("error: mmfile_codec_decode\n");
-						ret = MM_ERROR_FILE_INTERNAL;
+						ret = FILEINFO_ERROR_FILE_INTERNAL;
 						goto warning;
 					}
 
@@ -465,7 +465,7 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 					formatContext->thumbNail = mmfile_malloc(sizeof(MMFileFormatFrame));
 					if (NULL == formatContext->thumbNail) {
 						debug_error("error: mmfile_malloc\n");
-						ret = MM_ERROR_FILE_INTERNAL;
+						ret = FILEINFO_ERROR_FILE_INTERNAL;
 						goto warning;
 					}
 
@@ -479,7 +479,7 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 					formatContext->thumbNail = mmfile_malloc(sizeof(MMFileFormatFrame));
 					if (NULL == formatContext->thumbNail) {
 						debug_error("error: mmfile_format_read_frame\n");
-						ret = MM_ERROR_FILE_INTERNAL;
+						ret = FILEINFO_ERROR_FILE_INTERNAL;
 						goto warning;
 					}
 
@@ -539,7 +539,7 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 		mmfile_codec_close(codecContext);
 	}
 
-	return MM_ERROR_NONE;
+	return FILEINFO_ERROR_NONE;
 
 warning:
 	formatContext->commandType = MM_FILE_CONTENTS;
@@ -581,7 +581,7 @@ warning:
 	if (codecContext)   {
 		mmfile_codec_close(codecContext);
 	}
-	return MM_ERROR_NONE;
+	return FILEINFO_ERROR_NONE;
 
 
 exception:
@@ -631,14 +631,14 @@ _get_tag_info(mmf_attrs_t *attrs, MMFileSourceType *src)
 	ret = mmfile_format_open(&formatContext, src);
 	if (MMFILE_FORMAT_FAIL == ret || formatContext == NULL) {
 		debug_error("error: mmfile_format_open\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto exception;
 	}
 
 	ret = mmfile_format_read_tag(formatContext);
 	if (MMFILE_FORMAT_FAIL == ret) {
 		debug_warning("reading tag is fail\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto exception;
 	}
 
@@ -650,7 +650,7 @@ _get_tag_info(mmf_attrs_t *attrs, MMFileSourceType *src)
 		mmfile_format_close(formatContext);
 	}
 
-	return MM_ERROR_NONE;
+	return FILEINFO_ERROR_NONE;
 
 
 exception:
@@ -658,7 +658,7 @@ exception:
 		mmfile_format_close(formatContext);
 	}
 
-	return MM_ERROR_FILE_INTERNAL;
+	return FILEINFO_ERROR_FILE_INTERNAL;
 }
 
 
@@ -667,17 +667,17 @@ exception:
  */
 int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *first_attribute_name, ...)
 {
-	int ret = MM_ERROR_NONE;
+	int ret = FILEINFO_ERROR_NONE;
 	va_list var_args;
 
 	if (!attrs) {
 		debug_error("Invalid arguments [attrs 0]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	if (first_attribute_name == NULL) {
 		debug_error("Invalid arguments [first_attribute_name null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	/* get requested attributes */
@@ -685,7 +685,7 @@ int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *firs
 	ret = mm_attrs_get_valist(attrs, err_attr_name, first_attribute_name, var_args);
 	va_end(var_args);
 
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		if (err_attr_name) {
 			debug_error("failed to get %s\n", *err_attr_name);
 		}
@@ -696,7 +696,7 @@ int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *firs
 
 int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long *time_info, char **lyrics)
 {
-	int ret = MM_ERROR_NONE;
+	int ret = FILEINFO_ERROR_NONE;
 	AvSynclyricsInfo *sync_lyric_item = NULL;
 	GList *synclyrics_list = NULL;
 
@@ -706,11 +706,11 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 
 	if ((mmf_attrs_t *)tag_attrs == NULL) {
 		debug_error("invalid handle");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	ret = mm_attrs_get_data_by_name(tag_attrs, MM_FILE_TAG_SYNCLYRICS, (void **)&synclyrics_list);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 #ifdef __MMFILE_TEST_MODE__
 		debug_warning("get data fail");
 #endif
@@ -725,7 +725,7 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 #ifdef __MMFILE_TEST_MODE__
 			debug_warning("synclyric item is NULL");
 #endif
-			return MM_ERROR_COMMON_ATTR_NOT_EXIST;
+			return FILEINFO_ERROR_ATTR_NOT_EXIST;
 		}
 
 		*time_info = sync_lyric_item->time_info;
@@ -735,7 +735,7 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 #ifdef __MMFILE_TEST_MODE__
 		debug_warning("synclyrics_list is NULL");
 #endif
-		return MM_ERROR_COMMON_ATTR_NOT_EXIST;
+		return FILEINFO_ERROR_ATTR_NOT_EXIST;
 	}
 
 	return ret;
@@ -744,7 +744,7 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 
 int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 {
-	int ret = MM_ERROR_NONE;
+	int ret = FILEINFO_ERROR_NONE;
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src;
 
@@ -755,15 +755,15 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 	/* Check argument here */
 	if (tag_attrs == NULL) {
 		debug_error("Invalid arguments [tag null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 	if (filename == NULL) {
 		debug_error("Invalid arguments [filename null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 	if (strlen(filename) == 0)	{
 		debug_error("Invalid arguments [filename size 0]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 
@@ -773,7 +773,7 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 
@@ -782,7 +782,7 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
@@ -790,12 +790,12 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("tag", g_tag_attrs, ARRAY_SIZE(g_tag_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	ret = _get_tag_info(attrs, &src);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get tag: %s\n", filename);
@@ -821,7 +821,7 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 {
 	void *artwork = NULL;
 	GList *synclyrics_list = NULL;
-	int ret = MM_ERROR_NONE;
+	int ret = FILEINFO_ERROR_NONE;
 
 #ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
@@ -829,7 +829,7 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 
 	if ((mmf_attrs_t *)tag_attrs == NULL) {
 		debug_error("invalid handle.\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	ret = mm_attrs_get_data_by_name(tag_attrs, MM_FILE_TAG_ARTWORK, &artwork);
@@ -868,15 +868,15 @@ int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filen
 	/* Check argument here */
 	if (contents_attrs == NULL) {
 		debug_error("Invalid arguments [contents null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 	if (filename == NULL) {
 		debug_error("Invalid arguments [filename null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 	if (strlen(filename) == 0)	{
 		debug_error("Invalid arguments [filename size 0]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 
@@ -891,7 +891,7 @@ int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filen
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 
 #ifdef CHECK_TIME
@@ -905,7 +905,7 @@ int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filen
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
@@ -913,14 +913,14 @@ int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filen
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("content", g_content_attrs, ARRAY_SIZE(g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info(attrs, &src, &parse);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
@@ -967,7 +967,7 @@ int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *da
 	/* Check argument here */
 	if (tag_attrs == NULL || data == NULL) {
 		debug_error("Invalid arguments\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -976,7 +976,7 @@ int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *da
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 
@@ -986,13 +986,13 @@ int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *da
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("tag", g_tag_attrs, ARRAY_SIZE(g_tag_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	/*parse.type = MM_FILE_PARSE_TYPE_ALL;*/
 	ret = _get_tag_info(attrs, &src);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get tag");
@@ -1028,7 +1028,7 @@ int mm_file_create_content_attrs_from_memory(MMHandleType *contents_attrs, const
 	/* Check argument here */
 	if (contents_attrs == NULL || data == NULL) {
 		debug_error("Invalid arguments\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -1037,7 +1037,7 @@ int mm_file_create_content_attrs_from_memory(MMHandleType *contents_attrs, const
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 
@@ -1047,13 +1047,13 @@ int mm_file_create_content_attrs_from_memory(MMHandleType *contents_attrs, const
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("content", g_content_attrs, ARRAY_SIZE(g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info(attrs, &src, &parse);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents");
@@ -1078,7 +1078,7 @@ EXPORT_API
 int mm_file_destroy_content_attrs(MMHandleType contents_attrs)
 {
 	void *thumbnail = NULL;
-	int ret = MM_ERROR_NONE;
+	int ret = FILEINFO_ERROR_NONE;
 
 #ifdef __MMFILE_TEST_MODE__
 	debug_fenter();
@@ -1086,7 +1086,7 @@ int mm_file_destroy_content_attrs(MMHandleType contents_attrs)
 
 	if ((mmf_attrs_t *)contents_attrs == NULL) {
 		debug_error("invalid handle.\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	ret = mm_attrs_get_data_by_name(contents_attrs, MM_FILE_CONTENT_VIDEO_THUMBNAIL, &thumbnail);
@@ -1118,7 +1118,7 @@ int mm_file_get_stream_info(const char *filename, int *audio_stream_num, int *vi
 
 	if (filename == NULL || strlen(filename) == 0 || audio_stream_num == NULL || video_stream_num == NULL) {
 		debug_error("Invalid arguments\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -1127,7 +1127,7 @@ int mm_file_get_stream_info(const char *filename, int *audio_stream_num, int *vi
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 
@@ -1136,13 +1136,13 @@ int mm_file_get_stream_info(const char *filename, int *audio_stream_num, int *vi
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_SIMPLE;
 	ret = _get_contents_info(NULL, &src, &parse);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		debug_error("failed to get stream info: %s\n", filename);
 	} else {
 		if (parse.audio_track_num == 0 && parse.video_track_num == 0) {
@@ -1186,15 +1186,15 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 	if (filename == NULL) {
-		ret =  MM_ERROR_INVALID_ARGUMENT;
+		ret =  FILEINFO_ERROR_INVALID_ARGUMENT;
 		goto END;
 	} else {
 		if (strlen(filename) == 0) {
-			ret =  MM_ERROR_INVALID_ARGUMENT;
+			ret =  FILEINFO_ERROR_INVALID_ARGUMENT;
 			goto END;
 		}
 	}
@@ -1204,7 +1204,7 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
@@ -1212,13 +1212,13 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("content", g_content_attrs, ARRAY_SIZE(g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
 	ret = _get_contents_info(attrs, &src, &parse);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
@@ -1256,15 +1256,15 @@ int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 	if (filename == NULL) {
-		ret = MM_ERROR_INVALID_ARGUMENT;
+		ret = FILEINFO_ERROR_INVALID_ARGUMENT;
 		goto END;
 	} else {
 		if (strlen(filename) == 0) {
-			ret = MM_ERROR_INVALID_ARGUMENT;
+			ret = FILEINFO_ERROR_INVALID_ARGUMENT;
 			goto END;
 		}
 	}
@@ -1274,7 +1274,7 @@ int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
@@ -1282,13 +1282,13 @@ int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("content", g_content_attrs, ARRAY_SIZE(g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_SAFE;
 	ret = _get_contents_info(attrs, &src, &parse);
-	if (ret != MM_ERROR_NONE) {
+	if (ret != FILEINFO_ERROR_NONE) {
 		mmf_attrs_free((MMHandleType)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
@@ -1316,7 +1316,7 @@ int mm_file_get_video_frame(const char *path, double timestamp, bool is_accurate
 
 	if (path == NULL) {
 		debug_error("Invalid arguments [Path is Null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -1346,12 +1346,12 @@ int mm_file_get_video_frame(const char *path, double timestamp, bool is_accurate
 
 	if (formatFuncHandle) dlclose(formatFuncHandle);
 
-	return MM_ERROR_NONE;
+	return FILEINFO_ERROR_NONE;
 
 exception:
 	if (formatFuncHandle) dlclose(formatFuncHandle);
 
-	return MM_ERROR_FILE_INTERNAL;
+	return FILEINFO_ERROR_FILE_INTERNAL;
 }
 
 EXPORT_API
@@ -1362,12 +1362,12 @@ int mm_file_get_video_frame_from_memory(const void *data, unsigned int datasize,
 
 	if (data == NULL) {
 		debug_error("Invalid arguments [data is Null]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 	if (datasize == 0) {
 		debug_error("Invalid arguments [datasize is zero]\n");
-		return MM_ERROR_INVALID_ARGUMENT;
+		return FILEINFO_ERROR_INVALID_ARGUMENT;
 	}
 
 #ifdef __MMFILE_DYN_LOADING__
@@ -1397,12 +1397,12 @@ int mm_file_get_video_frame_from_memory(const void *data, unsigned int datasize,
 
 	if (formatFuncHandle) dlclose(formatFuncHandle);
 
-	return MM_ERROR_NONE;
+	return FILEINFO_ERROR_NONE;
 
 exception:
 	if (formatFuncHandle) dlclose(formatFuncHandle);
 
-	return MM_ERROR_FILE_INTERNAL;
+	return FILEINFO_ERROR_FILE_INTERNAL;
 }
 
 EXPORT_API
@@ -1419,15 +1419,15 @@ int mm_file_check_uhqa(const char *filename, bool *is_uhqa)
 	ret = _load_dynamic_functions(&func_handle);
 	if (ret == 0) {
 		debug_error("load library error\n");
-		return MM_ERROR_FILE_INTERNAL;
+		return FILEINFO_ERROR_FILE_INTERNAL;
 	}
 #endif
 	if (filename == NULL) {
-		ret = MM_ERROR_INVALID_ARGUMENT;
+		ret = FILEINFO_ERROR_INVALID_ARGUMENT;
 		goto END;
 	} else {
 		if (strlen(filename) == 0) {
-			ret = MM_ERROR_INVALID_ARGUMENT;
+			ret = FILEINFO_ERROR_INVALID_ARGUMENT;
 			goto END;
 		}
 	}
@@ -1437,7 +1437,7 @@ int mm_file_check_uhqa(const char *filename, bool *is_uhqa)
 
 	ret = _is_file_exist(filename);
 	if (!ret) {
-		ret = MM_ERROR_FILE_NOT_FOUND;
+		ret = FILEINFO_ERROR_FILE_NOT_FOUND;
 		goto END;
 	}
 
@@ -1445,13 +1445,13 @@ int mm_file_check_uhqa(const char *filename, bool *is_uhqa)
 	attrs = (mmf_attrs_t *) mmf_attrs_new_from_data("content", g_content_attrs, ARRAY_SIZE(g_content_attrs), NULL, NULL);
 	if (!attrs) {
 		debug_error("attribute internal error.\n");
-		ret = MM_ERROR_FILE_INTERNAL;
+		ret = FILEINFO_ERROR_FILE_INTERNAL;
 		goto END;
 	}
 
 	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
 	ret = _get_contents_info(attrs, &src, &parse);
-	if (ret == MM_ERROR_NONE) {
+	if (ret == FILEINFO_ERROR_NONE) {
 		*is_uhqa = parse.is_uhqa;
 	} else {
 		debug_error("_get_contents_info failed\n");

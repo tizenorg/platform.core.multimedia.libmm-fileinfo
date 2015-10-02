@@ -12,16 +12,17 @@ noinst_HEADERS = include/mm_file_codecs.h \
 		 include/mm_file_formats.h \
 		 include/mm_file_format_frame.h
 
-libmmffile_la_SOURCES = mm_file.c 
+libmmffile_la_SOURCES = mm_file.c
 
 includelibmmffiledir = $(includedir)/mmf
-includelibmmffile_HEADERS = include/mm_file.h 
-			
+includelibmmffile_HEADERS = include/mm_file.h \
+							include/mm_file_error.h
+
 libmmffile_la_CFLAGS = -I$(srcdir)/include \
 		       $(MMCOMMON_CFLAGS) \
 		       -I$(srcdir)/utils/include \
 		       -D_LARGEFILE64_SOURCE \
-		       -D_FILE_OFFSET_BITS=64 
+		       -D_FILE_OFFSET_BITS=64
 
 if USE_TESTMODE
 libmmffile_la_CFLAGS += -D__MMFILE_TEST_MODE__
