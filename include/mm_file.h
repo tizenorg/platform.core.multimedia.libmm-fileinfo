@@ -35,6 +35,7 @@
 #include <glib.h>
 
 #include <mm_types.h>
+#include "mm_file_error.h"
 
 /**
 	@addtogroup FILEINFO
