@@ -15,7 +15,8 @@ noinst_HEADERS = include/mm_file_codecs.h \
 libmmffile_la_SOURCES = mm_file.c 
 
 includelibmmffiledir = $(includedir)/mmf
-includelibmmffile_HEADERS = include/mm_file.h 
+includelibmmffile_HEADERS = include/mm_file.h \
+							include/mm_file_error.h
 			
 libmmffile_la_CFLAGS = -I$(srcdir)/include \
 		       $(MMCOMMON_CFLAGS) \

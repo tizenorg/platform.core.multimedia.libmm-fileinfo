@@ -69,5 +69,6 @@ CFLAGS="${CFLAGS} -D_MM_PROJECT_FLOATER -DEXPORT_API=\"__attribute__((visibility
 %files devel
 %manifest %{name}.manifest
 %{_includedir}/mmf/mm_file.h
+%{_includedir}/mmf/mm_file_error.h
 %{_libdir}/pkgconfig/mm-fileinfo.pc
 
