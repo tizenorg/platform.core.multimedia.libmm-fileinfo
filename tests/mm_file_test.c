@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #include <mm_file.h>
-#include <mm_error.h>
+#include "mm_file_error.h"
 
 #include "mm_file_traverse.h"
 
@@ -216,7 +216,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 	printf("Extracting information for [%s] \n", filename);
 	/* get track info */
 	ret = mm_file_get_stream_info(filename, &audio_track_num, &video_track_num);
-	if (ret == MM_ERROR_NONE) {
+	if (ret == FILEINFO_ERROR_NONE) {
 		printf("# audio=%d, video=%d\n", audio_track_num, video_track_num);
 	} else {
 		printf("Failed to mm_file_get_stream_info() error=[%x]\n", ret);
@@ -234,14 +234,14 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 		ret = mm_file_create_content_attrs_from_memory(&content_attrs, buffer, file_size, MM_FILE_FORMAT_3GP);
 	}
 
-	if (ret == MM_ERROR_NONE && content_attrs) {
+	if (ret == FILEINFO_ERROR_NONE && content_attrs) {
 		ContentContext_t ccontent;
 		memset(&ccontent, 0, sizeof(ContentContext_t));
 
 		ret = mm_file_get_attrs(content_attrs, &err_attr_name, MM_FILE_CONTENT_DURATION, &ccontent.duration, NULL);
 		printf("# duration: %d\n", ccontent.duration);
 
-		if (ret != MM_ERROR_NONE && err_attr_name) {
+		if (ret != FILEINFO_ERROR_NONE && err_attr_name) {
 			printf("failed to get %s\n", err_attr_name);
 			free(err_attr_name);
 			err_attr_name = NULL;
@@ -259,7 +259,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 			                        MM_FILE_CONTENT_AUDIO_BITPERSAMPLE, &ccontent.audio_bitpersample,
 			                        NULL);
 
-			if (ret != MM_ERROR_NONE) {
+			if (ret != FILEINFO_ERROR_NONE) {
 				printf("failed to get audio attrs\n");
 			} else {
 				printf("[Audio] ----------------------------------------- \n");
@@ -286,7 +286,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 			                        MM_FILE_CONTENT_VIDEO_THUMBNAIL, &ccontent.thumbnail.value.p_val, &ccontent.thumbnail.len,
 			                        NULL);
 
-			if (ret != MM_ERROR_NONE) {
+			if (ret != FILEINFO_ERROR_NONE) {
 				printf("failed to get video attrs\n");
 			} else {
 				printf("[Video] ----------------------------------------- \n");
@@ -317,7 +317,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 		ret = mm_file_create_tag_attrs_from_memory(&tag_attrs, buffer, file_size, MM_FILE_FORMAT_3GP);
 	}
 
-	if (ret == MM_ERROR_NONE && tag_attrs) {
+	if (ret == FILEINFO_ERROR_NONE && tag_attrs) {
 		TagContext_t ctag;
 		memset(&ctag, 0, sizeof(TagContext_t));
 		/* get attributes of tag  */
@@ -348,7 +348,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 		                        MM_FILE_TAG_SYNCLYRICS_NUM, &ctag.synclyrics_size.value.i_val,
 		                        MM_FILE_TAG_ROTATE, &ctag.rotate.value.s_val, &ctag.rotate.len,
 		                        NULL);
-		if (ret != MM_ERROR_NONE &&  err_attr_name) {
+		if (ret != FILEINFO_ERROR_NONE &&  err_attr_name) {
 			printf("failed to get %s attrs\n", err_attr_name);
 			free(err_attr_name);
 			err_attr_name = NULL;
@@ -398,7 +398,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 
 			for (idx = 0; idx < ctag.synclyrics_size.value.i_val; idx++) {
 				ret = mm_file_get_synclyrics_info(tag_attrs, idx, &time_info, &lyrics_info);
-				if (ret == MM_ERROR_NONE) {
+				if (ret == FILEINFO_ERROR_NONE) {
 					printf("[%2d][%6ld][%s]\n", idx, time_info, lyrics_info);
 				} else {
 					printf("Error when get lyrics\n");
@@ -409,7 +409,7 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 
 		/* release tag */
 		ret = mm_file_destroy_tag_attrs(tag_attrs);
-		if (ret != MM_ERROR_NONE) {
+		if (ret != FILEINFO_ERROR_NONE) {
 			printf("Error mm_file_destroy_tag_attrs: %d", ret);
 			if (msg_tmp_fp) {
 				fclose(msg_tmp_fp);
