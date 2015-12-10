@@ -125,8 +125,8 @@ static int _CleanupFrameContext(MMFileFormatContext *formatContext, bool clean_a
 		if (formatContext->genre)				mmfile_free(formatContext->genre);
 		if (formatContext->classification)		mmfile_free(formatContext->classification);
 		if (formatContext->year)				mmfile_free(formatContext->year);
-		if (formatContext->recDate) 			mmfile_free(formatContext->recDate);
-		if (formatContext->tagTrackNum) 		mmfile_free(formatContext->tagTrackNum);
+		if (formatContext->recDate)			mmfile_free(formatContext->recDate);
+		if (formatContext->tagTrackNum)		mmfile_free(formatContext->tagTrackNum);
 		if (formatContext->rating)				mmfile_free(formatContext->rating);
 		if (formatContext->artworkMime)		mmfile_free(formatContext->artworkMime);
 		if (formatContext->artwork)			mmfile_free(formatContext->artwork);

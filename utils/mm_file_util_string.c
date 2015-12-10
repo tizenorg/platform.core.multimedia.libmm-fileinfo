@@ -71,18 +71,18 @@ short *mmfile_swap_2byte_string(short *mszOutput, short *mszInput, int length)
 
 EXPORT_API
 char *mmfile_string_convert_debug(const char *str, unsigned int len,
-                                  const char *to_codeset, const char *from_codeset,
-                                  int *bytes_read,
-                                  int *bytes_written,
-                                  const char *func,
-                                  unsigned int line)
+								const char *to_codeset, const char *from_codeset,
+								int *bytes_read,
+								int *bytes_written,
+								const char *func,
+								unsigned int line)
 {
 	char *tmp = g_convert(str, len, to_codeset, from_codeset, bytes_read, bytes_written, NULL);
 
 	if (tmp) {
 #ifdef __MMFILE_TEST_MODE__
 		debug_msg("## DEBUG ## %p = g_convert (%p, %u, %p, %p, %p ,%p, %p, %u) by %s() %d\n",
-		          tmp, str, len, to_codeset, from_codeset, bytes_read, bytes_written, func, line);
+				tmp, str, len, to_codeset, from_codeset, bytes_read, bytes_written, func, line);
 #endif
 	}
 
@@ -197,9 +197,9 @@ done:
 
 EXPORT_API
 char *mmfile_string_convert(const char *str, unsigned int len,
-                            const char *to_codeset, const char *from_codeset,
-                            gsize *bytes_read,
-                            unsigned int *bytes_written)
+				const char *to_codeset, const char *from_codeset,
+				gsize *bytes_read,
+				unsigned int *bytes_written)
 {
 	char *result = NULL;
 	GError *err = NULL;

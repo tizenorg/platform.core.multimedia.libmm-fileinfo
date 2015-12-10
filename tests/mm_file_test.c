@@ -63,7 +63,7 @@ typedef struct _TagContext {
 	mmfile_value_t genre;
 	mmfile_value_t author;
 	mmfile_value_t copyright;
-	mmfile_value_t date; 			/*string */
+	mmfile_value_t date;			/*string */
 	mmfile_value_t recdate;			/*string */
 	mmfile_value_t description;
 	mmfile_value_t comment;
@@ -247,15 +247,15 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 
 		if (audio_track_num) {
 			ret = mm_file_get_attrs(content_attrs,
-			                        NULL,
-			                        MM_FILE_CONTENT_AUDIO_CODEC, &ccontent.audio_codec,
-			                        MM_FILE_CONTENT_AUDIO_SAMPLERATE, &ccontent.audio_samplerate,
-			                        MM_FILE_CONTENT_AUDIO_BITRATE, &ccontent.audio_bitrate,
-			                        MM_FILE_CONTENT_AUDIO_CHANNELS, &ccontent.audio_channel,
-			                        MM_FILE_CONTENT_AUDIO_TRACK_INDEX, &ccontent.audio_track_id,
-			                        MM_FILE_CONTENT_AUDIO_TRACK_COUNT, &ccontent.audio_track_num,
-			                        MM_FILE_CONTENT_AUDIO_BITPERSAMPLE, &ccontent.audio_bitpersample,
-			                        NULL);
+								NULL,
+								MM_FILE_CONTENT_AUDIO_CODEC, &ccontent.audio_codec,
+								MM_FILE_CONTENT_AUDIO_SAMPLERATE, &ccontent.audio_samplerate,
+								MM_FILE_CONTENT_AUDIO_BITRATE, &ccontent.audio_bitrate,
+								MM_FILE_CONTENT_AUDIO_CHANNELS, &ccontent.audio_channel,
+								MM_FILE_CONTENT_AUDIO_TRACK_INDEX, &ccontent.audio_track_id,
+								MM_FILE_CONTENT_AUDIO_TRACK_COUNT, &ccontent.audio_track_num,
+								MM_FILE_CONTENT_AUDIO_BITPERSAMPLE, &ccontent.audio_bitpersample,
+								NULL);
 
 			if (ret != FILEINFO_ERROR_NONE) {
 				printf("failed to get audio attrs\n");
@@ -274,15 +274,15 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 
 		if (video_track_num) {
 			ret = mm_file_get_attrs(content_attrs,
-			                        NULL,
-			                        MM_FILE_CONTENT_VIDEO_CODEC, &ccontent.video_codec,
-			                        MM_FILE_CONTENT_VIDEO_BITRATE, &ccontent.video_bitrate,
-			                        MM_FILE_CONTENT_VIDEO_FPS, &ccontent.video_fps,
-			                        MM_FILE_CONTENT_VIDEO_TRACK_INDEX, &ccontent.video_track_id,
-			                        MM_FILE_CONTENT_VIDEO_WIDTH, &ccontent.video_w,
-			                        MM_FILE_CONTENT_VIDEO_HEIGHT, &ccontent.video_h,
-			                        MM_FILE_CONTENT_VIDEO_THUMBNAIL, &ccontent.thumbnail.value.p_val, &ccontent.thumbnail.len,
-			                        NULL);
+								NULL,
+								MM_FILE_CONTENT_VIDEO_CODEC, &ccontent.video_codec,
+								MM_FILE_CONTENT_VIDEO_BITRATE, &ccontent.video_bitrate,
+								MM_FILE_CONTENT_VIDEO_FPS, &ccontent.video_fps,
+								MM_FILE_CONTENT_VIDEO_TRACK_INDEX, &ccontent.video_track_id,
+								MM_FILE_CONTENT_VIDEO_WIDTH, &ccontent.video_w,
+								MM_FILE_CONTENT_VIDEO_HEIGHT, &ccontent.video_h,
+								MM_FILE_CONTENT_VIDEO_THUMBNAIL, &ccontent.thumbnail.value.p_val, &ccontent.thumbnail.len,
+								NULL);
 
 			if (ret != FILEINFO_ERROR_NONE) {
 				printf("failed to get video attrs\n");
@@ -320,32 +320,32 @@ static int mmfile_get_file_infomation(void *data, void *user_data, bool file_tes
 		memset(&ctag, 0, sizeof(TagContext_t));
 		/* get attributes of tag  */
 		ret = mm_file_get_attrs(tag_attrs,
-		                        &err_attr_name,
-		                        MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
-		                        MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
-		                        MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
-		                        MM_FILE_TAG_TITLE, &ctag.title.value.s_val, &ctag.title.len,
-		                        MM_FILE_TAG_GENRE, &ctag.genre.value.s_val, &ctag.genre.len,
-		                        MM_FILE_TAG_AUTHOR, &ctag.author.value.s_val, &ctag.author.len,
-		                        MM_FILE_TAG_COPYRIGHT, &ctag.copyright.value.s_val, &ctag.copyright.len,
-		                        MM_FILE_TAG_DATE, &ctag.date.value.s_val, &ctag.date.len,
-		                        MM_FILE_TAG_RECDATE, &ctag.recdate.value.s_val, &ctag.recdate.len,
-		                        MM_FILE_TAG_DESCRIPTION, &ctag.description.value.s_val, &ctag.description.len,
-		                        MM_FILE_TAG_COMMENT, &ctag.comment.value.s_val, &ctag.comment.len,
-		                        MM_FILE_TAG_ARTWORK, &ctag.artwork.value.p_val, &ctag.artwork.len,
-		                        MM_FILE_TAG_ARTWORK_SIZE, &ctag.artwork_size.value.i_val,
-		                        MM_FILE_TAG_ARTWORK_MIME, &ctag.artwork_mime.value.s_val, &ctag.artwork_mime.len,
-		                        MM_FILE_TAG_TRACK_NUM, &ctag.track_num.value.s_val, &ctag.track_num.len,
-		                        MM_FILE_TAG_CLASSIFICATION, &ctag.classfication.value.s_val, &ctag.classfication.len,
-		                        MM_FILE_TAG_RATING, &ctag.rating.value.s_val, &ctag.rating.len,
-		                        MM_FILE_TAG_LONGITUDE, &ctag.longitude.value.d_val,
-		                        MM_FILE_TAG_LATIDUE, &ctag.latitude.value.d_val,
-		                        MM_FILE_TAG_ALTIDUE, &ctag.altitude.value.d_val,
-		                        MM_FILE_TAG_CONDUCTOR, &ctag.conductor.value.s_val, &ctag.conductor.len,
-		                        MM_FILE_TAG_UNSYNCLYRICS, &ctag.unsynclyrics.value.s_val, &ctag.unsynclyrics.len,
-		                        MM_FILE_TAG_SYNCLYRICS_NUM, &ctag.synclyrics_size.value.i_val,
-		                        MM_FILE_TAG_ROTATE, &ctag.rotate.value.s_val, &ctag.rotate.len,
-		                        NULL);
+						&err_attr_name,
+						MM_FILE_TAG_ARTIST, &ctag.artist.value.s_val, &ctag.artist.len,
+						MM_FILE_TAG_ALBUM, &ctag.album.value.s_val, &ctag.album.len,
+						MM_FILE_TAG_ALBUM_ARTIST, &ctag.album_artist.value.s_val, &ctag.album_artist.len,
+						MM_FILE_TAG_TITLE, &ctag.title.value.s_val, &ctag.title.len,
+						MM_FILE_TAG_GENRE, &ctag.genre.value.s_val, &ctag.genre.len,
+						MM_FILE_TAG_AUTHOR, &ctag.author.value.s_val, &ctag.author.len,
+						MM_FILE_TAG_COPYRIGHT, &ctag.copyright.value.s_val, &ctag.copyright.len,
+						MM_FILE_TAG_DATE, &ctag.date.value.s_val, &ctag.date.len,
+						MM_FILE_TAG_RECDATE, &ctag.recdate.value.s_val, &ctag.recdate.len,
+						MM_FILE_TAG_DESCRIPTION, &ctag.description.value.s_val, &ctag.description.len,
+						MM_FILE_TAG_COMMENT, &ctag.comment.value.s_val, &ctag.comment.len,
+						MM_FILE_TAG_ARTWORK, &ctag.artwork.value.p_val, &ctag.artwork.len,
+						MM_FILE_TAG_ARTWORK_SIZE, &ctag.artwork_size.value.i_val,
+						MM_FILE_TAG_ARTWORK_MIME, &ctag.artwork_mime.value.s_val, &ctag.artwork_mime.len,
+						MM_FILE_TAG_TRACK_NUM, &ctag.track_num.value.s_val, &ctag.track_num.len,
+						MM_FILE_TAG_CLASSIFICATION, &ctag.classfication.value.s_val, &ctag.classfication.len,
+						MM_FILE_TAG_RATING, &ctag.rating.value.s_val, &ctag.rating.len,
+						MM_FILE_TAG_LONGITUDE, &ctag.longitude.value.d_val,
+						MM_FILE_TAG_LATIDUE, &ctag.latitude.value.d_val,
+						MM_FILE_TAG_ALTIDUE, &ctag.altitude.value.d_val,
+						MM_FILE_TAG_CONDUCTOR, &ctag.conductor.value.s_val, &ctag.conductor.len,
+						MM_FILE_TAG_UNSYNCLYRICS, &ctag.unsynclyrics.value.s_val, &ctag.unsynclyrics.len,
+						MM_FILE_TAG_SYNCLYRICS_NUM, &ctag.synclyrics_size.value.i_val,
+						MM_FILE_TAG_ROTATE, &ctag.rotate.value.s_val, &ctag.rotate.len,
+						NULL);
 		if (ret != FILEINFO_ERROR_NONE &&  err_attr_name) {
 			printf("failed to get %s attrs\n", err_attr_name);
 			free(err_attr_name);

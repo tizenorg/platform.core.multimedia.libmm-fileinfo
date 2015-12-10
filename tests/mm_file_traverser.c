@@ -35,10 +35,10 @@ static GList *g_directories = NULL;
 
 int mmfile_get_file_names(char *root_dir, MMFunc cbfunc, void *user_data)
 {
-	struct stat 	statbuf;
-	struct dirent 	dirp;
+	struct stat statbuf;
+	struct dirent dirp;
 	struct dirent *result = NULL;
-	DIR				*dp;
+	DIR *dp;
 
 	char pdirname[MMFILE_PATH_MAX + 1];
 

@@ -63,7 +63,7 @@ int64_t gettime(void)
 
 #define _SEEK_POINT_	3000		/*1000 = 1 seconds*/
 
-#define	MM_FILE_TAG_SYNCLYRICS         	"tag-synclyrics"  		/**< Synchronized Lyrics Information*/
+#define	MM_FILE_TAG_SYNCLYRICS	"tag-synclyrics"	/**< Synchronized Lyrics Information*/
 
 
 enum {
@@ -295,13 +295,13 @@ _info_set_attr_media(mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 		if (formatContext->description)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DESCRIPTION, formatContext->description);
 		if (formatContext->comment)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_COMMENT, formatContext->comment);
 		if (formatContext->genre)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_GENRE, formatContext->genre);
-		if (formatContext->classification)  		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CLASSIFICATION, formatContext->classification);
+		if (formatContext->classification)		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CLASSIFICATION, formatContext->classification);
 		if (formatContext->year)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_DATE, formatContext->year);
 		if (formatContext->tagTrackNum)		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_TRACK_NUM, formatContext->tagTrackNum);
 		if (formatContext->rating)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_RATING, formatContext->rating);
-		if (formatContext->conductor)       	mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CONDUCTOR, formatContext->conductor);
-		if (formatContext->recDate)       		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_RECDATE, formatContext->recDate);
-		if (formatContext->rotate)       		mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ROTATE, formatContext->rotate);
+		if (formatContext->conductor)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_CONDUCTOR, formatContext->conductor);
+		if (formatContext->recDate)			mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_RECDATE, formatContext->recDate);
+		if (formatContext->rotate)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_ROTATE, formatContext->rotate);
 		mm_attrs_set_double_by_name(hattrs, MM_FILE_TAG_LONGITUDE, formatContext->longitude);
 		mm_attrs_set_double_by_name(hattrs, MM_FILE_TAG_LATIDUE, formatContext->latitude);
 		mm_attrs_set_double_by_name(hattrs, MM_FILE_TAG_ALTIDUE, formatContext->altitude);
@@ -417,8 +417,8 @@ _get_contents_info(mmf_attrs_t *attrs, MMFileSourceType *src, MMFILE_PARSE_INFO 
 		} else {
 			parse->is_uhqa = FALSE;
 		}
- 
- 		if (parse->type >= MM_FILE_PARSE_TYPE_ALL) {
+
+		if (parse->type >= MM_FILE_PARSE_TYPE_ALL) {
 			if (formatContext->videoTotalTrackNum > 0) {
 
 				if (parse->type != MM_FILE_PARSE_TYPE_SAFE) {

@@ -335,9 +335,9 @@ int mmfile_format_read_stream_ffmpg(MMFileFormatContext *formatContext)
 					 * 2. if (1) failed, try to get fps of media container.
 					 */
 					videoStream->framePerSec	= _get_video_fps(pFormatCtx->streams[i]->nb_frames,
-					                                             pFormatCtx->streams[i]->duration,
-					                                             pFormatCtx->streams[i]->time_base,
-					                                             1);
+												pFormatCtx->streams[i]->duration,
+												pFormatCtx->streams[i]->time_base,
+												1);
 
 					if (videoStream->framePerSec == 0) {
 #ifndef __MMFILE_LIBAV_VERSION__
@@ -595,7 +595,7 @@ int mmfile_format_read_tag_ffmpg(MMFileFormatContext *formatContext)
 					}
 				}
 			}
-#ifdef 	__MMFILE_TEST_MODE__
+#ifdef __MMFILE_TEST_MODE__
 			mmfile_format_print_tags(formatContext);
 #endif
 		}
@@ -785,8 +785,7 @@ int mmfile_format_read_frame_ffmpg(MMFileFormatContext *formatContext, unsigned 
 #ifdef __MMFILE_FFMPEG_V085__
 		struct SwsContext *img_convert_ctx = NULL;
 
-		img_convert_ctx = sws_getContext(width, height, pVideoCodecCtx->pix_fmt,
-		                                 width, height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+		img_convert_ctx = sws_getContext(width, height, pVideoCodecCtx->pix_fmt, width, height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
 
 		if (NULL == img_convert_ctx) {
 			debug_error("failed to get img convet ctx\n");
@@ -794,8 +793,7 @@ int mmfile_format_read_frame_ffmpg(MMFileFormatContext *formatContext, unsigned 
 			goto exception;
 		}
 
-		ret = sws_scale(img_convert_ctx, (const uint8_t * const *)pFrame->data, pFrame->linesize,
-		                0, height, pFrameRGB->data, pFrameRGB->linesize);
+		ret = sws_scale(img_convert_ctx, (const uint8_t * const *)pFrame->data, pFrame->linesize, 0, height, pFrameRGB->data, pFrameRGB->linesize);
 		if (ret < 0) {
 			debug_error("failed to convet image\n");
 			ret = MMFILE_FORMAT_FAIL;

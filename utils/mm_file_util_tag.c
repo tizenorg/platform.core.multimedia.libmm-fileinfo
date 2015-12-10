@@ -150,21 +150,21 @@ typedef struct _mmfilesmtabox {
 #define GENRE_COUNT	149
 
 static const char *MpegAudio_Genre[GENRE_COUNT] = {"Blues", "Classic Rock", "Country", "Dance", "Disco", "Funk", "Grunge", "Hip-Hop", "Jazz", "Metal",
-                                                   "New Age", "Oldies", "Other", "Pop", "R&B", "Rap", "Reggae", "Rock", "Techno", "Industrial",
-                                                   "Alternative", "Ska", "Death Metal", "Pranks", "Soundtrack", "Euro-Techno", "Ambient", "Trip-Hop", "Vocal", "Jazz+Funk",
-                                                   "Fusion", "Trance", "Classical", "Instrumental", "Acid", "House", "Game", "Sound Clip", "Gospel", "Noise",
-                                                   "AlternRock", "Bass", "Soul", "Punk", "Space", "Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic", "Gothic",
-                                                   "Darkwave", "Techno-Industrial", "Electronic", "Pop-Folk", "Eurodance", "Dream", "Southern Rock", "Comedy", "Cult", "Gangsta",
-                                                   "Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American", "Cabaret", "New Wave", "Psychadelic", "Rave", "Showtunes",
-                                                   "Trailer", "Lo-Fi", "Tribal", "Acid Punk", "Acid Jazz", "Polka", "Retro", "Musical", "Rock & Roll", "Hard Rock",
-                                                   "Folk", "Folk-Rock", "National Folk", "Swing", "Fast Fusion", "Bebob", "Latin", "Revival", "Celtic", "Bluegrass",
-                                                   "Avantgarde", "Gothic Rock", "Progressive Rock", "Psychedelic Rock", "Symphonic Rock", "Slow Rock", "Big Band", "Chorus", "Easy Listening", "Acoustic",
-                                                   "Humour", "Speech", "Chanson", "Opera", "Chamber Music", "Sonata", "Symphony", "Booty Bass", "Primus", "Porn Groove",
-                                                   "Satire", "Slow Jam", "Club", "Tango", "Samba", "Folklore", "Ballad", "Power Ballad", "Rhythmic Soul", "Freestyle",
-                                                   "Duet", "Punk Rock", "Drum Solo", "A capella", "Euro-House", "Dance Hall", "Goa", "Drum & Bass", "Club-House", "Hardcore",
-                                                   "Terror", "Indie", "BritPop", "Negerpunk", "Polsk Punk", "Beat", "Christian", "Heavy Metal", "Black Metal", "Crossover",
-                                                   "Contemporary", "Christian Rock", "Merengue", "Salsa", "Thrash Metal", "Anime", "JPop", "Synthpop", "Unknown"
-                                                  };
+												"New Age", "Oldies", "Other", "Pop", "R&B", "Rap", "Reggae", "Rock", "Techno", "Industrial",
+												"Alternative", "Ska", "Death Metal", "Pranks", "Soundtrack", "Euro-Techno", "Ambient", "Trip-Hop", "Vocal", "Jazz+Funk",
+												"Fusion", "Trance", "Classical", "Instrumental", "Acid", "House", "Game", "Sound Clip", "Gospel", "Noise",
+												"AlternRock", "Bass", "Soul", "Punk", "Space", "Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic", "Gothic",
+												"Darkwave", "Techno-Industrial", "Electronic", "Pop-Folk", "Eurodance", "Dream", "Southern Rock", "Comedy", "Cult", "Gangsta",
+												"Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American", "Cabaret", "New Wave", "Psychadelic", "Rave", "Showtunes",
+												"Trailer", "Lo-Fi", "Tribal", "Acid Punk", "Acid Jazz", "Polka", "Retro", "Musical", "Rock & Roll", "Hard Rock",
+												"Folk", "Folk-Rock", "National Folk", "Swing", "Fast Fusion", "Bebob", "Latin", "Revival", "Celtic", "Bluegrass",
+												"Avantgarde", "Gothic Rock", "Progressive Rock", "Psychedelic Rock", "Symphonic Rock", "Slow Rock", "Big Band", "Chorus", "Easy Listening", "Acoustic",
+												"Humour", "Speech", "Chanson", "Opera", "Chamber Music", "Sonata", "Symphony", "Booty Bass", "Primus", "Porn Groove",
+												"Satire", "Slow Jam", "Club", "Tango", "Samba", "Folklore", "Ballad", "Power Ballad", "Rhythmic Soul", "Freestyle",
+												"Duet", "Punk Rock", "Drum Solo", "A capella", "Euro-House", "Dance Hall", "Goa", "Drum & Bass", "Club-House", "Hardcore",
+												"Terror", "Indie", "BritPop", "Negerpunk", "Polsk Punk", "Beat", "Christian", "Heavy Metal", "Black Metal", "Crossover",
+												"Contemporary", "Christian Rock", "Merengue", "Salsa", "Thrash Metal", "Anime", "JPop", "Synthpop", "Unknown"
+												};
 
 
 static int GetStringFromTextTagBox(MMFileFormatContext *formatContext, MMFileIOHandle *fp, MMFILE_MP4_BASIC_BOX_HEADER *basic_header, eMMFILE_3GP_TEXT_TAG eTag)
@@ -535,7 +535,7 @@ exception:
 /**
  * The Location Information box
  * --------------------+-------------------+-----------------------------------+------
- * Field				Type 				Details								Value
+ * Field				Type				Details								Value
  * --------------------+-------------------+-----------------------------------+------
  * BoxHeader.Size		Unsigned int(32)
  * BoxHeader.Type		Unsigned int(32)										'loci'
@@ -545,13 +545,13 @@ exception:
  * Language				Unsigned int(5)[3]	Packed ISO-639-2/T language code
  * Name					String				Text of place name
  * Role					Unsigned int(8)		Non-negative value indicating role
- * 											 of location
+ *											of location
  * Longitude			Unsigned int(32)	Fixed-point value of the longitude
  * Latitude				Unsigned int(32)	Fixed-point value of the latitude
  * Altitude				Unsigned int(32)	Fixed-point value of the Altitude
  * Astronomical_body	String				Text of astronomical body
  * Additional_notes		String				Text of additional location-related
- * 											 information
+ *											information
  * --------------------+-------------------+-----------------------------------+------
  */
 static int _get_char_position(unsigned char *src, char ch, int max)
@@ -864,7 +864,7 @@ static int GetTagFromMetaBox(MMFileFormatContext *formatContext, MMFileIOHandle 
 		iTunes_meta = 0;
 #endif
 	} else if (hdlrBox.handler_type == FOURCC('m', 'd', 'i', 'r') &&
-	           mmfile_io_le_uint32(hdlrBox.reserved[0]) == FOURCC('a', 'p', 'p', 'l')) {
+				mmfile_io_le_uint32(hdlrBox.reserved[0]) == FOURCC('a', 'p', 'p', 'l')) {
 
 #ifdef __MMFILE_TEST_MODE__
 		debug_msg("Apple iTunes tag detected by mdir.\n");
@@ -875,9 +875,9 @@ static int GetTagFromMetaBox(MMFileFormatContext *formatContext, MMFileIOHandle 
 #endif
 	} else {
 		debug_warning("unknown meta type. 4CC:[%c%c%c%c]\n", ((char *)&hdlrBox.handler_type)[0],
-		              ((char *)&hdlrBox.handler_type)[1],
-		              ((char *)&hdlrBox.handler_type)[2],
-		              ((char *)&hdlrBox.handler_type)[3]);
+					((char *)&hdlrBox.handler_type)[1],
+					((char *)&hdlrBox.handler_type)[2],
+					((char *)&hdlrBox.handler_type)[3]);
 		/*goto exception; */
 	}
 
@@ -1301,9 +1301,9 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 
 #ifdef __MMFILE_TEST_MODE__
 		debug_msg("START_OFFSET:[%lld] SIZE:[%d Byte] 4CC:[%c%c%c%c]\n",
-		          basic_header.start_offset, basic_header.size,
-		          ((char *)&basic_header.type)[0], ((char *)&basic_header.type)[1],
-		          ((char *)&basic_header.type)[2], ((char *)&basic_header.type)[3]);
+				basic_header.start_offset, basic_header.size,
+				((char *)&basic_header.type)[0], ((char *)&basic_header.type)[1],
+				((char *)&basic_header.type)[2], ((char *)&basic_header.type)[3]);
 #endif
 
 		switch (basic_header.type) {
@@ -1729,7 +1729,7 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 			CompTmp[3] = 0;
 			oneFrameLen = MP3_TAGv2_22_TXT_HEADER_LEN;
 			oneFrameLen += (unsigned long)buffer[3 + curPos] << 16 | (unsigned long)buffer[4 + curPos] << 8
-			               | (unsigned long)buffer[5 + curPos];
+						| (unsigned long)buffer[5 + curPos];
 			if (oneFrameLen > taglen - curPos)
 				break;
 			purelyFramelen = oneFrameLen - MP3_TAGv2_22_TXT_HEADER_LEN;
@@ -2151,7 +2151,7 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 			CompTmp[4] = 0;
 			oneFrameLen = MP3_TAGv2_23_TXT_HEADER_LEN;
 			oneFrameLen += (unsigned long)buffer[4 + curPos] << 24 | (unsigned long)buffer[5 + curPos] << 16
-			               | (unsigned long)buffer[6 + curPos] << 8 | (unsigned long)buffer[7 + curPos];
+						| (unsigned long)buffer[6 + curPos] << 8 | (unsigned long)buffer[7 + curPos];
 
 #ifdef __MMFILE_TEST_MODE__
 			debug_msg("----------------------------------------------------------------------------------------------------\n");
@@ -2770,13 +2770,13 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 								} else {
 #ifdef __MMFILE_TEST_MODE__
 									debug_msg("pExtContent[imgstartOffset](%d) value should setted NULL value for end of description! realCpyFrameNum - imgstartOffset(%d)\n",
-									          pExtContent[imgstartOffset], realCpyFrameNum - imgstartOffset);
+											pExtContent[imgstartOffset], realCpyFrameNum - imgstartOffset);
 #endif
 								}
 							} else {
 #ifdef __MMFILE_TEST_MODE__
 								debug_msg("pExtContent[imgstartOffset](%d) value should setted NULL value for end of mimetype! realCpyFrameNum - imgstartOffset(%d)\n",
-								          pExtContent[imgstartOffset], realCpyFrameNum - imgstartOffset);
+											pExtContent[imgstartOffset], realCpyFrameNum - imgstartOffset);
 #endif
 							}
 
@@ -2885,7 +2885,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 			CompTmp[4] = 0;
 			oneFrameLen = MP3_TAGv2_23_TXT_HEADER_LEN;
 			oneFrameLen += (unsigned long)buffer[4 + curPos] << 21 | (unsigned long)buffer[5 + curPos] << 14
-			               | (unsigned long)buffer[6 + curPos] << 7 | (unsigned long)buffer[7 + curPos];
+						| (unsigned long)buffer[6 + curPos] << 7 | (unsigned long)buffer[7 + curPos];
 			if (oneFrameLen > taglen - curPos)
 				break;
 
@@ -3622,7 +3622,7 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo *pInfo)
 {
 	char	*mpegAudioGenre = NULL/*, *tmpGenreForV1Tag = NULL*/;
 	bool	bAdditionGenre = false /*, bMpegAudioFrame = false*/;
-	int 	mpegAudioFileLen = 0, idv2IntGenre = 148/*, tmpinx = 0, tmpinx2=0*/;
+	int mpegAudioFileLen = 0, idv2IntGenre = 148/*, tmpinx = 0, tmpinx2=0*/;
 #ifdef _SM_ONLY
 	char	*pGenreForUTF16;
 #endif
@@ -3635,8 +3635,8 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo *pInfo)
 			debug_msg("Genre: %d\n", genre);
 #endif
 			if (genre > 147)
- 				genre = 148;
- 
+				genre = 148;
+
 			if (MpegAudio_Genre[genre] != NULL) {
 				pInfo->genreLen = strlen(MpegAudio_Genre[genre]);
 				if (pInfo->genreLen > 0) {
@@ -3703,10 +3703,10 @@ void mm_file_id3tag_restore_content_info(AvFileContentInfo *pInfo)
 
 			if (bAdditionGenre == true) {
 				idv2IntGenre = atoi(mpegAudioGenre + 1);
- 
+
 				if (idv2IntGenre > 147 || idv2IntGenre < 0)
- 					idv2IntGenre = 148;
- 
+					idv2IntGenre = 148;
+
 				if (MpegAudio_Genre[idv2IntGenre] != NULL) {
 					pInfo->genreLen = strlen(MpegAudio_Genre[idv2IntGenre]);
 					if (pInfo->genreLen > 0) {

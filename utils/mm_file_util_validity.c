@@ -1036,7 +1036,7 @@ int MMFileFormatIsValidFLAC(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_FLAC_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1082,7 +1082,7 @@ int MMFileFormatIsValidFLV(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_FLV_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1129,7 +1129,7 @@ int MMFileFormatIsValidREAL(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_RMVB_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1168,9 +1168,9 @@ exit:
 /***********************************************************************/
 /*                     MPEGTS Header Check API                            */
 /***********************************************************************/
-#define MPEGTS_NONE		0x00
+#define MPEGTS_NONE	0x00
 #define MPEGTS_FECE		0x10
-#define MPEGTS_DVHS 	0x20
+#define MPEGTS_DVHS	0x20
 #define MPEGTS_PACKET	0x40
 
 #define TS_PACKET_SIZE		188
@@ -1183,7 +1183,7 @@ int MMFileFormatIsValidMPEGTS(MMFileIOHandle *pFileIO, const char *mmfileuri)
 {
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[TS_MAX_PACKET_SIZE] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1229,7 +1229,7 @@ int MMFileFormatIsValidMPEGPS(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MPEGPS_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1275,7 +1275,7 @@ int MMFileFormatIsValidMPEGAUDIO(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MPEGAUDIO_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1321,7 +1321,7 @@ int MMFileFormatIsValidMPEGVIDEO(MMFileIOHandle *pFileIO, const char *mmfileuri)
 
 	MMFileIOHandle *fp = pFileIO;
 	unsigned char buffer[_MMFILE_MPEGVIDEO_HEADER_LENGTH] = {0, };
-	int 		  readed = 0;
+	int readed = 0;
 	int ret = 0;
 
 	if (fp == NULL) {
@@ -1454,9 +1454,9 @@ static int _MMFileIsMMFHeader(void *header)
 		if (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x2F) {
 			return 1;
 		} else if (((*(s + _MMFILE_MMF_TYPE_POSITION) >= 0x30) && (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x38)) /* MA3, MA5 type */
-		           || ((*(s + _MMFILE_MMF_TYPE_POSITION) >= 0x40) && (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x48))
-		           || ((*(s + _MMFILE_MMF_TYPE_POSITION) >= 0x50) && (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x58))
-		           || ((*(s + _MMFILE_MMF_TYPE_POSITION) == 0xF0))) {
+			|| ((*(s + _MMFILE_MMF_TYPE_POSITION) >= 0x40) && (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x48))
+			|| ((*(s + _MMFILE_MMF_TYPE_POSITION) >= 0x50) && (*(s + _MMFILE_MMF_TYPE_POSITION) <= 0x58))
+			|| ((*(s + _MMFILE_MMF_TYPE_POSITION) == 0xF0))) {
 
 			return 1;
 		}
@@ -1536,7 +1536,7 @@ static int _MMFileIsREALHeader(void *header)
 static int _MMFileIsMPEGTSHeader(MMFileIOHandle *fp)
 {
 	unsigned char header[TS_MAX_PACKET_SIZE] = {0, };
- 	unsigned char *s = NULL;
+	unsigned char *s = NULL;
 
 	mmfile_seek(fp, 0, MMFILE_SEEK_SET);
 	mmfile_read(fp, header, sizeof(header));

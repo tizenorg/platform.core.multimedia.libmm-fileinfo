@@ -537,7 +537,7 @@ static int __mmfile_get_frame(AVFormatContext *pFormatCtx, double timestamp, boo
 		struct SwsContext *img_convert_ctx = NULL;
 
 		img_convert_ctx = sws_getContext(*width, *height, pVideoCodecCtx->pix_fmt,
-		                                 *width, *height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+						*width, *height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
 
 		if (NULL == img_convert_ctx) {
 			debug_error("failed to get img convet ctx\n");
@@ -546,7 +546,7 @@ static int __mmfile_get_frame(AVFormatContext *pFormatCtx, double timestamp, boo
 		}
 
 		ret = sws_scale(img_convert_ctx, (const uint8_t * const *)pFrame->data, pFrame->linesize,
-		                0, *height, pFrameRGB->data, pFrameRGB->linesize);
+					0, *height, pFrameRGB->data, pFrameRGB->linesize);
 		if (ret < 0) {
 			debug_error("failed to convet image\n");
 			sws_freeContext(img_convert_ctx);
@@ -620,7 +620,7 @@ int mmfile_format_get_frame(const char *path, double timestamp, bool is_accurate
 
 exception:
 	/* Close video file */
-	if (pFormatCtx) 		avformat_close_input(&pFormatCtx);
+	if (pFormatCtx)	avformat_close_input(&pFormatCtx);
 
 	return ret;
 }
@@ -704,7 +704,7 @@ int mmfile_format_get_frame_from_memory(const void *data, unsigned int datasize,
 
 exception:
 	/* Close video file */
-	if (pFormatCtx) 		avformat_close_input(&pFormatCtx);
+	if (pFormatCtx)	avformat_close_input(&pFormatCtx);
 
 	return ret;
 }
