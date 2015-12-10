@@ -427,7 +427,7 @@ exception:
 
 #define DATA_LENGTH 4
 #define POS_OF_MIME_LEN DATA_LENGTH
-#define CONVERT_TO_INT(dest, src) {dest = 0; dest |= (0 | src[0] << 24) | (0 | src[1] << 16) | (0 | src[2] << 8) | (0 | src[3]);}
+#define CONVERT_TO_INT(dest, src) {dest = 0; dest |= (0 | src[0] << 24) | (0 | src[1] << 16) | (0 | src[2] << 8) | (0 | src[3]); }
 
 EXPORT_API
 int mmfile_format_read_tag_ffmpg(MMFileFormatContext *formatContext)
@@ -489,7 +489,7 @@ int mmfile_format_read_tag_ffmpg(MMFileFormatContext *formatContext)
 
 					formatContext->artworkSize = pkt.size;
 					formatContext->artwork = mmfile_malloc(pkt.size);
-					if(formatContext->artwork != NULL)
+					if (formatContext->artwork != NULL)
 						memcpy(formatContext->artwork, pkt.data, pkt.size);
 				}
 			}

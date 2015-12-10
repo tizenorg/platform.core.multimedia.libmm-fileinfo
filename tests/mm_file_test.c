@@ -43,7 +43,7 @@
 		fprintf(msg_tmp_fp, " - start_time:   %3.5lf sec\n", start_time); \
 		fprintf(msg_tmp_fp, " - finish_time:  %3.5lf sec\n", end_time); \
 		fprintf(msg_tmp_fp, " - elapsed time: %3.5lf sec\n", end_time - start_time); \
-		fflush(msg_tmp_fp); fclose(msg_tmp_fp); }}
+		fflush(msg_tmp_fp); fclose(msg_tmp_fp); } }
 
 typedef struct _mmfile_value {
 	int len;

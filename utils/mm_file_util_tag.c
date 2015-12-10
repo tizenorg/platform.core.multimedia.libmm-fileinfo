@@ -2009,7 +2009,7 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 
 								tmp_desc = mmfile_malloc(sizeof(char) * dis_len);
 
-								if(tmp_desc != NULL) {
+								if (tmp_desc != NULL) {
 									memcpy(tmp_desc, pExtContent + imgstartOffset, dis_len);
 
 									/*convert description*/
@@ -3521,7 +3521,7 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 
 									tmp_desc = mmfile_malloc(sizeof(char) * dis_len);
 
-									if(tmp_desc != NULL) {
+									if (tmp_desc != NULL) {
 										memcpy(tmp_desc, pExtContent + imgstartOffset, dis_len);
 										debug_msg("tmp_desc %s\n", tmp_desc);
 
