@@ -198,8 +198,8 @@ int main(int argc, char **argv)
 
 static int mmfile_get_file_infomation(void *data, void *user_data, bool file_test)
 {
-	MMHandleType content_attrs = 0;
-	MMHandleType tag_attrs = 0;
+	mm_fileinfo_h content_attrs = 0;
+	mm_fileinfo_h tag_attrs = 0;
 	char *err_attr_name = NULL;
 	int audio_track_num = 0;
 	int video_track_num = 0;

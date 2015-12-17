@@ -44,7 +44,7 @@ extern "C" {
 
 #define MMFILE_IO_FAILED		MMFILE_UTIL_FAIL
 #define MMFILE_IO_SUCCESS		MMFILE_UTIL_SUCCESS
-#define CAST_MM_HANDLE(x)			(MMHandleType)(x)
+#define CAST_MM_HANDLE(x)			(mm_fileinfo_h)(x)
 
 #ifndef TRUE
 #define TRUE	(1==1)

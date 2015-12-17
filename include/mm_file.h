@@ -51,6 +51,7 @@
 extern "C" {
 #endif
 
+typedef void *mm_fileinfo_h;
 
 /**
  * content attributes.
@@ -123,7 +124,7 @@ extern "C" {
   * @code
 #include <mm_file.h>
 
-MMHandleType tag_attrs = NULL;
+mm_fileinfo_h tag_attrs = NULL;
 // get tag handle
 mm_file_create_tag_attrs(&tag_attrs, filename);
 
@@ -149,7 +150,7 @@ mm_file_destroy_tag_attrs(tag_attrs);
 
  *	@endcode
  */
-int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename);
+int mm_file_create_tag_attrs(mm_fileinfo_h *tag_attrs, const char *filename);
 
 /**
  * This function is to destory the tag attribute handle which is created by mm_file_create_tag_attrs().<BR>
@@ -167,7 +168,7 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename);
  * @code
 #include <mm_file.h>
 
-MMHandleType tag_attrs = NULL;
+mm_fileinfo_h tag_attrs = NULL;
 // get tag handle
 mm_file_create_tag_attrs(&tag_attrs, filename);
 
@@ -193,7 +194,7 @@ mm_file_destroy_tag_attrs(tag_attrs);
 
  *	@endcode
  */
-int mm_file_destroy_tag_attrs(MMHandleType tag_attrs);
+int mm_file_destroy_tag_attrs(mm_fileinfo_h tag_attrs);
 
 /**
  * This function is to create content attribute from media file.<BR>
@@ -270,7 +271,7 @@ if (video_track_num)
 mm_file_destroy_content_attrs(content_attrs);
  * @endcode
  */
-int mm_file_create_content_attrs(MMHandleType *content_attrs, const char *filename);
+int mm_file_create_content_attrs(mm_fileinfo_h *content_attrs, const char *filename);
 
 /**
   * This function is to destroy content attribute handle.<BR>
@@ -345,7 +346,7 @@ if (video_track_num)
 mm_file_destroy_content_attrs(content_attrs);
 * @endcode
 */
-int mm_file_destroy_content_attrs(MMHandleType content_attrs);
+int mm_file_destroy_content_attrs(mm_fileinfo_h content_attrs);
 
 /**
   * This function is to get the attributes from media tag or content.<BR>
@@ -426,7 +427,7 @@ mm_file_destroy_content_attrs(content_attrs);
   * @endcode
   */
 
-int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *first_attribute_name, ...)G_GNUC_NULL_TERMINATED;
+int mm_file_get_attrs(mm_fileinfo_h attrs, char **err_attr_name, const char *first_attribute_name, ...)G_GNUC_NULL_TERMINATED;
 
 /**
   * This function is to get the tag attributes from media data on memory while mm_file_create_tag_attrs() extracts from file.<BR>
@@ -462,7 +463,7 @@ mm_file_get_attrs(tag_attrs,
 mm_file_destroy_tag_attrs(tag_attrs);
   * @endcode
  */
-int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *data, unsigned int size, int format);
+int mm_file_create_tag_attrs_from_memory(mm_fileinfo_h *tag_attrs, const void *data, unsigned int size, int format);
 
 /**
   * This function is to get the content attributes from media data on memory while mm_file_create_content_attrs() extracts from file.<BR>
@@ -498,7 +499,7 @@ mm_file_get_attrs(content_attrs,
 mm_file_destroy_content_attrs(content_attrs);
    * @endcode
    */
-int mm_file_create_content_attrs_from_memory(MMHandleType *content_attrs, const void *data, unsigned int size, int format);
+int mm_file_create_content_attrs_from_memory(mm_fileinfo_h *content_attrs, const void *data, unsigned int size, int format);
 
 /**
  * This function is to get the count of audio/video stream from media file.<BR>
@@ -559,11 +560,11 @@ mm_file_get_attrs(content_attrs,
 mm_file_destroy_content_attrs(content_attrs);
   * @endcode
   */
-int mm_file_create_content_attrs_simple(MMHandleType *content_attrs, const char *filename);
+int mm_file_create_content_attrs_simple(mm_fileinfo_h *content_attrs, const char *filename);
 
-int mm_file_create_content_attrs_safe(MMHandleType *content_attrs, const char *filename);
+int mm_file_create_content_attrs_safe(mm_fileinfo_h *content_attrs, const char *filename);
 
-int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long *time_info, char **lyrics);
+int mm_file_get_synclyrics_info(mm_fileinfo_h tag_attrs, int index, unsigned long *time_info, char **lyrics);
 
 /**
  * @brief Get a frame of video media. Not support for DRM Contents.

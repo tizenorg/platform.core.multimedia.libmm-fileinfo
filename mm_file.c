@@ -281,7 +281,7 @@ static int
 _info_set_attr_media(mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 {
 	int ret = 0;
-	MMHandleType hattrs = CAST_MM_HANDLE(attrs);
+	mm_fileinfo_h hattrs = CAST_MM_HANDLE(attrs);
 
 	if (formatContext->commandType == MM_FILE_TAG) {
 		if (formatContext->title)				mm_attrs_set_string_by_name(hattrs, MM_FILE_TAG_TITLE, formatContext->title);
@@ -372,7 +372,7 @@ _info_set_attr_media(mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 	}
 
 	/*commit attrs*/
-	ret = mmf_attrs_commit((MMHandleType)hattrs);
+	ret = mmf_attrs_commit((mm_fileinfo_h)hattrs);
 
 	return ret;
 }
@@ -663,7 +663,7 @@ exception:
 /**
  * global functions.
  */
-int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *first_attribute_name, ...)
+int mm_file_get_attrs(mm_fileinfo_h attrs, char **err_attr_name, const char *first_attribute_name, ...)
 {
 	int ret = FILEINFO_ERROR_NONE;
 	va_list var_args;
@@ -692,7 +692,7 @@ int mm_file_get_attrs(MMHandleType attrs, char **err_attr_name, const char *firs
 	return ret;
 }
 
-int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long *time_info, char **lyrics)
+int mm_file_get_synclyrics_info(mm_fileinfo_h tag_attrs, int index, unsigned long *time_info, char **lyrics)
 {
 	int ret = FILEINFO_ERROR_NONE;
 	AvSynclyricsInfo *sync_lyric_item = NULL;
@@ -740,7 +740,7 @@ int mm_file_get_synclyrics_info(MMHandleType tag_attrs, int index, unsigned long
 
 }
 
-int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
+int mm_file_create_tag_attrs(mm_fileinfo_h *tag_attrs, const char *filename)
 {
 	int ret = FILEINFO_ERROR_NONE;
 	mmf_attrs_t *attrs = NULL;
@@ -794,12 +794,12 @@ int mm_file_create_tag_attrs(MMHandleType *tag_attrs, const char *filename)
 
 	ret = _get_tag_info(attrs, &src);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get tag: %s\n", filename);
 	}
 
-	*tag_attrs = (MMHandleType)attrs;
+	*tag_attrs = (mm_fileinfo_h)attrs;
 
 END:
 #ifdef __MMFILE_DYN_LOADING__
@@ -815,7 +815,7 @@ END:
 
 
 EXPORT_API
-int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
+int mm_file_destroy_tag_attrs(mm_fileinfo_h tag_attrs)
 {
 	void *artwork = NULL;
 	GList *synclyrics_list = NULL;
@@ -852,7 +852,7 @@ int mm_file_destroy_tag_attrs(MMHandleType tag_attrs)
 }
 
 EXPORT_API
-int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filename)
+int mm_file_create_content_attrs(mm_fileinfo_h *contents_attrs, const char *filename)
 {
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src = {0, };
@@ -919,12 +919,12 @@ int mm_file_create_content_attrs(MMHandleType *contents_attrs, const char *filen
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info(attrs, &src, &parse);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
 	}
 
-	*contents_attrs = (MMHandleType) attrs;
+	*contents_attrs = (mm_fileinfo_h) attrs;
 
 
 END:
@@ -951,7 +951,7 @@ END:
 
 
 EXPORT_API
-int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *data, unsigned int size, int format)
+int mm_file_create_tag_attrs_from_memory(mm_fileinfo_h *tag_attrs, const void *data, unsigned int size, int format)
 {
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src;
@@ -991,12 +991,12 @@ int mm_file_create_tag_attrs_from_memory(MMHandleType *tag_attrs, const void *da
 	/*parse.type = MM_FILE_PARSE_TYPE_ALL;*/
 	ret = _get_tag_info(attrs, &src);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get tag");
 	}
 
-	*tag_attrs = (MMHandleType)attrs;
+	*tag_attrs = (mm_fileinfo_h)attrs;
 
 END:
 #ifdef __MMFILE_DYN_LOADING__
@@ -1012,7 +1012,7 @@ END:
 
 
 EXPORT_API
-int mm_file_create_content_attrs_from_memory(MMHandleType *contents_attrs, const void *data, unsigned int size, int format)
+int mm_file_create_content_attrs_from_memory(mm_fileinfo_h *contents_attrs, const void *data, unsigned int size, int format)
 {
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src;
@@ -1052,12 +1052,12 @@ int mm_file_create_content_attrs_from_memory(MMHandleType *contents_attrs, const
 	parse.type = MM_FILE_PARSE_TYPE_ALL;
 	ret = _get_contents_info(attrs, &src, &parse);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents");
 	}
 
-	*contents_attrs = (MMHandleType)attrs;
+	*contents_attrs = (mm_fileinfo_h)attrs;
 
 END:
 #ifdef __MMFILE_DYN_LOADING__
@@ -1073,7 +1073,7 @@ END:
 
 
 EXPORT_API
-int mm_file_destroy_content_attrs(MMHandleType contents_attrs)
+int mm_file_destroy_content_attrs(mm_fileinfo_h contents_attrs)
 {
 	void *thumbnail = NULL;
 	int ret = FILEINFO_ERROR_NONE;
@@ -1167,7 +1167,7 @@ END:
 }
 
 EXPORT_API
-int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char *filename)
+int mm_file_create_content_attrs_simple(mm_fileinfo_h *contents_attrs, const char *filename)
 {
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src = {0, };
@@ -1217,12 +1217,12 @@ int mm_file_create_content_attrs_simple(MMHandleType *contents_attrs, const char
 	parse.type = MM_FILE_PARSE_TYPE_NORMAL;
 	ret = _get_contents_info(attrs, &src, &parse);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
 	}
 
-	*contents_attrs = (MMHandleType) attrs;
+	*contents_attrs = (mm_fileinfo_h) attrs;
 
 END:
 #ifdef __MMFILE_DYN_LOADING__
@@ -1237,7 +1237,7 @@ END:
 }
 
 EXPORT_API
-int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *filename)
+int mm_file_create_content_attrs_safe(mm_fileinfo_h *contents_attrs, const char *filename)
 {
 	mmf_attrs_t *attrs = NULL;
 	MMFileSourceType src = {0, };
@@ -1287,12 +1287,12 @@ int mm_file_create_content_attrs_safe(MMHandleType *contents_attrs, const char *
 	parse.type = MM_FILE_PARSE_TYPE_SAFE;
 	ret = _get_contents_info(attrs, &src, &parse);
 	if (ret != FILEINFO_ERROR_NONE) {
-		mmf_attrs_free((MMHandleType)attrs);
+		mmf_attrs_free((mm_fileinfo_h)attrs);
 		attrs = NULL;
 		debug_error("failed to get contents: %s\n", filename);
 	}
 
-	*contents_attrs = (MMHandleType) attrs;
+	*contents_attrs = (mm_fileinfo_h) attrs;
 
 END:
 #ifdef __MMFILE_DYN_LOADING__
@@ -1456,7 +1456,7 @@ int mm_file_check_uhqa(const char *filename, bool *is_uhqa)
 		*is_uhqa = FALSE;
 	}
 
-	mmf_attrs_free((MMHandleType)attrs);
+	mmf_attrs_free((mm_fileinfo_h)attrs);
 	attrs = NULL;
 
 END:
