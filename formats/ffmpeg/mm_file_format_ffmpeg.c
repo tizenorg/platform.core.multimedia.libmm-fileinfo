@@ -865,9 +865,9 @@ static unsigned int _diff_memory(const void *s1, const void *s2, unsigned int n)
 {
 	char *s = (char *)s1;
 	char *d = (char *)s2;
-	unsigned int i;
-	unsigned int ret;
-	int tmp;
+	unsigned int i = 0;
+	unsigned int ret = 0;
+	int tmp = 0;
 
 	for (i = 0, ret = 0; i < n; i++) {
 		if (*s++ != *d++) {
@@ -875,7 +875,10 @@ static unsigned int _diff_memory(const void *s1, const void *s2, unsigned int n)
 			ret += (tmp < 0 ? -tmp : tmp);
 		}
 	}
-	ret /= n;
+
+	if (n != 0)
+		ret /= n;
+
 	return ret;
 }
 

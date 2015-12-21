@@ -876,9 +876,7 @@ __AvFindStartOfMp3Header(MMFileIOHandle *hFile,  unsigned char *buf, AvFileConte
 	bool bFoundSync = false;
 	unsigned long  minLen;
 
-
-
-	if (pInfo->fileLen > (_AV_MP3_HEADER_POSITION_MAX + pInfo->tagV2Info.tagLen))
+	if (pInfo->fileLen > (long long)(_AV_MP3_HEADER_POSITION_MAX + pInfo->tagV2Info.tagLen))
 		bufLen = _AV_MP3_HEADER_POSITION_MAX;
 	else
 		bufLen = pInfo->fileLen - pInfo->tagV2Info.tagLen;
@@ -1163,7 +1161,7 @@ static int mmf_file_mp3_get_infomation(char *filename, AvFileContentInfo *pInfo)
 	debug_msg("pInfo->fileLen(%lld)\n", pInfo->fileLen);
 #endif
 
-	if (pInfo->fileLen > (_AV_MP3_HEADER_POSITION_MAX + pInfo->tagV2Info.tagLen)) {
+	if (pInfo->fileLen > (long long)(_AV_MP3_HEADER_POSITION_MAX + pInfo->tagV2Info.tagLen)) {
 		readAmount = _AV_MP3_HEADER_POSITION_MAX + pInfo->tagV2Info.tagLen;
 		buf = mmfile_malloc(readAmount);
 		if (buf == NULL) {
