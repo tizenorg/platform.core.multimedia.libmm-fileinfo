@@ -28,7 +28,7 @@ Group:      Development/Libraries
 Requires:   %{name} = %{version}-%{release}
 
 %description devel
-Multimedia Framework FileInfo Library (developement files)
+Multimedia Framework FileInfo Library (development files)
 
 %prep
 %setup -q
