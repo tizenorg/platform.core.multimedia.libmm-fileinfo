@@ -2135,8 +2135,12 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 		debug_msg("--------------- extendedHeaderLen = %d\n", extendedHeaderLen);
 #endif
 
-		curPos += extendedHeaderLen;
-		curPos += 4;
+		if (extendedHeaderLen > (int)(taglen - curPos)) {
+			debug_error("extended header too long.\n");
+		} else {
+			curPos += extendedHeaderLen;
+			curPos += 4;
+		}
 	}
 
 	if (needToloopv2taglen - MP3_TAGv2_23_TXT_HEADER_LEN > MP3_TAGv2_23_TXT_HEADER_LEN) {
@@ -2870,7 +2874,11 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 		debug_msg("--------------- extendedHeaderLen = %d\n", extendedHeaderLen);
 #endif
 
-		curPos += extendedHeaderLen;
+		if (extendedHeaderLen > (int)(taglen - curPos)) {
+			debug_error("extended header too long.\n");
+		} else {
+			curPos += extendedHeaderLen;
+		}
 	}
 
 	if (needToloopv2taglen - MP3_TAGv2_23_TXT_HEADER_LEN > MP3_TAGv2_23_TXT_HEADER_LEN) {
