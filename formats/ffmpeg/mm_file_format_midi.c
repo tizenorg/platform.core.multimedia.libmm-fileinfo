@@ -1229,7 +1229,7 @@ __AvGetSizeOfFileInfo(PMIDINFO pI)
 									/*<== I Think that Below Code is Trash!! and Erase it! (Actually I Don Know ^^)
 									dTime = (dTime << 7) / 125; */
 
-									sdDelta = (UINT32)(dTime / pI->dTimeResolution > 0 ? pI->dTimeResolution : 1);
+									sdDelta = (UINT32)(dTime / (pI->dTimeResolution > 0 ? pI->dTimeResolution : 1));
 									break;
 
 								default:
