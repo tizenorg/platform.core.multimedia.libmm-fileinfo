@@ -64,4 +64,4 @@ libmmfile_formats_la_LIBADD += $(DLOG_LIBS)
 
 libmmfile_formats_la_CFLAGS += -D__MMFILE_FFMPEG_V100__
 libmmfile_formats_la_CFLAGS += -D__MMFILE_FFMPEG_V085__
-libmmfile_formats_la_CFLAGS += -D__MMFILE_LIBAV_VERSION__=11
+libmmfile_formats_la_CFLAGS += -D__MMFILE_LIBAV_VERSION__=11.4

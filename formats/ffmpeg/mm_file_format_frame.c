@@ -706,5 +706,7 @@ exception:
 	/* Close video file */
 	if (pFormatCtx)	avformat_close_input(&pFormatCtx);
 
+	ffurl_deregister_protocol(&MMFileMEMProtocol);
+
 	return ret;
 }
