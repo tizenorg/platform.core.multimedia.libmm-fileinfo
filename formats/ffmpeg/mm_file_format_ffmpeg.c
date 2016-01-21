@@ -853,6 +853,10 @@ int mmfile_format_close_ffmpg(MMFileFormatContext *formatContext)
 #endif
 			formatContext->privateFormatData = NULL;
 		}
+
+		if (formatContext->filesrc->type  == MM_FILE_SRC_TYPE_MEMORY) {
+			ffurl_deregister_protocol(&MMFileMEMProtocol);
+		}
 	}
 
 	return MMFILE_FORMAT_SUCCESS;
