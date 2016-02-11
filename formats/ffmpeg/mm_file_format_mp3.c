@@ -1271,10 +1271,12 @@ static int mmf_file_mp3_get_infomation(char *filename, AvFileContentInfo *pInfo)
 #endif
 
 		pInfo->bV1tagFound = true;
-		/* In this case, V2 Tag alreay exist So, ignore V1 tag  */
-		if (pInfo->tagV2Info.tagLen == 0) {
-			memcpy(TagBuff, (TagBuff + tagHeaderPos), MP3TAGINFO_SIZE);
-			if (!mm_file_id3tag_parse_v110(pInfo, TagBuff))
+		/* In this case, V2 Tag not exist.. So, try to read V1 tag  */
+		if (pInfo->tagV2Info.tagLen == 0 && tagHeaderPos == TAGV1_SEEK_GAP) {
+			unsigned char	TmpBuff[MP3TAGINFO_SIZE] = {0, };
+
+			memcpy(TmpBuff, (TagBuff + tagHeaderPos), MP3TAGINFO_SIZE);
+			if (!mm_file_id3tag_parse_v110(pInfo, TmpBuff))
 				goto EXCEPTION;
 		}
 	}
