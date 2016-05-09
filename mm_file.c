@@ -124,6 +124,7 @@ static mmf_attrs_construct_info_t g_tag_attrs[] = {
 	{(char *)"tag-rotate",			MMF_VALUE_TYPE_STRING,	MM_ATTRS_FLAG_RW, (void *)NULL},
 	{(char *)"tag-cdis",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
 	{(char *)"tag-smta",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
+	{(char *)"tag-360",			MMF_VALUE_TYPE_INT,		MM_ATTRS_FLAG_RW, (void *)0},
 };
 
 static mmf_attrs_construct_info_t g_content_attrs[] = {
@@ -308,6 +309,8 @@ _info_set_attr_media(mmf_attrs_t *attrs, MMFileFormatContext *formatContext)
 		mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_SYNCLYRICS_NUM, formatContext->syncLyricsNum);
 		mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_CDIS, formatContext->cdis);
 		mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_SMTA, formatContext->smta);
+
+		mm_attrs_set_int_by_name(hattrs, MM_FILE_TAG_360, formatContext->is_360);
 
 		if ((formatContext->syncLyricsNum > 0) && (formatContext->syncLyrics))
 			mm_attrs_set_data_by_name(hattrs, MM_FILE_TAG_SYNCLYRICS, formatContext->syncLyrics, formatContext->syncLyricsNum);
