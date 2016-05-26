@@ -1983,7 +1983,7 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 								int dis_len = 0;
 								int new_dis_len = 0;
 								unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
-								unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+								unsigned char png_sign[8] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 								char *tmp_desc = NULL;
 
 								while (1) {
