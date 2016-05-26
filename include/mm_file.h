@@ -102,6 +102,7 @@ extern "C" {
 #define	MM_FILE_TAG_CDIS			"tag-cdis"				/**< CDIS in User Data Information*/
 #define	MM_FILE_TAG_SMTA			"tag-smta"				/**< SMTA in User Data Information*/
 
+#define	MM_FILE_TAG_360			"tag-360"			/**< 360 content in User Data Information*/
 
 
 /**

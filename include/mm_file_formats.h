@@ -150,6 +150,7 @@ struct _MMFileFormatContext {
 	int syncLyricsNum;
 	int cdis;
 	int smta;
+	int is_360;
 
 	/* private data */
 	void *privateFormatData;

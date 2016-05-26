@@ -1432,6 +1432,34 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 					GetTagFromMetaBox(formatContext, fp, &basic_header);
 					break;
 				}
+
+			case FOURCC('t', 'r', 'a', 'k'): {
+#ifdef __MMFILE_TEST_MODE__
+					debug_msg("MPEG4: [trak] SIZE: [%d]Byte\n", basic_header.size);
+#endif
+					break;
+				}
+			case FOURCC('u', 'u', 'i', 'd'): {
+#ifdef __MMFILE_TEST_MODE__
+					debug_msg("MPEG4: [uuid] SIZE: [%d]Byte\n", basic_header.size);
+#endif
+					if (!formatContext->is_360) {
+						unsigned long uuid[4] = {0, };
+
+						mmfile_read(fp, (unsigned char *)uuid, sizeof(uuid));
+
+						if (mmfile_io_be_uint32(uuid[0]) == 0xffcc8263
+							&& mmfile_io_be_uint32(uuid[1]) == 0xf8554a93
+							&& mmfile_io_be_uint32(uuid[2]) == 0x8814587a
+							&& mmfile_io_be_uint32(uuid[3]) == 0x02521fdd) {
+							formatContext->is_360 = 1;
+						}
+						ret = mmfile_seek(fp, basic_header.start_offset + basic_header.size, SEEK_SET);
+					}
+
+					break;
+				}
+
 			default: {
 #ifdef __MMFILE_TEST_MODE__
 					debug_msg("4CC: Not Support.. so skip it\n");
