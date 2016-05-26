@@ -166,6 +166,8 @@ static const char *MpegAudio_Genre[GENRE_COUNT] = {"Blues", "Classic Rock", "Cou
 												"Contemporary", "Christian Rock", "Merengue", "Salsa", "Thrash Metal", "Anime", "JPop", "Synthpop", "Unknown"
 												};
 
+static unsigned char gTagJPEGHeader[] = {0xff, 0xd8, 0xff };
+static unsigned char gTagPNGHeader[] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 
 static int GetStringFromTextTagBox(MMFileFormatContext *formatContext, MMFileIOHandle *fp, MMFILE_MP4_BASIC_BOX_HEADER *basic_header, eMMFILE_3GP_TEXT_TAG eTag)
 {
@@ -1982,8 +1984,6 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 								int cur_pos = 0;
 								int dis_len = 0;
 								int new_dis_len = 0;
-								unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
-								unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 								char *tmp_desc = NULL;
 
 								while (1) {
@@ -1993,8 +1993,8 @@ bool mm_file_id3tag_parse_v222(AvFileContentInfo *pInfo, unsigned char *buffer)
 											break;
 										}
 										/*check end of image description*/
-										if ((pExtContent[imgstartOffset + cur_pos + 1] == jpg_sign[0]) ||
-										    (pExtContent[imgstartOffset + cur_pos + 1] == png_sign[0])) {
+										if ((pExtContent[imgstartOffset + cur_pos + 1] == gTagJPEGHeader[0]) ||
+										    (pExtContent[imgstartOffset + cur_pos + 1] == gTagPNGHeader[0])) {
 #ifdef __MMFILE_TEST_MODE__
 											debug_msg("length of description (%d)", cur_pos);
 #endif
@@ -2697,8 +2697,6 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 									int cur_pos = 0;
 									int dis_len = 0;
 									int new_dis_len = 0;
-									unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
-									unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 									char *tmp_desc = NULL;
 
 									while (1) {
@@ -2708,8 +2706,8 @@ bool mm_file_id3tag_parse_v223(AvFileContentInfo *pInfo, unsigned char *buffer)
 												break;
 											}
 											/*check end of image description*/
-											if ((pExtContent[imgstartOffset + cur_pos + 1] == jpg_sign[0]) ||
-											    (pExtContent[imgstartOffset + cur_pos + 1] == png_sign[0])) {
+											if ((pExtContent[imgstartOffset + cur_pos + 1] == gTagJPEGHeader[0]) ||
+											    (pExtContent[imgstartOffset + cur_pos + 1] == gTagPNGHeader[0])) {
 #ifdef __MMFILE_TEST_MODE__
 												debug_msg("length of description (%d)", cur_pos);
 #endif
@@ -3502,8 +3500,6 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 									int cur_pos = 0;
 									int dis_len = 0;
 									int new_dis_len = 0;
-									unsigned char jpg_sign[3] = {0xff, 0xd8, 0xff};
-									unsigned char png_sign[8] = {0x80, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 									char *tmp_desc = NULL;
 
 									while (1) {
@@ -3513,8 +3509,8 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 												break;
 											}
 											/*check end of image description*/
-											if ((pExtContent[imgstartOffset + cur_pos + 1] == jpg_sign[0]) ||
-											    (pExtContent[imgstartOffset + cur_pos + 1] == png_sign[0])) {
+											if ((pExtContent[imgstartOffset + cur_pos + 1] == gTagJPEGHeader[0]) ||
+											    (pExtContent[imgstartOffset + cur_pos + 1] == gTagPNGHeader[0])) {
 #ifdef __MMFILE_TEST_MODE__
 												debug_msg("length of description (%d)", cur_pos);
 #endif
