@@ -3003,11 +3003,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						if (strncmp((char *)CompTmp, "TIT2", 4) == 0 && pInfo->tagV2Info.bTitleMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pTitle = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pTitle, pExtContent, realCpyFrameNum);
-								pInfo->pTitle[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->titleLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pTitle, pExtContent, pInfo->titleLen);
+								if (pInfo->pTitle) {
+									memcpy(pInfo->pTitle, pExtContent, realCpyFrameNum);
+									pInfo->pTitle[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->titleLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pTitle, pExtContent, pInfo->titleLen);
+								}
 							} else {
 								pInfo->pTitle = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->titleLen);
 							}
@@ -3020,11 +3022,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TPE1", 4) == 0 && pInfo->tagV2Info.bArtistMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pArtist = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pArtist, pExtContent, realCpyFrameNum);
-								pInfo->pArtist[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->artistLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pArtist, pExtContent, pInfo->artistLen);
+								if (pInfo->pArtist) {
+									memcpy(pInfo->pArtist, pExtContent, realCpyFrameNum);
+									pInfo->pArtist[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->artistLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pArtist, pExtContent, pInfo->artistLen);
+								}
 							} else {
 								pInfo->pArtist = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->artistLen);
 							}
@@ -3036,11 +3040,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TPE2", 4) == 0 && pInfo->tagV2Info.bAlbum_ArtistMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pAlbum_Artist = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pAlbum_Artist, pExtContent, realCpyFrameNum);
-								pInfo->pAlbum_Artist[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->album_artistLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pAlbum_Artist, pExtContent, pInfo->album_artistLen);
+								if (pInfo->pAlbum_Artist) {
+									memcpy(pInfo->pAlbum_Artist, pExtContent, realCpyFrameNum);
+									pInfo->pAlbum_Artist[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->album_artistLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pAlbum_Artist, pExtContent, pInfo->album_artistLen);
+								}
 							} else {
 								pInfo->pAlbum_Artist = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->album_artistLen);
 							}
@@ -3052,11 +3058,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TPE3", 4) == 0 && pInfo->tagV2Info.bConductorMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pConductor = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pConductor, pExtContent, realCpyFrameNum);
-								pInfo->pConductor[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->conductorLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pConductor, pExtContent, pInfo->conductorLen);
+								if (pInfo->pConductor) {
+									memcpy(pInfo->pConductor, pExtContent, realCpyFrameNum);
+									pInfo->pConductor[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->conductorLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pConductor, pExtContent, pInfo->conductorLen);
+								}
 							} else {
 								pInfo->pConductor = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->conductorLen);
 							}
@@ -3068,11 +3076,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TALB", 4) == 0 && pInfo->tagV2Info.bAlbumMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pAlbum = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pAlbum, pExtContent, realCpyFrameNum);
-								pInfo->pAlbum[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->albumLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pAlbum, pExtContent, pInfo->albumLen);
+								if (pInfo->pAlbum) {
+									memcpy(pInfo->pAlbum, pExtContent, realCpyFrameNum);
+									pInfo->pAlbum[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->albumLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pAlbum, pExtContent, pInfo->albumLen);
+								}
 							} else {
 								pInfo->pAlbum = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->albumLen);
 							}
@@ -3084,11 +3094,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TYER", 4) == 0 && pInfo->tagV2Info.bYearMarked == false) {	/*TODO. TYER is replaced by the TDRC. but many files use TYER in v2.4 */
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pYear = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pYear, pExtContent, realCpyFrameNum);
-								pInfo->pYear[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->yearLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pYear, pExtContent, pInfo->yearLen);
+								if (pInfo->pYear) {
+									memcpy(pInfo->pYear, pExtContent, realCpyFrameNum);
+									pInfo->pYear[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->yearLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pYear, pExtContent, pInfo->yearLen);
+								}
 							} else {
 								pInfo->pYear = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->yearLen);
 							}
@@ -3137,12 +3149,14 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 
 								if (textEncodingType == AV_ID3V2_UTF8) {
 									pInfo->pComment = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-									memset(pInfo->pComment, 0, (realCpyFrameNum + 2));
-									memcpy(pInfo->pComment, pExtContent + tmp, realCpyFrameNum);
-									pInfo->pComment[realCpyFrameNum] = '\0';
-									/*string copy with '\0'*/
-									pInfo->commentLen = realCpyFrameNum;
-									_STRNCPY_EX(pInfo->pComment, pExtContent, pInfo->commentLen);
+									if (pInfo->pComment) {
+										memset(pInfo->pComment, 0, (realCpyFrameNum + 2));
+										memcpy(pInfo->pComment, pExtContent + tmp, realCpyFrameNum);
+										pInfo->pComment[realCpyFrameNum] = '\0';
+										/*string copy with '\0'*/
+										pInfo->commentLen = realCpyFrameNum;
+										_STRNCPY_EX(pInfo->pComment, pExtContent, pInfo->commentLen);
+									}
 								} else {
 									pInfo->pComment = mmfile_string_convert((const char *)&pExtContent[tmp], realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->commentLen);
 								}
@@ -3219,9 +3233,11 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 
 												if (textEncodingType == AV_ID3V2_UTF8) {
 													synclyrics_info->lyric_info = mmfile_malloc(copy_len + 1);
-													memset(synclyrics_info->lyric_info, 0, copy_len + 1);
-													memcpy(synclyrics_info->lyric_info, pExtContent + copy_start_pos, copy_len);
-													synclyrics_info->lyric_info[copy_len + 1] = '\0';
+													if (synclyrics_info->lyric_info) {
+														memset(synclyrics_info->lyric_info, 0, copy_len + 1);
+														memcpy(synclyrics_info->lyric_info, pExtContent + copy_start_pos, copy_len);
+														synclyrics_info->lyric_info[copy_len + 1] = '\0';
+													}
 												} else {
 													synclyrics_info->lyric_info = mmfile_string_convert((const char *)&pExtContent[copy_start_pos], copy_len, "UTF-8", charset_array[textEncodingType], NULL, NULL);
 												}
@@ -3318,11 +3334,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TCON", 4) == 0 && pInfo->tagV2Info.bGenreMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pGenre = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pGenre, pExtContent, realCpyFrameNum);
-								pInfo->pGenre[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->genreLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pGenre, pExtContent, pInfo->genreLen);
+								if (pInfo->pGenre) {
+									memcpy(pInfo->pGenre, pExtContent, realCpyFrameNum);
+									pInfo->pGenre[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->genreLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pGenre, pExtContent, pInfo->genreLen);
+								}
 							} else {
 								pInfo->pGenre = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->genreLen);
 							}
@@ -3369,11 +3387,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TRCK", 4) == 0 && pInfo->tagV2Info.bTrackNumMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pTrackNum = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pTrackNum, pExtContent, realCpyFrameNum);
-								pInfo->pTrackNum[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->tracknumLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pTrackNum, pExtContent, pInfo->tracknumLen);
+								if (pInfo->pTrackNum != NULL) {
+									memcpy(pInfo->pTrackNum, pExtContent, realCpyFrameNum);
+									pInfo->pTrackNum[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->tracknumLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pTrackNum, pExtContent, pInfo->tracknumLen);
+								}
 							} else {
 								pInfo->pTrackNum = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->tracknumLen);
 							}
@@ -3386,11 +3406,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TENC", 4) == 0 && pInfo->tagV2Info.bEncByMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pEncBy = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pEncBy, pExtContent, realCpyFrameNum);
-								pInfo->pEncBy[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->encbyLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pEncBy, pExtContent, pInfo->encbyLen);
+								if (pInfo->pEncBy != NULL) {
+									memcpy(pInfo->pEncBy, pExtContent, realCpyFrameNum);
+									pInfo->pEncBy[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->encbyLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pEncBy, pExtContent, pInfo->encbyLen);
+								}
 							} else {
 								pInfo->pEncBy = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->encbyLen);
 							}
@@ -3402,11 +3424,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "WXXX", 4) == 0 && pInfo->tagV2Info.bURLMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pURL = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pURL, pExtContent, realCpyFrameNum);
-								pInfo->pURL[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->urlLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pURL, pExtContent, pInfo->urlLen);
+								if (pInfo->pURL != NULL) {
+									memcpy(pInfo->pURL, pExtContent, realCpyFrameNum);
+									pInfo->pURL[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->urlLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pURL, pExtContent, pInfo->urlLen);
+								}
 							} else {
 								pInfo->pURL = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->urlLen);
 							}
@@ -3418,11 +3442,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TCOP", 4) == 0 && pInfo->tagV2Info.bCopyRightMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pCopyright = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pCopyright, pExtContent, realCpyFrameNum);
-								pInfo->pCopyright[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->copyrightLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pCopyright, pExtContent, pInfo->copyrightLen);
+								if (pInfo->pCopyright != NULL) {
+									memcpy(pInfo->pCopyright, pExtContent, realCpyFrameNum);
+									pInfo->pCopyright[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->copyrightLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pCopyright, pExtContent, pInfo->copyrightLen);
+								}
 							} else {
 								pInfo->pCopyright = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->copyrightLen);
 							}
@@ -3434,11 +3460,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TOPE", 4) == 0 && pInfo->tagV2Info.bOriginArtistMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pOriginArtist = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pOriginArtist, pExtContent, realCpyFrameNum);
-								pInfo->pOriginArtist[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->originartistLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pOriginArtist, pExtContent, pInfo->originartistLen);
+								if (pInfo->pOriginArtist != NULL) {
+									memcpy(pInfo->pOriginArtist, pExtContent, realCpyFrameNum);
+									pInfo->pOriginArtist[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->originartistLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pOriginArtist, pExtContent, pInfo->originartistLen);
+								}
 							} else {
 								pInfo->pOriginArtist = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->originartistLen);
 							}
@@ -3450,11 +3478,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TCOM", 4) == 0 && pInfo->tagV2Info.bComposerMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pComposer = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pComposer, pExtContent, realCpyFrameNum);
-								pInfo->pComposer[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->composerLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pComposer, pExtContent, pInfo->composerLen);
+								if (pInfo->pComposer != NULL) {
+									memcpy(pInfo->pComposer, pExtContent, realCpyFrameNum);
+									pInfo->pComposer[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->composerLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pComposer, pExtContent, pInfo->composerLen);
+								}
 							} else {
 								pInfo->pComposer = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->composerLen);
 							}
@@ -3466,11 +3496,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TDRC", 4) == 0 && pInfo->tagV2Info.bRecDateMarked == false) {	/*TYER(year) and TRDA are replaced by the TDRC */
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pRecDate = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pRecDate, pExtContent, realCpyFrameNum);
-								pInfo->pRecDate[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->recdateLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pRecDate, pExtContent, pInfo->recdateLen);
+								if (pInfo->pRecDate != NULL) {
+									memcpy(pInfo->pRecDate, pExtContent, realCpyFrameNum);
+									pInfo->pRecDate[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->recdateLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pRecDate, pExtContent, pInfo->recdateLen);
+								}
 							} else {
 								pInfo->pRecDate = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->recdateLen);
 							}
@@ -3482,11 +3514,13 @@ bool mm_file_id3tag_parse_v224(AvFileContentInfo *pInfo, unsigned char *buffer)
 						} else if (strncmp((char *)CompTmp, "TIT1", 4) == 0 && pInfo->tagV2Info.bContentGroupMarked == false) {
 							if (textEncodingType == AV_ID3V2_UTF8) {
 								pInfo->pContentGroup = mmfile_malloc(realCpyFrameNum + 2); /*Ignore NULL char for UTF16 */
-								memcpy(pInfo->pContentGroup, pExtContent, realCpyFrameNum);
-								pInfo->pContentGroup[realCpyFrameNum] = '\0';
-								/*string copy with '\0'*/
-								pInfo->contentGroupLen = realCpyFrameNum;
-								_STRNCPY_EX(pInfo->pContentGroup, pExtContent, pInfo->contentGroupLen);
+								if (pInfo->pContentGroup != NULL) {
+									memcpy(pInfo->pContentGroup, pExtContent, realCpyFrameNum);
+									pInfo->pContentGroup[realCpyFrameNum] = '\0';
+									/*string copy with '\0'*/
+									pInfo->contentGroupLen = realCpyFrameNum;
+									_STRNCPY_EX(pInfo->pContentGroup, pExtContent, pInfo->contentGroupLen);
+								}
 							} else {
 								pInfo->pContentGroup = mmfile_string_convert((const char *)pExtContent, realCpyFrameNum, "UTF-8", charset_array[textEncodingType], NULL, (unsigned int *)&pInfo->contentGroupLen);
 							}
