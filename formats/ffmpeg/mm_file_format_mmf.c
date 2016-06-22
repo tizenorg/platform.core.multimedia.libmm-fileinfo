@@ -2731,6 +2731,12 @@ mmf_file_mmf_get_duration(char *src, int is_xmf)
 
 	/*alloc work buffer*/
 	buf = mmfile_malloc(src_size + 1);
+	if (!buf) {
+		debug_error("failed to memory allocaion.\n");
+		ret_msec = -1;
+		return _RELEASE_RESOURCE;
+	}
+
 
 	/*read data*/
 	if ((readed = mmfile_read(fp, buf, src_size)) <= 0) {
