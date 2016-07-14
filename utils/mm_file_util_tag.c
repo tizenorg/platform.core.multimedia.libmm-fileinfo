@@ -1276,11 +1276,13 @@ exception:
 }
 
 
+#define BIG_CONTENT_BOX_SIZE_LEN 8
 EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 {
 	MMFileIOHandle *fp = NULL;
 	int ret = 0;
 	int readed;
+	unsigned long long chunk_size = 0;
 
 	ret = mmfile_open(&fp, formatContext->uriFileName, MMFILE_RDONLY);
 	if (ret == MMFILE_UTIL_FAIL) {
@@ -1299,6 +1301,19 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 			debug_warning("header is invalid.\n");
 			basic_header.size = readed;
 			basic_header.type = 0;
+			chunk_size = basic_header.size;
+		} else if (basic_header.size == 1) {
+			int i = 0;
+			unsigned char temp[BIG_CONTENT_BOX_SIZE_LEN] = {0, };
+			unsigned long long size = 0;
+
+			mmfile_read(fp, (unsigned char *)&temp, BIG_CONTENT_BOX_SIZE_LEN);
+
+			for(i = 0; i < BIG_CONTENT_BOX_SIZE_LEN; i++)
+				size |= (unsigned long long)temp[i] << (BIG_CONTENT_BOX_SIZE_LEN - 1 - i) * BIG_CONTENT_BOX_SIZE_LEN;
+			chunk_size = size;
+		} else {
+			chunk_size = basic_header.size;
 		}
 
 #ifdef __MMFILE_TEST_MODE__
@@ -1311,13 +1326,13 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 		switch (basic_header.type) {
 			case FOURCC('m', 'o', 'o', 'v'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [moov] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [moov] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					break;
 				}
 			case FOURCC('u', 'd', 't', 'a'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [udat] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [udat] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					break;
 				}
@@ -1326,84 +1341,84 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 				/*/////////////////////////////////////////////////////////////// */
 			case FOURCC('t', 'i', 't', 'l'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [titl] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [titl] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_TITLE);
 					break;
 				}
 			case FOURCC('d', 's', 'c', 'p'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [dscp] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [dscp] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_CAPTION);
 					break;
 				}
 			case FOURCC('c', 'p', 'r', 't'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [cprt] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [cprt] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_COPYRIGHT);
 					break;
 				}
 			case FOURCC('p', 'e', 'r', 'f'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [perf] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [perf] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_PERFORMER);
 					break;
 				}
 			case FOURCC('a', 'u', 't', 'h'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [auth] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [auth] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_AUTHOR);
 					break;
 				}
 			case FOURCC('g', 'n', 'r', 'e'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [gnre] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [gnre] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetStringFromTextTagBox(formatContext, fp, &basic_header, eMMFILE_3GP_TAG_GENRE);
 					break;
 				}
 			case FOURCC('a', 'l', 'b', 'm'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [albm] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [albm] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetAlbumFromAlbumTagBox(formatContext, fp, &basic_header);
 					break;
 				}
 			case FOURCC('y', 'r', 'r', 'c'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [yrrc] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [yrrc] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetYearFromYearTagBox(formatContext, fp, &basic_header);
 					break;
 				}
 			case FOURCC('r', 't', 'n', 'g'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [rtng] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [rtng] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetRatingFromRatingTagBox(formatContext, fp, &basic_header);  /* not use */
 					break;
 				}
 			case FOURCC('c', 'l', 's', 'f'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [clsf] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [clsf] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetClassficationFromClsfTagBox(formatContext, fp, &basic_header);
 					break;
 				}
 			case FOURCC('k', 'y', 'w', 'd'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [kywd] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [kywd] SIZE: [%lld]Byte\n", chunk_size);
 #endif
-					ret = mmfile_seek(fp, basic_header.start_offset + basic_header.size, SEEK_SET);
+					ret = mmfile_seek(fp, basic_header.start_offset + chunk_size, SEEK_SET);
 					break;
 				}
 			case FOURCC('l', 'o', 'c', 'i'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [loci] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [loci] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetLocationFromLociTagBox(formatContext, fp, &basic_header);
 					break;
@@ -1411,7 +1426,7 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 				/* Check smta in user data field to be compatible with android */
 			case FOURCC('s', 'm', 't', 'a'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [smta] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [smta] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetSAUTInfoFromSMTATagBox(formatContext, fp, &basic_header);
 					break;
@@ -1419,7 +1434,7 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 				/* Check smta in user data field to be compatible with android */
 			case FOURCC('c', 'd', 'i', 's'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [smta] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [smta] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetValueFromCDISTagBox(formatContext, fp, &basic_header);
 					break;
@@ -1429,7 +1444,7 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 				/*/////////////////////////////////////////////////////////////// */
 			case FOURCC('m', 'e', 't', 'a'): {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("MPEG4: [meta] SIZE: [%d]Byte\n", basic_header.size);
+					debug_msg("MPEG4: [meta] SIZE: [%lld]Byte\n", chunk_size);
 #endif
 					GetTagFromMetaBox(formatContext, fp, &basic_header);
 					break;
@@ -1464,9 +1479,11 @@ EXPORT_API int MMFileUtilGetMetaDataFromMP4(MMFileFormatContext *formatContext)
 
 			default: {
 #ifdef __MMFILE_TEST_MODE__
-					debug_msg("4CC: Not Support.. so skip it\n");
+					debug_msg("4CC: Not Support [%c%c%c%c]. So skip it. Size [%lld Byte]\n",
+								((char *)&basic_header.type)[0], ((char *)&basic_header.type)[1],
+								((char *)&basic_header.type)[2], ((char *)&basic_header.type)[3], chunk_size);
 #endif
-					ret = mmfile_seek(fp, basic_header.start_offset + basic_header.size, SEEK_SET);
+					ret = mmfile_seek(fp, basic_header.start_offset + chunk_size, SEEK_SET);
 					break;
 				}
 		}
